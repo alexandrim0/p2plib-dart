@@ -1,0 +1,9 @@
+version: "3.9"  
+services:
+  bootstrap:
+    container_name: bootstrap
+    image: p2pbootstrap
+    entrypoint: bootstrap_server
+    restart: unless-stopped
+    ports: 
+      - "4349:4349/udp"
