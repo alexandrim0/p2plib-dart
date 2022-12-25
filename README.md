@@ -42,8 +42,8 @@ Peers are identified by 64-byte public keys: a 32-byte encryption key + a 32-byt
 The peers are introduced to each other through the bootstrap server accessed by pre-defined ip-port tuple. If you want to run your own bootstrap service, you can run it in the Docker container as follows:
 
 ```
-docker build -t p2pbootstrap -f docker/Dockerfile .
-docker-compose -f docker/docker-compose.yml up -d bootstrap
+docker build -t p2pbootstrap .
+docker run --rm -d --network host p2pbootstrap
 ```
 ### Usage examples
 
