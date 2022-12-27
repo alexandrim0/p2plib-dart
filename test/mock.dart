@@ -21,7 +21,7 @@ Future<P2PRouter> createRouter({
   final String? debugLabel,
 }) async {
   final crypto = P2PCrypto();
-  await crypto.init(seedEnc: seedEnc, seedSign: seedSign);
+  await crypto.init(P2PCryptoKeys(encSeed: seedEnc, signSeed: seedSign));
   final router = P2PRouter(
     crypto: crypto,
     transports: [P2PUdpTransport(fullAddress: address)],
@@ -38,7 +38,10 @@ Future<Isolate> createProxy({
   final isolate = await Isolate.spawn(
     (_) async {
       final crypto = P2PCrypto();
-      await crypto.init(seedEnc: proxySeedEnc, seedSign: proxySeedSign);
+      await crypto.init(P2PCryptoKeys(
+        encSeed: proxySeedEnc,
+        signSeed: proxySeedSign,
+      ));
       final router = P2PRouterBase(
         crypto: crypto,
         transports: [P2PUdpTransport(fullAddress: address ?? proxyAddress)],

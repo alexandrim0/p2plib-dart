@@ -20,18 +20,15 @@ class P2PCrypto {
     );
   }
 
-  /// seed is Uint8List(32)
-  Future<P2PCryptoKeys> init({
-    final Uint8List? seedEnc,
-    final Uint8List? seedSign,
-  }) async {
+  /// Will create key pair if seed is not empty else use key pair
+  Future<P2PCryptoKeys> init([P2PCryptoKeys? keys]) async {
     await Isolate.spawn<P2PCryptoTask>(
       cryptoWorker,
       P2PCryptoTask(
         id: _idCounter,
         type: P2PCryptoTaskType.sign, // does not matter for initial task
         payload: _recievePort.sendPort,
-        extra: [seedEnc, seedSign],
+        extra: keys,
       ),
     );
     final initResult = await _completers[_idCounter]!.future;

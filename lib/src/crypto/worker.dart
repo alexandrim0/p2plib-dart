@@ -8,27 +8,51 @@ import '/src/data/data.dart';
 
 void cryptoWorker(final P2PCryptoTask initialTask) async {
   final sodium = await SodiumInit.init(_loadSodium());
+  late final KeyPair encKeyPair;
+  late final KeyPair signKeyPair;
   final box = sodium.crypto.box;
   final sign = sodium.crypto.sign;
+  final cryptoKeys = initialTask.extra == null
+      ? P2PCryptoKeys()
+      : initialTask.extra as P2PCryptoKeys;
 
-  // extra is a list of [0] encSeed, [1] signSeed
-  final seeds = initialTask.extra as List<Uint8List?>;
-  // Init of crypto keys
-  seeds[0] ??= sodium.randombytes.buf(sodium.randombytes.seedBytes);
-  seeds[1] ??= sodium.randombytes.buf(sodium.randombytes.seedBytes);
-  final encKeyPair = box.seedKeyPair(SecureKey.fromList(sodium, seeds[0]!));
-  final signKeyPair = sign.seedKeyPair(SecureKey.fromList(sodium, seeds[1]!));
+  // use given encryption key pair or create it from given or generated seed
+  if (cryptoKeys.encPrivateKey == null || cryptoKeys.encPublicKey == null) {
+    cryptoKeys.encSeed ??= sodium.randombytes.buf(sodium.randombytes.seedBytes);
+    encKeyPair = box.seedKeyPair(SecureKey.fromList(
+      sodium,
+      cryptoKeys.encSeed!,
+    ));
+    cryptoKeys.encPublicKey = encKeyPair.publicKey;
+    cryptoKeys.encPrivateKey = encKeyPair.secretKey.extractBytes();
+  } else {
+    encKeyPair = KeyPair(
+      secretKey: SecureKey.fromList(sodium, cryptoKeys.encPrivateKey!),
+      publicKey: cryptoKeys.encPublicKey!,
+    );
+  }
+  // use given sign key pair or create it from given or generated seed
+  if (cryptoKeys.signPrivateKey == null || cryptoKeys.signPublicKey == null) {
+    cryptoKeys.signSeed ??=
+        sodium.randombytes.buf(sodium.randombytes.seedBytes);
+    signKeyPair = sign.seedKeyPair(SecureKey.fromList(
+      sodium,
+      cryptoKeys.signSeed!,
+    ));
+    cryptoKeys.signPublicKey = signKeyPair.publicKey;
+    cryptoKeys.signPrivateKey = signKeyPair.secretKey.extractBytes();
+  } else {
+    signKeyPair = KeyPair(
+      secretKey: SecureKey.fromList(sodium, cryptoKeys.signPrivateKey!),
+      publicKey: cryptoKeys.signPublicKey!,
+    );
+  }
 
   // send back index, SendPort and keys
   final receivePort = ReceivePort();
   final mainIsolatePort = initialTask.payload as SendPort;
   initialTask.payload = receivePort.sendPort;
-  initialTask.extra = P2PCryptoKeys(
-    encPublicKey: encKeyPair.publicKey,
-    encSeed: seeds[0]!,
-    signPublicKey: signKeyPair.publicKey,
-    signSeed: seeds[1]!,
-  );
+  initialTask.extra = cryptoKeys;
   mainIsolatePort.send(initialTask);
 
   receivePort.listen(

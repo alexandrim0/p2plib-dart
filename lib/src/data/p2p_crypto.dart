@@ -23,13 +23,21 @@ class P2PCryptoTask {
   });
 }
 
+/// seed and publicKey is Uint8List(32), privateKey is Uint8List(64)
 class P2PCryptoKeys {
-  final Uint8List encPublicKey, encSeed, signPublicKey, signSeed;
+  Uint8List? encSeed,
+      encPublicKey,
+      encPrivateKey,
+      signSeed,
+      signPublicKey,
+      signPrivateKey;
 
-  const P2PCryptoKeys({
-    required this.encPublicKey,
-    required this.encSeed,
-    required this.signPublicKey,
-    required this.signSeed,
+  P2PCryptoKeys({
+    this.encSeed,
+    this.encPublicKey,
+    this.encPrivateKey,
+    this.signSeed,
+    this.signPublicKey,
+    this.signPrivateKey,
   });
 }

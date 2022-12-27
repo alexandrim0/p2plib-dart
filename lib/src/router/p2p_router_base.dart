@@ -24,8 +24,8 @@ class P2PRouterBase with P2PResolveHandler {
     this.debugLabel,
     this.logger,
   }) : selfId = P2PPeerId.fromKeys(
-          encryptionKey: crypto.cryptoKeys.encPublicKey,
-          signKey: crypto.cryptoKeys.signPublicKey,
+          encryptionKey: crypto.cryptoKeys.encPublicKey!,
+          signKey: crypto.cryptoKeys.signPublicKey!,
         );
 
   Future<void> start() async {
