@@ -20,7 +20,7 @@ main() async {
       test(
         'P2PCrypto seed',
         () => expect(
-          PeerId.fromKeys(
+          P2PPeerId.fromKeys(
             encryptionKey: encPublicKey,
             signKey: signPublicKey,
           ).asHex,
@@ -47,7 +47,7 @@ main() async {
             payload,
           );
           final decryptedData = await crypto.decrypt(encryptedData);
-          expect(Token(value: payload), Token(value: decryptedData));
+          expect(P2PToken(value: payload), P2PToken(value: decryptedData));
         },
       );
 
@@ -59,7 +59,7 @@ main() async {
             signPublicKey,
             signedData,
           );
-          expect(Token(value: payload), Token(value: unsignedData));
+          expect(P2PToken(value: payload), P2PToken(value: unsignedData));
         },
       );
     },

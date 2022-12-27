@@ -1,14 +1,14 @@
 part of 'data.dart';
 
-class FullAddress {
+class P2PFullAddress {
   final InternetAddress address;
   final int port;
 
-  const FullAddress({required this.address, required this.port});
+  const P2PFullAddress({required this.address, required this.port});
 
   @override
   bool operator ==(Object other) =>
-      other is FullAddress &&
+      other is P2PFullAddress &&
       runtimeType == other.runtimeType &&
       port == other.port &&
       address == other.address;

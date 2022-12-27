@@ -1,15 +1,15 @@
 part of 'router.dart';
 
-class P2PRouter extends P2PRouterBase with AckHandler, LastSeenHandler {
+class P2PRouter extends P2PRouterBase with P2PHandlerAck, P2PHandlerLastSeen {
   final _messageController = StreamController<P2PMessage>();
   final Set<P2PPacketHeader> _recieved = {};
 
-  Iterable<FullAddress> get selfAddresses =>
+  Iterable<P2PFullAddress> get selfAddresses =>
       transports.map((t) => t.fullAddress);
 
   Stream<P2PMessage> get messageStream => _messageController.stream;
 
-  Stream<MapEntry<PeerId, bool>> get lastSeenStream =>
+  Stream<MapEntry<P2PPeerId, bool>> get lastSeenStream =>
       _lastSeenController.stream;
 
   P2PRouter({
@@ -58,7 +58,7 @@ class P2PRouter extends P2PRouterBase with AckHandler, LastSeenHandler {
 
   Future<int> sendMessage({
     final bool isConfirmable = false,
-    required final PeerId dstPeerId,
+    required final P2PPeerId dstPeerId,
     final int? messageId,
     final Uint8List? payload,
     final Duration? ackTimeout,
@@ -91,7 +91,8 @@ class P2PRouter extends P2PRouterBase with AckHandler, LastSeenHandler {
   }
 
   @override
-  Future<void> _sendEmptyConfirmableTo(final PeerId dstPeerId) => sendMessage(
+  Future<void> _sendEmptyConfirmableTo(final P2PPeerId dstPeerId) =>
+      sendMessage(
         isConfirmable: true,
         dstPeerId: dstPeerId,
         ackTimeout: ackTimeout,

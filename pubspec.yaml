@@ -7,7 +7,7 @@ environment:
   sdk: '>=2.18.0 <3.0.0'
 
 dependencies: 
-  collection: ^1.17.0
+  collection: ^1.16.0
   sodium: ^2.0.1
 
 dev_dependencies:

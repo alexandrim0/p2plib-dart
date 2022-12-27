@@ -10,8 +10,8 @@ void main() async {
     () {
       final bytesA = getRandomBytes(64);
       final bytesB = bytesA.buffer.asUint8List();
-      final peerIdA = PeerId(value: bytesA);
-      final peerIdB = PeerId(value: bytesB);
+      final peerIdA = P2PPeerId(value: bytesA);
+      final peerIdB = P2PPeerId(value: bytesB);
 
       expect(proxyPeerId == randomPeerId, false);
       expect(peerIdA == peerIdB, true);
@@ -43,9 +43,9 @@ void main() async {
       final datagram = message.toBytes();
 
       expect(messageId == datagram.buffer.asInt64List(8, 1).first, true);
-      final dstPeerId = PeerId(
+      final dstPeerId = P2PPeerId(
           value: datagram.sublist(
-        P2PPacketHeader.length + PeerId.length,
+        P2PPacketHeader.length + P2PPeerId.length,
         P2PMessage.headerLength,
       ));
       expect(randomPeerId == dstPeerId, true);
@@ -62,11 +62,11 @@ void main() async {
       expect(addressA == addressB, true);
       expect(addressA == addressC, false);
 
-      final fullAddressA = FullAddress(address: addressA, port: 5000);
-      final fullAddressB = FullAddress(address: addressB, port: 5000);
-      final fullAddressC = FullAddress(address: addressC, port: 5000);
-      final fullAddressD = FullAddress(address: addressA, port: 5001);
-      final fullAddressE = FullAddress(address: addressC, port: 5001);
+      final fullAddressA = P2PFullAddress(address: addressA, port: 5000);
+      final fullAddressB = P2PFullAddress(address: addressB, port: 5000);
+      final fullAddressC = P2PFullAddress(address: addressC, port: 5000);
+      final fullAddressD = P2PFullAddress(address: addressA, port: 5001);
+      final fullAddressE = P2PFullAddress(address: addressC, port: 5001);
 
       expect(fullAddressA.hashCode == fullAddressB.hashCode, true);
       expect(fullAddressA.hashCode == fullAddressC.hashCode, false);

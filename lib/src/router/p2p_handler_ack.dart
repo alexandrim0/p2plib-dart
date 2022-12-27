@@ -1,6 +1,6 @@
 part of 'router.dart';
 
-mixin AckHandler on P2PRouterBase {
+mixin P2PHandlerAck on P2PRouterBase {
   final _completers = <int, Completer<void>>{};
 
   var ackTimeout = P2PRouterBase.defaultTimeout;
@@ -38,7 +38,7 @@ mixin AckHandler on P2PRouterBase {
   Future<void> _ackBack({
     required final int messageId,
     required final Uint8List datagram,
-    required final Iterable<FullAddress> addresses,
+    required final Iterable<P2PFullAddress> addresses,
     required final Duration timeout,
   }) {
     final completer = Completer<void>();
@@ -56,7 +56,7 @@ mixin AckHandler on P2PRouterBase {
   void _sendAgain({
     required final int messageId,
     required final Uint8List datagram,
-    required final Iterable<FullAddress> addresses,
+    required final Iterable<P2PFullAddress> addresses,
   }) async {
     await Future.delayed(ackRetryPeriod);
     if (isNotRun) return;

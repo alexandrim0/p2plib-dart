@@ -5,12 +5,12 @@ import 'package:collection/collection.dart';
 
 export 'dart:typed_data' show Uint8List;
 
-part 'token.dart';
-part 'crypto.dart';
-part 'peer_id.dart';
+part 'p2p_token.dart';
+part 'p2p_crypto.dart';
+part 'p2p_peer_id.dart';
 part 'p2p_message.dart';
 part 'p2p_datagram.dart';
-part 'full_address.dart';
+part 'p2p_full_address.dart';
 part 'p2p_message_header.dart';
 
 const _maxRandomNumber = 1 << 32;

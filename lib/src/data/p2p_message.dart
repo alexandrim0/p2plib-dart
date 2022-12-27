@@ -8,25 +8,25 @@ class P2PMessage {
   static const protocolNumber = 0;
   static const sealLength = 48;
   static const signatureLength = 64;
-  static const headerLength = P2PPacketHeader.length + PeerId.length * 2;
+  static const headerLength = P2PPacketHeader.length + P2PPeerId.length * 2;
   static const minimalLength = headerLength + signatureLength;
 
   static const _listEq = ListEquality<int>();
 
-  static PeerId getSrcPeerId(Uint8List datagram) => PeerId(
+  static P2PPeerId getSrcPeerId(Uint8List datagram) => P2PPeerId(
           value: datagram.sublist(
         P2PPacketHeader.length,
-        P2PPacketHeader.length + PeerId.length,
+        P2PPacketHeader.length + P2PPeerId.length,
       ));
 
-  static PeerId getDstPeerId(Uint8List datagram) => PeerId(
+  static P2PPeerId getDstPeerId(Uint8List datagram) => P2PPeerId(
           value: datagram.sublist(
-        P2PPacketHeader.length + PeerId.length,
+        P2PPacketHeader.length + P2PPeerId.length,
         headerLength,
       ));
 
   final P2PPacketHeader header;
-  final PeerId srcPeerId, dstPeerId;
+  final P2PPeerId srcPeerId, dstPeerId;
   final Uint8List payload;
 
   @override
@@ -46,6 +46,9 @@ class P2PMessage {
       srcPeerId == other.srcPeerId &&
       dstPeerId == other.dstPeerId &&
       _listEq.equals(payload, other.payload);
+
+  bool get isEmpty => payload.isEmpty;
+  bool get isNotEmpty => payload.isNotEmpty;
 
   P2PMessage({
     required this.header,
@@ -80,8 +83,8 @@ class P2PMessage {
 
   P2PMessage copyWith({
     final P2PPacketHeader? header,
-    final PeerId? srcPeerId,
-    final PeerId? dstPeerId,
+    final P2PPeerId? srcPeerId,
+    final P2PPeerId? dstPeerId,
     final Uint8List? payload,
   }) =>
       P2PMessage(

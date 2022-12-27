@@ -1,16 +1,16 @@
 part of 'router.dart';
 
-mixin LastSeenHandler on P2PRouterBase {
-  final _pingTasks = <PeerId>{};
-  final _lastSeen = <PeerId, int>{};
+mixin P2PHandlerLastSeen on P2PRouterBase {
+  final _pingTasks = <P2PPeerId>{};
+  final _lastSeen = <P2PPeerId, int>{};
   final _lastSeenController =
-      StreamController<MapEntry<PeerId, bool>>.broadcast();
+      StreamController<MapEntry<P2PPeerId, bool>>.broadcast();
 
   var pingTimeout = P2PRouterBase.defaultTimeout;
   var pingPeriod = P2PRouterBase.defaultPeriod;
   Timer? _pingTimer;
 
-  bool getPeerStatus(final PeerId peerId) {
+  bool getPeerStatus(final P2PPeerId peerId) {
     final lastSeen = _lastSeen[peerId];
     return lastSeen == null
         ? false
@@ -18,7 +18,7 @@ mixin LastSeenHandler on P2PRouterBase {
             DateTime.now().millisecondsSinceEpoch;
   }
 
-  Future<bool> pingPeer(final PeerId peerId) async {
+  Future<bool> pingPeer(final P2PPeerId peerId) async {
     try {
       await _sendEmptyConfirmableTo(peerId);
       return true;
@@ -27,7 +27,7 @@ mixin LastSeenHandler on P2PRouterBase {
   }
 
   StreamSubscription<bool> trackPeer({
-    required final PeerId peerId,
+    required final P2PPeerId peerId,
     required final void Function(bool status) onChange,
   }) {
     _pingTasks.add(peerId);
@@ -41,7 +41,7 @@ mixin LastSeenHandler on P2PRouterBase {
         );
   }
 
-  Future<void> _sendEmptyConfirmableTo(final PeerId dstPeerId);
+  Future<void> _sendEmptyConfirmableTo(final P2PPeerId dstPeerId);
 
   void _stopLastSeenHandler() {
     _lastSeen.clear();
@@ -53,7 +53,8 @@ mixin LastSeenHandler on P2PRouterBase {
   void _processLastSeen(final P2PMessage message) {
     _lastSeen[message.srcPeerId] = DateTime.now().millisecondsSinceEpoch;
     if (_pingTasks.contains(message.srcPeerId)) {
-      _lastSeenController.add(MapEntry<PeerId, bool>(message.srcPeerId, true));
+      _lastSeenController
+          .add(MapEntry<P2PPeerId, bool>(message.srcPeerId, true));
     }
   }
 
@@ -64,7 +65,7 @@ mixin LastSeenHandler on P2PRouterBase {
       pingPeer(peerId);
       final lastSeen = _lastSeen[peerId];
       if (lastSeen == null || lastSeen < stale) {
-        _lastSeenController.add(MapEntry<PeerId, bool>(peerId, false));
+        _lastSeenController.add(MapEntry<P2PPeerId, bool>(peerId, false));
       }
     }
   }

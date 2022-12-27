@@ -6,11 +6,11 @@ import '/src/data/data.dart';
 import 'worker.dart';
 
 class P2PCrypto {
-  late final CryptoKeys cryptoKeys;
+  late final P2PCryptoKeys cryptoKeys;
   late final SendPort _sendPort;
   final _recievePort = ReceivePort();
-  final Map<int, Completer<CryptoTask>> _completers = {
-    0: Completer<CryptoTask>(),
+  final Map<int, Completer<P2PCryptoTask>> _completers = {
+    0: Completer<P2PCryptoTask>(),
   };
   var _idCounter = 0;
 
@@ -21,33 +21,33 @@ class P2PCrypto {
   }
 
   /// seed is Uint8List(32)
-  Future<CryptoKeys> init({
+  Future<P2PCryptoKeys> init({
     final Uint8List? seedEnc,
     final Uint8List? seedSign,
   }) async {
-    await Isolate.spawn<CryptoTask>(
+    await Isolate.spawn<P2PCryptoTask>(
       cryptoWorker,
-      CryptoTask(
+      P2PCryptoTask(
         id: _idCounter,
-        type: CryptoTaskType.sign, // does not matter for initial task
+        type: P2PCryptoTaskType.sign, // does not matter for initial task
         payload: _recievePort.sendPort,
         extra: [seedEnc, seedSign],
       ),
     );
     final initResult = await _completers[_idCounter]!.future;
     _sendPort = initResult.payload as SendPort;
-    cryptoKeys = initResult.extra as CryptoKeys;
+    cryptoKeys = initResult.extra as P2PCryptoKeys;
     _completers.remove(_idCounter);
     return cryptoKeys;
   }
 
   Future<Uint8List> seal(final P2PMessage message) async {
     _idCounter++;
-    final completer = Completer<CryptoTask>();
+    final completer = Completer<P2PCryptoTask>();
     _completers[_idCounter] = completer;
-    _sendPort.send(CryptoTask(
+    _sendPort.send(P2PCryptoTask(
       id: _idCounter,
-      type: CryptoTaskType.seal,
+      type: P2PCryptoTaskType.seal,
       payload: message,
     ));
     final result = await completer.future;
@@ -64,11 +64,11 @@ class P2PCrypto {
     final P2PPacketHeader? header,
   ]) async {
     _idCounter++;
-    final completer = Completer<CryptoTask>();
+    final completer = Completer<P2PCryptoTask>();
     _completers[_idCounter] = completer;
-    _sendPort.send(CryptoTask(
+    _sendPort.send(P2PCryptoTask(
       id: _idCounter,
-      type: CryptoTaskType.unseal,
+      type: P2PCryptoTaskType.unseal,
       payload: datagram,
       extra: header,
     ));
@@ -86,11 +86,11 @@ class P2PCrypto {
     final Uint8List data,
   ) async {
     _idCounter++;
-    final completer = Completer<CryptoTask>();
+    final completer = Completer<P2PCryptoTask>();
     _completers[_idCounter] = completer;
-    _sendPort.send(CryptoTask(
+    _sendPort.send(P2PCryptoTask(
       id: _idCounter,
-      type: CryptoTaskType.encrypt,
+      type: P2PCryptoTaskType.encrypt,
       payload: data,
       extra: pubKey,
     ));
@@ -105,11 +105,11 @@ class P2PCrypto {
 
   Future<Uint8List> decrypt(final Uint8List data) async {
     _idCounter++;
-    final completer = Completer<CryptoTask>();
+    final completer = Completer<P2PCryptoTask>();
     _completers[_idCounter] = completer;
-    _sendPort.send(CryptoTask(
+    _sendPort.send(P2PCryptoTask(
       id: _idCounter,
-      type: CryptoTaskType.decrypt,
+      type: P2PCryptoTaskType.decrypt,
       payload: data,
     ));
     final result = await completer.future;
@@ -123,11 +123,11 @@ class P2PCrypto {
 
   Future<Uint8List> sign(final Uint8List data) async {
     _idCounter++;
-    final completer = Completer<CryptoTask>();
+    final completer = Completer<P2PCryptoTask>();
     _completers[_idCounter] = completer;
-    _sendPort.send(CryptoTask(
+    _sendPort.send(P2PCryptoTask(
       id: _idCounter,
-      type: CryptoTaskType.sign,
+      type: P2PCryptoTaskType.sign,
       payload: data,
     ));
     final result = await completer.future;
@@ -144,11 +144,11 @@ class P2PCrypto {
     final Uint8List data,
   ) async {
     _idCounter++;
-    final completer = Completer<CryptoTask>();
+    final completer = Completer<P2PCryptoTask>();
     _completers[_idCounter] = completer;
-    _sendPort.send(CryptoTask(
+    _sendPort.send(P2PCryptoTask(
       id: _idCounter,
-      type: CryptoTaskType.openSigned,
+      type: P2PCryptoTaskType.openSigned,
       payload: data,
       extra: pubKey,
     ));

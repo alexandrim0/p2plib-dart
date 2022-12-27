@@ -23,7 +23,7 @@ class P2PUdpTransport extends P2PTransport {
         callback!(P2PPacket(
           header: P2PPacketHeader.fromBytes(
             datagram.data,
-            FullAddress(address: datagram.address, port: datagram.port),
+            P2PFullAddress(address: datagram.address, port: datagram.port),
           ),
           datagram: datagram.data,
         ));
@@ -39,7 +39,7 @@ class P2PUdpTransport extends P2PTransport {
 
   @override
   void send(
-    final Iterable<FullAddress> fullAddresses,
+    final Iterable<P2PFullAddress> fullAddresses,
     final Uint8List datagram,
   ) {
     if (_socket == null) return;

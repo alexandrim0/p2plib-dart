@@ -12,7 +12,7 @@ class P2PPacketHeader {
 
   final P2PPacketType messageType;
   final int protocolNumber, issuedAt, id;
-  final FullAddress? srcFullAddress;
+  final P2PFullAddress? srcFullAddress;
 
   @override
   int get hashCode => Object.hash(
@@ -41,7 +41,7 @@ class P2PPacketHeader {
 
   factory P2PPacketHeader.fromBytes(
     final Uint8List datagram, [
-    final FullAddress? srcFullAddress,
+    final P2PFullAddress? srcFullAddress,
   ]) {
     if (datagram[0] > maxProtocolNumber) {
       throw const FormatException('Protocol number is wrong!');
@@ -70,7 +70,7 @@ class P2PPacketHeader {
     final int? issuedAt,
     final int? id,
     final P2PPacketType? messageType,
-    final FullAddress? srcFullAddress,
+    final P2PFullAddress? srcFullAddress,
   }) =>
       P2PPacketHeader(
         protocolNumber: protocolNumber ?? this.protocolNumber,

@@ -6,16 +6,16 @@ export 'package:p2plib/p2plib.dart';
 
 const initTime = Duration(milliseconds: 250);
 final localAddress = InternetAddress('127.0.0.1');
-final proxyAddress = FullAddress(address: localAddress, port: 2022);
+final proxyAddress = P2PFullAddress(address: localAddress, port: 2022);
 final proxyAddresses = [proxyAddress];
-final aliceAddress = FullAddress(address: localAddress, port: 3022);
-final bobAddress = FullAddress(address: localAddress, port: 4022);
-final randomPeerId = PeerId(value: getRandomBytes(PeerId.length));
+final aliceAddress = P2PFullAddress(address: localAddress, port: 3022);
+final bobAddress = P2PFullAddress(address: localAddress, port: 4022);
+final randomPeerId = P2PPeerId(value: getRandomBytes(P2PPeerId.length));
 final payload = getRandomBytes(64);
-final token = Token(value: payload);
+final token = P2PToken(value: payload);
 
 Future<P2PRouter> createRouter({
-  required final FullAddress address,
+  required final P2PFullAddress address,
   final Uint8List? seedEnc,
   final Uint8List? seedSign,
   final String? debugLabel,
@@ -32,7 +32,7 @@ Future<P2PRouter> createRouter({
 }
 
 Future<Isolate> createProxy({
-  final FullAddress? address,
+  final P2PFullAddress? address,
   final String? debugLabel = 'Proxy',
 }) async {
   final isolate = await Isolate.spawn(
@@ -122,7 +122,7 @@ final proxySeedSign = Uint8List.fromList([
   95,
   114,
 ]);
-final proxyPeerId = PeerId(
+final proxyPeerId = P2PPeerId(
     value: Uint8List.fromList([
   196,
   63,

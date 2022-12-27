@@ -6,7 +6,7 @@ import 'package:sodium/sodium.dart';
 
 import '/src/data/data.dart';
 
-void cryptoWorker(final CryptoTask initialTask) async {
+void cryptoWorker(final P2PCryptoTask initialTask) async {
   final sodium = await SodiumInit.init(_loadSodium());
   final box = sodium.crypto.box;
   final sign = sodium.crypto.sign;
@@ -23,7 +23,7 @@ void cryptoWorker(final CryptoTask initialTask) async {
   final receivePort = ReceivePort();
   final mainIsolatePort = initialTask.payload as SendPort;
   initialTask.payload = receivePort.sendPort;
-  initialTask.extra = CryptoKeys(
+  initialTask.extra = P2PCryptoKeys(
     encPublicKey: encKeyPair.publicKey,
     encSeed: seeds[0]!,
     signPublicKey: signKeyPair.publicKey,
@@ -33,10 +33,10 @@ void cryptoWorker(final CryptoTask initialTask) async {
 
   receivePort.listen(
     (final task) {
-      task as CryptoTask;
+      task as P2PCryptoTask;
       try {
         switch (task.type) {
-          case CryptoTaskType.seal:
+          case P2PCryptoTaskType.seal:
             final message = task.payload as P2PMessage;
             final datagram = message.payload.isEmpty
                 ? message.toBytes()
@@ -58,7 +58,7 @@ void cryptoWorker(final CryptoTask initialTask) async {
             task.payload = signedDatagram.toBytes();
             break;
 
-          case CryptoTaskType.unseal:
+          case P2PCryptoTaskType.unseal:
             final datagram = task.payload as Uint8List;
             final unsignedDatagram = datagram.sublist(
               0,
@@ -89,14 +89,14 @@ void cryptoWorker(final CryptoTask initialTask) async {
             }
             break;
 
-          case CryptoTaskType.encrypt:
+          case P2PCryptoTaskType.encrypt:
             task.payload = box.seal(
               message: task.payload as Uint8List,
               publicKey: task.extra as Uint8List,
             );
             break;
 
-          case CryptoTaskType.decrypt:
+          case P2PCryptoTaskType.decrypt:
             task.payload = box.sealOpen(
               cipherText: task.payload as Uint8List,
               publicKey: encKeyPair.publicKey,
@@ -104,7 +104,7 @@ void cryptoWorker(final CryptoTask initialTask) async {
             );
             break;
 
-          case CryptoTaskType.sign:
+          case P2PCryptoTaskType.sign:
             final message = task.payload as Uint8List;
             final signature = sign.detached(
               message: message,
@@ -116,7 +116,7 @@ void cryptoWorker(final CryptoTask initialTask) async {
             task.payload = signed.toBytes();
             break;
 
-          case CryptoTaskType.openSigned:
+          case P2PCryptoTaskType.openSigned:
             final data = task.payload as Uint8List;
             final messageLength = data.length - P2PMessage.signatureLength;
             final message = data.sublist(0, messageLength);

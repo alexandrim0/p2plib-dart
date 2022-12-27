@@ -1,18 +1,18 @@
 part of 'data.dart';
 
-class Token {
+class P2PToken {
   static const _listEq = ListEquality<int>();
 
   final Uint8List value;
 
-  const Token({required this.value});
+  const P2PToken({required this.value});
 
   @override
   int get hashCode => Object.hash(runtimeType, _listEq.hash(value));
 
   @override
   bool operator ==(Object other) =>
-      other is Token &&
+      other is P2PToken &&
       runtimeType == other.runtimeType &&
       _listEq.equals(value, other.value);
 

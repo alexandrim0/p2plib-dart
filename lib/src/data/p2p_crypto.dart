@@ -1,6 +1,6 @@
 part of 'data.dart';
 
-enum CryptoTaskType {
+enum P2PCryptoTaskType {
   seal,
   unseal,
   encrypt,
@@ -9,13 +9,13 @@ enum CryptoTaskType {
   openSigned,
 }
 
-class CryptoTask {
+class P2PCryptoTask {
   final int id;
-  final CryptoTaskType type;
+  final P2PCryptoTaskType type;
   Object payload;
   Object? extra;
 
-  CryptoTask({
+  P2PCryptoTask({
     required this.id,
     required this.type,
     required this.payload,
@@ -23,10 +23,10 @@ class CryptoTask {
   });
 }
 
-class CryptoKeys {
+class P2PCryptoKeys {
   final Uint8List encPublicKey, encSeed, signPublicKey, signSeed;
 
-  const CryptoKeys({
+  const P2PCryptoKeys({
     required this.encPublicKey,
     required this.encSeed,
     required this.signPublicKey,

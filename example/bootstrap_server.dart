@@ -21,13 +21,13 @@ void main(List<String> args) async {
     crypto: crypto,
     transports: [
       P2PUdpTransport(
-        fullAddress: FullAddress(
+        fullAddress: P2PFullAddress(
           address: InternetAddress.anyIPv4,
           port: port,
         ),
       ),
       P2PUdpTransport(
-        fullAddress: FullAddress(
+        fullAddress: P2PFullAddress(
           address: InternetAddress.anyIPv6,
           port: port,
         ),

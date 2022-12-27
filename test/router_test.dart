@@ -44,7 +44,7 @@ main() async {
           );
           final completer = Completer<bool>();
           subscription.onData((message) {
-            completer.complete(token == Token(value: message.payload));
+            completer.complete(token == P2PToken(value: message.payload));
           });
           await aliceRouter.sendMessage(
             dstPeerId: bobRouter.selfId,
@@ -65,7 +65,7 @@ main() async {
           );
           final completer = Completer<bool>();
           subscription.onData((message) {
-            completer.complete(token == Token(value: message.payload));
+            completer.complete(token == P2PToken(value: message.payload));
           });
           await aliceRouter.sendMessage(
             isConfirmable: true,
@@ -205,7 +205,7 @@ main() async {
 
           final completer = Completer<bool>();
           subscription.onData((message) {
-            completer.complete(token == Token(value: message.payload));
+            completer.complete(token == P2PToken(value: message.payload));
           });
           await aliceRouter.sendMessage(
             dstPeerId: bobRouter.selfId,
@@ -235,7 +235,7 @@ main() async {
 
           final completer = Completer<bool>();
           subscription.onData((message) {
-            completer.complete(token == Token(value: message.payload));
+            completer.complete(token == P2PToken(value: message.payload));
           });
           await aliceRouter.sendMessage(
             isConfirmable: true,
@@ -354,7 +354,7 @@ main() async {
   tearDown(() {
     aliceRouter.stop();
     bobRouter.stop();
-    aliceRouter.clearCache();
-    bobRouter.clearCache();
+    aliceRouter.clearResolveCache();
+    bobRouter.clearResolveCache();
   });
 }
