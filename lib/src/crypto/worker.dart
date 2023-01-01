@@ -13,38 +13,42 @@ void cryptoWorker(final P2PCryptoTask initialTask) async {
   final box = sodium.crypto.box;
   final sign = sodium.crypto.sign;
   final cryptoKeys = initialTask.extra == null
-      ? P2PCryptoKeys()
+      ? P2PCryptoKeys.empty()
       : initialTask.extra as P2PCryptoKeys;
 
   // use given encryption key pair or create it from given or generated seed
-  if (cryptoKeys.encPrivateKey == null || cryptoKeys.encPublicKey == null) {
-    cryptoKeys.encSeed ??= sodium.randombytes.buf(sodium.randombytes.seedBytes);
+  if (cryptoKeys.encPrivateKey.isEmpty || cryptoKeys.encPublicKey.isEmpty) {
+    if (cryptoKeys.encSeed.isEmpty) {
+      cryptoKeys.encSeed = sodium.randombytes.buf(sodium.randombytes.seedBytes);
+    }
     encKeyPair = box.seedKeyPair(SecureKey.fromList(
       sodium,
-      cryptoKeys.encSeed!,
+      cryptoKeys.encSeed,
     ));
     cryptoKeys.encPublicKey = encKeyPair.publicKey;
     cryptoKeys.encPrivateKey = encKeyPair.secretKey.extractBytes();
   } else {
     encKeyPair = KeyPair(
-      secretKey: SecureKey.fromList(sodium, cryptoKeys.encPrivateKey!),
-      publicKey: cryptoKeys.encPublicKey!,
+      secretKey: SecureKey.fromList(sodium, cryptoKeys.encPrivateKey),
+      publicKey: cryptoKeys.encPublicKey,
     );
   }
   // use given sign key pair or create it from given or generated seed
-  if (cryptoKeys.signPrivateKey == null || cryptoKeys.signPublicKey == null) {
-    cryptoKeys.signSeed ??=
-        sodium.randombytes.buf(sodium.randombytes.seedBytes);
+  if (cryptoKeys.signPrivateKey.isEmpty || cryptoKeys.signPublicKey.isEmpty) {
+    if (cryptoKeys.signSeed.isEmpty) {
+      cryptoKeys.signSeed =
+          sodium.randombytes.buf(sodium.randombytes.seedBytes);
+    }
     signKeyPair = sign.seedKeyPair(SecureKey.fromList(
       sodium,
-      cryptoKeys.signSeed!,
+      cryptoKeys.signSeed,
     ));
     cryptoKeys.signPublicKey = signKeyPair.publicKey;
     cryptoKeys.signPrivateKey = signKeyPair.secretKey.extractBytes();
   } else {
     signKeyPair = KeyPair(
-      secretKey: SecureKey.fromList(sodium, cryptoKeys.signPrivateKey!),
-      publicKey: cryptoKeys.signPublicKey!,
+      secretKey: SecureKey.fromList(sodium, cryptoKeys.signPrivateKey),
+      publicKey: cryptoKeys.signPublicKey,
     );
   }
 

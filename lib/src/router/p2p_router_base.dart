@@ -43,8 +43,8 @@ class P2PRouterBase with P2PResolveHandler {
   Future<P2PCryptoKeys> init([P2PCryptoKeys? keys]) async {
     final cryptoKeys = await crypto.init(keys);
     selfId = P2PPeerId.fromKeys(
-      encryptionKey: cryptoKeys.encPublicKey!,
-      signKey: cryptoKeys.signPublicKey!,
+      encryptionKey: cryptoKeys.encPublicKey,
+      signKey: cryptoKeys.signPublicKey,
     );
     return cryptoKeys;
   }

@@ -25,7 +25,10 @@ Future<P2PRouter> createRouter({
     debugLabel: debugLabel,
     logger: print,
   );
-  await router.init(P2PCryptoKeys(encSeed: seedEnc, signSeed: seedSign));
+  final cryptoKeys = P2PCryptoKeys.empty();
+  if (seedEnc != null) cryptoKeys.encSeed = seedEnc;
+  if (seedSign != null) cryptoKeys.signSeed = seedSign;
+  await router.init(cryptoKeys);
   return router;
 }
 
@@ -40,10 +43,9 @@ Future<Isolate> createProxy({
         debugLabel: debugLabel,
         logger: print,
       );
-      await router.init(P2PCryptoKeys(
-        encSeed: proxySeedEnc,
-        signSeed: proxySeedSign,
-      ));
+      await router.init(P2PCryptoKeys.empty()
+        ..encSeed = proxySeedEnc
+        ..signSeed = proxySeedSign);
       await router.start();
     },
     null,

@@ -4,12 +4,11 @@ import 'mock.dart';
 
 main() async {
   final crypto = P2PCrypto();
-  await crypto.init(P2PCryptoKeys(
-    encSeed: proxySeedEnc,
-    signSeed: proxySeedSign,
-  ));
-  final encPublicKey = crypto.cryptoKeys.encPublicKey!;
-  final signPublicKey = crypto.cryptoKeys.signPublicKey!;
+  await crypto.init(P2PCryptoKeys.empty()
+    ..encSeed = proxySeedEnc
+    ..signSeed = proxySeedSign);
+  final encPublicKey = crypto.cryptoKeys.encPublicKey;
+  final signPublicKey = crypto.cryptoKeys.signPublicKey;
   final message = P2PMessage(
     header: P2PPacketHeader(id: genRandomInt()),
     srcPeerId: proxyPeerId,
