@@ -13,8 +13,8 @@ class P2PRouter extends P2PRouterBase with P2PHandlerAck, P2PHandlerLastSeen {
       _lastSeenController.stream;
 
   P2PRouter({
-    required super.crypto,
-    required super.transports,
+    super.crypto,
+    super.transports,
     super.debugLabel,
     super.logger,
   }) {

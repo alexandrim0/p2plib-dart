@@ -4,9 +4,10 @@ class P2PRouterBase with P2PResolveHandler {
   static const defaultTimeout = Duration(seconds: 3);
   static const defaultPeriod = Duration(seconds: 1);
 
-  final P2PPeerId selfId;
+  late final P2PPeerId selfId;
   final P2PCrypto crypto;
   final Iterable<P2PTransport> transports;
+  final int defaultPort;
   final String? debugLabel;
 
   var forwardFromKnownPeerOnly = false;
@@ -19,14 +20,34 @@ class P2PRouterBase with P2PResolveHandler {
   bool get isNotRun => !_isRun;
 
   P2PRouterBase({
-    required this.crypto,
-    required this.transports,
+    final P2PCrypto? crypto,
+    final Iterable<P2PTransport>? transports,
+    this.defaultPort = 2022,
     this.debugLabel,
     this.logger,
-  }) : selfId = P2PPeerId.fromKeys(
-          encryptionKey: crypto.cryptoKeys.encPublicKey!,
-          signKey: crypto.cryptoKeys.signPublicKey!,
-        );
+  })  : crypto = crypto ?? P2PCrypto(),
+        transports = transports ??
+            [
+              P2PUdpTransport(
+                  fullAddress: P2PFullAddress(
+                address: InternetAddress.anyIPv4,
+                port: defaultPort,
+              )),
+              P2PUdpTransport(
+                  fullAddress: P2PFullAddress(
+                address: InternetAddress.anyIPv6,
+                port: defaultPort,
+              )),
+            ];
+
+  Future<P2PCryptoKeys> init([P2PCryptoKeys? keys]) async {
+    final cryptoKeys = await crypto.init(keys);
+    selfId = P2PPeerId.fromKeys(
+      encryptionKey: cryptoKeys.encPublicKey!,
+      signKey: cryptoKeys.signPublicKey!,
+    );
+    return cryptoKeys;
+  }
 
   Future<void> start() async {
     if (_isRun) return;
