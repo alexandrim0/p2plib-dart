@@ -15,25 +15,8 @@ void main(List<String> args) async {
       exit(2);
     }
   }
-  final crypto = P2PCrypto();
-  await crypto.init();
-  final router = P2PRouterBase(
-    crypto: crypto,
-    transports: [
-      P2PUdpTransport(
-        fullAddress: P2PFullAddress(
-          address: InternetAddress.anyIPv4,
-          port: port,
-        ),
-      ),
-      P2PUdpTransport(
-        fullAddress: P2PFullAddress(
-          address: InternetAddress.anyIPv6,
-          port: port,
-        ),
-      ),
-    ],
-  );
+  final router = P2PRouterBase(defaultPort: port);
   if (args.contains('log')) router.logger = stdout.writeln;
+  await router.init();
   await router.start();
 }
