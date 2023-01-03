@@ -5,8 +5,12 @@ import 'package:p2plib/p2plib.dart';
 export 'package:p2plib/p2plib.dart';
 
 const initTime = Duration(milliseconds: 250);
-final localAddress = InternetAddress('127.0.0.1');
-final proxyAddress = P2PFullAddress(address: localAddress, port: 2022);
+final localAddress = InternetAddress.anyIPv4;
+final proxyAddress = P2PFullAddress(
+  // address: InternetAddress('198.199.126.92'),
+  address: localAddress,
+  port: 2022,
+);
 final proxyAddresses = [proxyAddress];
 final aliceAddress = P2PFullAddress(address: localAddress, port: 3022);
 final bobAddress = P2PFullAddress(address: localAddress, port: 4022);
@@ -190,5 +194,5 @@ final proxyPeerId = P2PPeerId(
   127,
   224,
 ]));
-const proxyPeerIdAsHex =
-    '0xc43fde029c3c6cdd840c38ab5330a812c3a949b1977c50f4598afbabb8568d554ec4d634560ef35a3aa9e3b1b8eb11c5e65cf0cd08094e20fe8cfb4f78867fe0';
+const proxyPeerIdAsBase64 =
+    'xD_eApw8bN2EDDirUzCoEsOpSbGXfFD0WYr7q7hWjVVOxNY0Vg7zWjqp47G46xHF5lzwzQgJTiD-jPtPeIZ_4A==';

@@ -25,8 +25,8 @@ main() async {
           P2PPeerId.fromKeys(
             encryptionKey: encPublicKey,
             signKey: signPublicKey,
-          ).asHex,
-          proxyPeerIdAsHex,
+          ).toString(),
+          proxyPeerIdAsBase64,
         ),
       );
       test(

@@ -176,7 +176,7 @@ main() async {
             peerId: proxyPeerId,
             addresses: proxyAddresses,
           );
-          await Future.wait([aliceRouter.start()]);
+          await aliceRouter.start();
           expect(
             () async => await aliceRouter.sendMessage(
               isConfirmable: true,
