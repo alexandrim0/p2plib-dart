@@ -2,10 +2,20 @@ import 'dart:io';
 import 'package:p2plib/p2plib.dart';
 
 void main(List<String> args) async {
-  if (args.contains('help')) {
-    stdout.writeln('Run with "log" parameter to write logs to stdout');
-    exit(0);
-  }
+  if (args.contains('help')) _printHelpScreen();
+  final router = P2PRouterBase(defaultPort: _getPort(args));
+  if (args.contains('log')) router.logger = stdout.writeln;
+  await router.init();
+  await router.start();
+}
+
+void _printHelpScreen() {
+  stdout.writeln('Run with "log" parameter to write logs to stdout');
+  stdout.writeln('Run with "port [1025-65535]" parameter to set listen port');
+  exit(0);
+}
+
+int _getPort(List<String> args) {
   var port = 2022;
   var portIndex = args.indexOf('port');
   if (portIndex > 0 && args.length > ++portIndex) {
@@ -15,8 +25,5 @@ void main(List<String> args) async {
       exit(2);
     }
   }
-  final router = P2PRouterBase(defaultPort: port);
-  if (args.contains('log')) router.logger = stdout.writeln;
-  await router.init();
-  await router.start();
+  return port;
 }

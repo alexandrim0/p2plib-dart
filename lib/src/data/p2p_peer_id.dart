@@ -12,7 +12,13 @@ class P2PPeerId extends P2PToken {
     required final Uint8List encryptionKey,
     required final Uint8List signKey,
   }) {
-    final builder = BytesBuilder()
+    if (encryptionKey.length != _keyLength) {
+      throw const FormatException('Encription key length');
+    }
+    if (signKey.length != _keyLength) {
+      throw const FormatException('Signing key length');
+    }
+    final builder = BytesBuilder(copy: false)
       ..add(encryptionKey)
       ..add(signKey);
     return P2PPeerId(value: builder.toBytes());
