@@ -1,19 +1,19 @@
 part of 'router.dart';
 
 mixin P2PHandlerAck on P2PRouterBase {
-  final _completers = <int, Completer<void>>{};
+  final _ackCompleters = <int, Completer<void>>{};
 
   var ackTimeout = P2PRouterBase.defaultTimeout;
   var ackRetryPeriod = P2PRouterBase.defaultPeriod;
 
   void _stopAckHandler() {
-    _completers.clear();
+    _ackCompleters.clear();
   }
 
   /// returns true if message is processed
   bool _processAck(final P2PMessage message) {
     if (message.header.messageType == P2PPacketType.acknowledgement) {
-      _completers.remove(message.header.id)?.complete();
+      _ackCompleters.remove(message.header.id)?.complete();
       return true;
     }
     if (message.header.messageType == P2PPacketType.confirmable) {
@@ -35,33 +35,40 @@ mixin P2PHandlerAck on P2PRouterBase {
     return false;
   }
 
-  Future<void> _ackBack({
+  Future<void> _sendDatagramRetry({
     required final int messageId,
     required final Uint8List datagram,
     required final Iterable<P2PFullAddress> addresses,
-    required final Duration timeout,
   }) {
     final completer = Completer<void>();
-    _completers[messageId] = completer;
-    _sendAgain(datagram: datagram, messageId: messageId, addresses: addresses);
+    _ackCompleters[messageId] = completer;
+    _sendAndRetry(
+        datagram: datagram, messageId: messageId, addresses: addresses);
     return completer.future.timeout(
-      timeout,
+      ackTimeout,
       onTimeout: () {
-        if (_completers.remove(messageId) == null) return;
+        if (_ackCompleters.remove(messageId) == null) return;
         throw TimeoutException('[$debugLabel] Ack timeout');
       },
     );
   }
 
-  void _sendAgain({
+  void _sendAndRetry({
     required final int messageId,
     required final Uint8List datagram,
     required final Iterable<P2PFullAddress> addresses,
-  }) async {
-    await Future.delayed(ackRetryPeriod);
-    if (isNotRun) return;
-    if (!_completers.containsKey(messageId)) return;
-    sendDatagram(addresses: addresses, datagram: datagram);
-    _sendAgain(datagram: datagram, messageId: messageId, addresses: addresses);
+  }) {
+    if (isRun && _ackCompleters.containsKey(messageId)) {
+      sendDatagram(addresses: addresses, datagram: datagram);
+      Future.delayed(
+        ackRetryPeriod,
+        () => _sendAndRetry(
+          datagram: datagram,
+          messageId: messageId,
+          addresses: addresses,
+        ),
+      );
+      logger?.call('[$debugLabel] send confirmable message, id: $messageId');
+    }
   }
 }

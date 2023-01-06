@@ -94,7 +94,7 @@ main() async {
       );
 
       test(
-        'onPeerStatusChanged',
+        'trackPeer',
         () async {
           await Future.wait([aliceRouter.start(), bobRouter.start()]);
 
@@ -114,13 +114,11 @@ main() async {
             },
             peerId: bobRouter.selfId,
           );
-          await Future.delayed(aliceRouter.pingPeriod * 1.5);
+          await Future.delayed(aliceRouter.pingTimeout);
           expect(isOnline, true);
 
           bobRouter.stop();
-          await Future.delayed(
-            aliceRouter.pingTimeout + aliceRouter.pingPeriod,
-          );
+          await Future.delayed(aliceRouter.pingTimeout);
           expect(isOnline, false);
           expect(aliceRouter.getPeerStatus(bobRouter.selfId), false);
           await subscription.cancel();
@@ -132,7 +130,6 @@ main() async {
         () async {
           await Future.wait([aliceRouter.start(), bobRouter.start()]);
 
-          var isOnline = false;
           aliceRouter.addPeerAddress(
             peerId: bobRouter.selfId,
             addresses: [bobAddress],
@@ -140,27 +137,16 @@ main() async {
                 .subtract(aliceRouter.pingTimeout)
                 .millisecondsSinceEpoch,
           );
-          final subscription = aliceRouter.trackPeer(
-            onChange: (status) {
-              isOnline = status;
-            },
-            peerId: bobRouter.selfId,
-          );
+          expect(aliceRouter.getPeerStatus(bobRouter.selfId), false);
+          expect(bobRouter.getPeerStatus(aliceRouter.selfId), false);
+
           expect(await aliceRouter.pingPeer(bobRouter.selfId), true);
+          expect(aliceRouter.getPeerStatus(bobRouter.selfId), true);
+          expect(bobRouter.getPeerStatus(aliceRouter.selfId), true);
 
-          await bobRouter.sendMessage(dstPeerId: aliceRouter.selfId);
-          expect(isOnline, true);
-
-          await Future.delayed(aliceRouter.pingTimeout * 1.5);
-          expect(isOnline, true);
-
-          bobRouter.stop();
-          await Future.delayed(
-            aliceRouter.pingTimeout + aliceRouter.pingPeriod,
-          );
-          expect(isOnline, false);
-          expect(await aliceRouter.pingPeer(bobRouter.selfId), false);
-          await subscription.cancel();
+          await Future.delayed(aliceRouter.pingTimeout * 1.1);
+          expect(aliceRouter.getPeerStatus(bobRouter.selfId), false);
+          expect(bobRouter.getPeerStatus(aliceRouter.selfId), false);
         },
       );
     },
@@ -272,7 +258,7 @@ main() async {
       );
 
       test(
-        'onPeerStatusChanged',
+        'trackPeer',
         () async {
           aliceRouter.addPeerAddress(
             peerId: proxyPeerId,
@@ -287,7 +273,6 @@ main() async {
             aliceRouter.sendMessage(dstPeerId: proxyPeerId),
             bobRouter.sendMessage(dstPeerId: proxyPeerId),
           ]);
-
           expect(aliceRouter.getPeerStatus(bobRouter.selfId), false);
 
           var isOnline = false;
@@ -299,9 +284,8 @@ main() async {
           expect(isOnline, true);
 
           bobRouter.stop();
-          await Future.delayed(
-            aliceRouter.pingTimeout + aliceRouter.pingPeriod,
-          );
+          await Future.delayed(aliceRouter.pingTimeout * 1.5);
+
           expect(isOnline, false);
           expect(aliceRouter.getPeerStatus(bobRouter.selfId), false);
           await subscription.cancel();
@@ -323,28 +307,18 @@ main() async {
           await Future.wait([
             aliceRouter.sendMessage(dstPeerId: proxyPeerId),
             bobRouter.sendMessage(dstPeerId: proxyPeerId),
+            Future.delayed(initTime),
           ]);
+          expect(aliceRouter.getPeerStatus(bobRouter.selfId), false);
+          expect(bobRouter.getPeerStatus(aliceRouter.selfId), false);
 
-          var isOnline = false;
-          final subscription = aliceRouter.trackPeer(
-            onChange: (status) => isOnline = status,
-            peerId: bobRouter.selfId,
-          );
           expect(await aliceRouter.pingPeer(bobRouter.selfId), true);
+          expect(aliceRouter.getPeerStatus(bobRouter.selfId), true);
+          expect(bobRouter.getPeerStatus(aliceRouter.selfId), true);
 
-          await bobRouter.sendMessage(dstPeerId: aliceRouter.selfId);
-          expect(isOnline, true);
-
-          await Future.delayed(aliceRouter.pingTimeout * 1.5);
-          expect(isOnline, true);
-
-          bobRouter.stop();
-          await Future.delayed(
-            aliceRouter.pingTimeout + aliceRouter.pingPeriod,
-          );
-          expect(isOnline, false);
-          expect(await aliceRouter.pingPeer(bobRouter.selfId), false);
-          await subscription.cancel();
+          await Future.delayed(aliceRouter.pingTimeout * 1.1);
+          expect(aliceRouter.getPeerStatus(bobRouter.selfId), false);
+          expect(bobRouter.getPeerStatus(aliceRouter.selfId), false);
         },
       );
     },

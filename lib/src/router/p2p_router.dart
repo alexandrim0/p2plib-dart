@@ -56,6 +56,7 @@ class P2PRouter extends P2PRouterBase with P2PHandlerAck, P2PHandlerLastSeen {
     return packet;
   }
 
+  @override
   Future<int> sendMessage({
     final bool isConfirmable = false,
     required final P2PPeerId dstPeerId,
@@ -77,24 +78,17 @@ class P2PRouter extends P2PRouterBase with P2PHandlerAck, P2PHandlerLastSeen {
       payload: payload,
     );
     final datagram = await crypto.seal(message);
-    sendDatagram(addresses: addresses, datagram: datagram);
 
     if (isConfirmable) {
-      await _ackBack(
+      await _sendDatagramRetry(
         messageId: message.header.id,
         datagram: datagram,
         addresses: addresses,
-        timeout: ackTimeout ?? this.ackTimeout,
       );
+    } else {
+      sendDatagram(addresses: addresses, datagram: datagram);
+      logger?.call('[$debugLabel] sent ${datagram.length} bytes to $addresses');
     }
     return message.header.id;
   }
-
-  @override
-  Future<void> _sendEmptyConfirmableTo(final P2PPeerId dstPeerId) =>
-      sendMessage(
-        isConfirmable: true,
-        dstPeerId: dstPeerId,
-        ackTimeout: ackTimeout,
-      );
 }

@@ -20,7 +20,7 @@ mixin P2PHandlerLastSeen on P2PRouterBase {
 
   Future<bool> pingPeer(final P2PPeerId peerId) async {
     try {
-      await _sendEmptyConfirmableTo(peerId);
+      await sendMessage(isConfirmable: true, dstPeerId: peerId);
       return true;
     } catch (_) {}
     return false;
@@ -41,7 +41,13 @@ mixin P2PHandlerLastSeen on P2PRouterBase {
         );
   }
 
-  Future<void> _sendEmptyConfirmableTo(final P2PPeerId dstPeerId);
+  Future<int> sendMessage({
+    final bool isConfirmable = false,
+    required final P2PPeerId dstPeerId,
+    final int? messageId,
+    final Uint8List? payload,
+    final Duration? ackTimeout,
+  });
 
   void _stopLastSeenHandler() {
     _lastSeen.clear();
