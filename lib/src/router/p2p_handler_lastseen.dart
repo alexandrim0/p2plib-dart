@@ -1,7 +1,6 @@
 part of 'router.dart';
 
 mixin P2PHandlerLastSeen on P2PRouterBase {
-  final _lastSeen = <P2PPeerId, int>{};
   final _lastSeenController =
       StreamController<MapEntry<P2PPeerId, bool>>.broadcast();
 
@@ -9,7 +8,7 @@ mixin P2PHandlerLastSeen on P2PRouterBase {
       _lastSeenController.stream;
 
   bool getPeerStatus(final P2PPeerId peerId) {
-    final lastSeen = _lastSeen[peerId];
+    final lastSeen = _resolveCache[peerId]?.values.reduce(max);
     return lastSeen == null
         ? false
         : lastSeen + requestTimeout.inMilliseconds >
@@ -26,12 +25,9 @@ mixin P2PHandlerLastSeen on P2PRouterBase {
     return false;
   }
 
-  void _stopLastSeenHandler() {
-    _lastSeen.clear();
-  }
-
   void _processLastSeen(final P2PMessage message) {
-    _lastSeen[message.srcPeerId] = DateTime.now().millisecondsSinceEpoch;
+    _resolveCache[message.srcPeerId]?[message.header.srcFullAddress!] =
+        DateTime.now().millisecondsSinceEpoch;
     _lastSeenController.add(MapEntry<P2PPeerId, bool>(message.srcPeerId, true));
   }
 }

@@ -83,7 +83,7 @@ class P2PRouterBase with P2PResolveHandler {
     // remember forwards count
     final forwardsCount = P2PPacketHeader.resetForwardsCount(packet.datagram);
     // if peer unknown then check signature and keep address if success
-    if (_cache[srcPeerId]?[packet.header.srcFullAddress] == null) {
+    if (_resolveCache[srcPeerId]?[packet.header.srcFullAddress] == null) {
       try {
         await crypto.openSigned(srcPeerId.signPiblicKey, packet.datagram);
         addPeerAddress(

@@ -30,7 +30,6 @@ class P2PRouter extends P2PRouterBase with P2PHandlerAck, P2PHandlerLastSeen {
   @override
   void stop() {
     _stopAckHandler();
-    _stopLastSeenHandler();
     super.stop();
   }
 
