@@ -9,9 +9,6 @@ class P2PRouter extends P2PRouterBase with P2PHandlerAck, P2PHandlerLastSeen {
 
   Stream<P2PMessage> get messageStream => _messageController.stream;
 
-  Stream<MapEntry<P2PPeerId, bool>> get lastSeenStream =>
-      _lastSeenController.stream;
-
   P2PRouter({
     super.crypto,
     super.transports,
@@ -57,7 +54,7 @@ class P2PRouter extends P2PRouterBase with P2PHandlerAck, P2PHandlerLastSeen {
   }
 
   @override
-  Future<int> sendMessage({
+  Future<P2PPacketHeader> sendMessage({
     final bool isConfirmable = false,
     required final P2PPeerId dstPeerId,
     final int? messageId,
@@ -66,22 +63,25 @@ class P2PRouter extends P2PRouterBase with P2PHandlerAck, P2PHandlerLastSeen {
   }) async {
     if (isNotRun) throw Exception('[$debugLabel] P2PRouter is not running!');
     final addresses = resolvePeerId(dstPeerId);
-    final message = P2PMessage(
-      header: P2PPacketHeader(
-        protocolNumber: P2PMessage.protocolNumber,
-        messageType:
-            isConfirmable ? P2PPacketType.confirmable : P2PPacketType.regular,
-        id: messageId ?? genRandomInt(),
-      ),
+    if (addresses.isEmpty) {
+      throw Exception('[$debugLabel] Unknown route to $dstPeerId. ');
+    }
+    final header = P2PPacketHeader(
+      protocolNumber: P2PMessage.protocolNumber,
+      messageType:
+          isConfirmable ? P2PPacketType.confirmable : P2PPacketType.regular,
+      id: messageId ?? genRandomInt(),
+    );
+    final datagram = await crypto.seal(P2PMessage(
+      header: header,
       srcPeerId: selfId,
       dstPeerId: dstPeerId,
       payload: payload,
-    );
-    final datagram = await crypto.seal(message);
+    ));
 
     if (isConfirmable) {
       await _sendDatagramRetry(
-        messageId: message.header.id,
+        messageId: header.id,
         datagram: datagram,
         addresses: addresses,
       );
@@ -89,6 +89,6 @@ class P2PRouter extends P2PRouterBase with P2PHandlerAck, P2PHandlerLastSeen {
       sendDatagram(addresses: addresses, datagram: datagram);
       logger?.call('[$debugLabel] sent ${datagram.length} bytes to $addresses');
     }
-    return message.header.id;
+    return header;
   }
 }

@@ -321,6 +321,34 @@ main() async {
           expect(bobRouter.getPeerStatus(aliceRouter.selfId), false);
         },
       );
+
+      // TBD:
+      // test('do not forward on limit', () async {
+      //   aliceRouter.addPeerAddress(
+      //     peerId: proxyPeerId,
+      //     addresses: proxyAddresses,
+      //   );
+      //   await aliceRouter.start();
+      //   final message = await aliceRouter.sendMessage(dstPeerId: proxyPeerId);
+      //   final datagram = message.toBytes();
+      //   aliceRouter.onMessage(P2PPacket(
+      //     header: P2PPacketHeader.fromBytes(datagram),
+      //     datagram: datagram,
+      //   ));
+
+      //   await bobRouter.sendMessage(dstPeerId: proxyPeerId);
+      //   await Future.delayed(initTime);
+      //   expect(
+      //     aliceRouter.sendDatagram(
+      //       addresses: bobRouter.selfAddresses,
+      //       datagram: P2PPacketHeader.setForwardsCount(
+      //         aliceRouter.maxForwardsCount,
+      //         message.toBytes(),
+      //       ),
+      //     ),
+      //     throwsA(isA<Exception>()),
+      //   );
+      // });
     },
   );
 

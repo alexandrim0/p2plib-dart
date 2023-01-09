@@ -21,12 +21,15 @@ void main() async {
   test(
     'P2PMessageHeader equality and serialization',
     () {
-      final messageId = genRandomInt();
-      final headerA = P2PPacketHeader(id: messageId);
-      final headerB = headerA.copyWith(messageType: P2PPacketType.confirmable);
+      final headerA = P2PPacketHeader(id: genRandomInt());
+      final headerB = headerA.copyWith(
+        messageType: P2PPacketType.confirmation,
+        protocolNumber: 3,
+      );
       final headerC = P2PPacketHeader.fromBytes(headerA.toBytes());
 
       expect(headerA == headerB, false);
+      expect(headerB.toBytes()[1], 50); // 00110010
       expect(headerA == headerC, true);
     },
   );

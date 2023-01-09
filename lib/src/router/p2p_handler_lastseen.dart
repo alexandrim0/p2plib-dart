@@ -10,6 +10,9 @@ mixin P2PHandlerLastSeen on P2PRouterBase {
   var pingPeriod = P2PRouterBase.defaultPeriod;
   Timer? _pingTimer;
 
+  Stream<MapEntry<P2PPeerId, bool>> get lastSeenStream =>
+      _lastSeenController.stream;
+
   bool getPeerStatus(final P2PPeerId peerId) {
     final lastSeen = _lastSeen[peerId];
     return lastSeen == null
@@ -41,13 +44,8 @@ mixin P2PHandlerLastSeen on P2PRouterBase {
         );
   }
 
-  Future<int> sendMessage({
-    final bool isConfirmable = false,
-    required final P2PPeerId dstPeerId,
-    final int? messageId,
-    final Uint8List? payload,
-    final Duration? ackTimeout,
-  });
+  void untrackPeer({required final P2PPeerId peerId}) =>
+      _pingTasks.remove(peerId);
 
   void _stopLastSeenHandler() {
     _lastSeen.clear();

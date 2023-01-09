@@ -10,7 +10,7 @@ class P2PRouterBase with P2PResolveHandler {
   final int defaultPort;
   final String? debugLabel;
 
-  var forwardFromKnownPeerOnly = false;
+  var maxForwardsCount = 1;
   var requestTimeout = defaultTimeout;
   void Function(String)? logger;
 
@@ -81,6 +81,8 @@ class P2PRouterBase with P2PResolveHandler {
     // drop echo message
     final srcPeerId = P2PMessage.getSrcPeerId(packet.datagram);
     if (srcPeerId == selfId) return null;
+    // remember forwards count
+    final forwardsCount = P2PPacketHeader.resetForwardsCount(packet.datagram);
     // if peer unknown then check signature and keep address if success
     if (_cache[srcPeerId]?[packet.header.srcFullAddress] == null) {
       try {
@@ -100,8 +102,8 @@ class P2PRouterBase with P2PResolveHandler {
     // is message for me or to forward?
     final dstPeerId = P2PMessage.getDstPeerId(packet.datagram);
     if (dstPeerId == selfId) return packet;
-    // exit if forward for anonymous disabled
-    if (forwardFromKnownPeerOnly && !_cache.containsKey(dstPeerId)) return null;
+    // check if forwards count exeeds
+    if (forwardsCount >= maxForwardsCount) return null;
     // resolve peer address exclude source address to prevent echo
     final addresses = resolvePeerId(dstPeerId)
         .where((e) => e != packet.header.srcFullAddress);
@@ -111,22 +113,33 @@ class P2PRouterBase with P2PResolveHandler {
         'Failed forwarding from ${packet.header.srcFullAddress}',
       );
     } else {
-      // forward message
+      // increment forwards count and forward message
+      P2PPacketHeader.setForwardsCount(forwardsCount + 1, packet.datagram);
       sendDatagram(addresses: addresses, datagram: packet.datagram);
       logger?.call(
         '[$debugLabel] forwarded from ${packet.header.srcFullAddress} '
         'to $addresses ${packet.datagram.length} bytes',
       );
     }
-    return packet;
+    return null;
   }
 
-  void sendDatagram({
+  int sendDatagram({
     required final Iterable<P2PFullAddress> addresses,
     required final Uint8List datagram,
   }) {
     for (final t in transports) {
       t.send(addresses, datagram);
     }
+    return datagram.length;
   }
+
+  Future<P2PPacketHeader> sendMessage({
+    final bool isConfirmable = false,
+    required final P2PPeerId dstPeerId,
+    final int? messageId,
+    final Uint8List? payload,
+    final Duration? ackTimeout,
+  }) =>
+      throw Exception('Must be implemented in children');
 }

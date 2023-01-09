@@ -12,7 +12,7 @@ mixin P2PHandlerAck on P2PRouterBase {
 
   /// returns true if message is processed
   bool _processAck(final P2PMessage message) {
-    if (message.header.messageType == P2PPacketType.acknowledgement) {
+    if (message.header.messageType == P2PPacketType.confirmation) {
       _ackCompleters.remove(message.header.id)?.complete();
       return true;
     }
@@ -20,7 +20,7 @@ mixin P2PHandlerAck on P2PRouterBase {
       crypto
           .sign(P2PMessage(
             header: message.header.copyWith(
-              messageType: P2PPacketType.acknowledgement,
+              messageType: P2PPacketType.confirmation,
             ),
             srcPeerId: selfId,
             dstPeerId: message.srcPeerId,
@@ -43,7 +43,10 @@ mixin P2PHandlerAck on P2PRouterBase {
     final completer = Completer<void>();
     _ackCompleters[messageId] = completer;
     _sendAndRetry(
-        datagram: datagram, messageId: messageId, addresses: addresses);
+      datagram: datagram,
+      messageId: messageId,
+      addresses: addresses,
+    );
     return completer.future.timeout(
       ackTimeout,
       onTimeout: () {
@@ -68,7 +71,10 @@ mixin P2PHandlerAck on P2PRouterBase {
           addresses: addresses,
         ),
       );
-      logger?.call('[$debugLabel] send confirmable message, id: $messageId');
+      logger?.call(
+        '[$debugLabel] send confirmable message, id: $messageId'
+        ' to $addresses',
+      );
     }
   }
 }
