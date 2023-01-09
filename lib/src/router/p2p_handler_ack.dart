@@ -3,9 +3,6 @@ part of 'router.dart';
 mixin P2PHandlerAck on P2PRouterBase {
   final _ackCompleters = <int, Completer<void>>{};
 
-  var ackTimeout = P2PRouterBase.defaultTimeout;
-  var ackRetryPeriod = P2PRouterBase.defaultPeriod;
-
   void _stopAckHandler() {
     _ackCompleters.clear();
   }
@@ -35,10 +32,11 @@ mixin P2PHandlerAck on P2PRouterBase {
     return false;
   }
 
-  Future<void> _sendDatagramRetry({
+  Future<void> sendDatagramConfirmable({
     required final int messageId,
     required final Uint8List datagram,
     required final Iterable<P2PFullAddress> addresses,
+    required final Duration ackTimeout,
   }) {
     final completer = Completer<void>();
     _ackCompleters[messageId] = completer;
@@ -63,17 +61,16 @@ mixin P2PHandlerAck on P2PRouterBase {
   }) {
     if (isRun && _ackCompleters.containsKey(messageId)) {
       sendDatagram(addresses: addresses, datagram: datagram);
+      logger?.call(
+        '[$debugLabel] sent confirmable message, id: $messageId to $addresses',
+      );
       Future.delayed(
-        ackRetryPeriod,
+        requestTimeout,
         () => _sendAndRetry(
           datagram: datagram,
           messageId: messageId,
           addresses: addresses,
         ),
-      );
-      logger?.call(
-        '[$debugLabel] send confirmable message, id: $messageId'
-        ' to $addresses',
       );
     }
   }

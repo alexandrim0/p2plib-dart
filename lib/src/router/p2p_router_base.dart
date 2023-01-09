@@ -1,8 +1,7 @@
 part of 'router.dart';
 
 class P2PRouterBase with P2PResolveHandler {
-  static const defaultTimeout = Duration(seconds: 3);
-  static const defaultPeriod = Duration(seconds: 1);
+  static const defaultTimeout = Duration(seconds: 2);
 
   late final P2PPeerId selfId;
   final P2PCrypto crypto;

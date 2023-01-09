@@ -80,10 +80,11 @@ class P2PRouter extends P2PRouterBase with P2PHandlerAck, P2PHandlerLastSeen {
     ));
 
     if (isConfirmable) {
-      await _sendDatagramRetry(
+      await sendDatagramConfirmable(
         messageId: header.id,
         datagram: datagram,
         addresses: addresses,
+        ackTimeout: ackTimeout ?? requestTimeout,
       );
     } else {
       sendDatagram(addresses: addresses, datagram: datagram);
