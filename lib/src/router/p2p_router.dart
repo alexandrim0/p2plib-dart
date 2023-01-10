@@ -83,7 +83,7 @@ class P2PRouter extends P2PRouterBase with P2PHandlerAck, P2PHandlerLastSeen {
         messageId: header.id,
         datagram: datagram,
         addresses: addresses,
-        ackTimeout: ackTimeout ?? requestTimeout,
+        ackTimeout: ackTimeout,
       );
     } else {
       sendDatagram(addresses: addresses, datagram: datagram);

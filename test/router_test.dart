@@ -320,33 +320,60 @@ main() async {
         },
       );
 
-      // TBD:
-      // test('do not forward on limit', () async {
-      //   aliceRouter.addPeerAddress(
-      //     peerId: proxyPeerId,
-      //     addresses: proxyAddresses,
-      //   );
-      //   await aliceRouter.start();
-      //   final message = await aliceRouter.sendMessage(dstPeerId: proxyPeerId);
-      //   final datagram = message.toBytes();
-      //   aliceRouter.onMessage(P2PPacket(
-      //     header: P2PPacketHeader.fromBytes(datagram),
-      //     datagram: datagram,
-      //   ));
+      test('do not forward on limit', () async {
+        aliceRouter.addPeerAddress(
+          peerId: proxyPeerId,
+          addresses: proxyAddresses,
+        );
+        bobRouter.addPeerAddress(
+          peerId: proxyPeerId,
+          addresses: proxyAddresses,
+        );
+        await Future.wait([aliceRouter.start(), bobRouter.start()]);
+        await Future.wait([
+          aliceRouter.sendMessage(dstPeerId: proxyPeerId),
+          bobRouter.sendMessage(dstPeerId: proxyPeerId),
+          Future.delayed(initTime),
+        ]);
+        final header = P2PPacketHeader(
+          id: genRandomInt(),
+          messageType: P2PPacketType.confirmable,
+        );
+        final datagram = await aliceRouter.crypto.sign(P2PMessage(
+          header: header,
+          srcPeerId: aliceRouter.selfId,
+          dstPeerId: bobRouter.selfId,
+        ).toBytes());
 
-      //   await bobRouter.sendMessage(dstPeerId: proxyPeerId);
-      //   await Future.delayed(initTime);
-      //   expect(
-      //     aliceRouter.sendDatagram(
-      //       addresses: bobRouter.selfAddresses,
-      //       datagram: P2PPacketHeader.setForwardsCount(
-      //         aliceRouter.maxForwardsCount,
-      //         message.toBytes(),
-      //       ),
-      //     ),
-      //     throwsA(isA<Exception>()),
-      //   );
-      // });
+        expect(
+          await aliceRouter.sendDatagramConfirmable(
+            messageId: header.id,
+            datagram: datagram,
+            addresses: proxyAddresses,
+          ),
+          0,
+        );
+
+        final header2 = P2PPacketHeader(
+          id: genRandomInt(),
+          messageType: P2PPacketType.confirmable,
+        );
+        final datagram2 = await aliceRouter.crypto.sign(P2PMessage(
+          header: header2,
+          srcPeerId: aliceRouter.selfId,
+          dstPeerId: bobRouter.selfId,
+        ).toBytes());
+        datagram2[0] = 2;
+
+        expect(
+          () async => await aliceRouter.sendDatagramConfirmable(
+            messageId: header2.id,
+            datagram: datagram2,
+            addresses: proxyAddresses,
+          ),
+          throwsA(isA<Exception>()),
+        );
+      });
     },
   );
 

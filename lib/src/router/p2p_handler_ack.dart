@@ -1,7 +1,7 @@
 part of 'router.dart';
 
 mixin P2PHandlerAck on P2PRouterBase {
-  final _ackCompleters = <int, Completer<void>>{};
+  final _ackCompleters = <int, Completer<int>>{};
 
   void _stopAckHandler() {
     _ackCompleters.clear();
@@ -10,7 +10,9 @@ mixin P2PHandlerAck on P2PRouterBase {
   /// returns true if message is processed
   bool _processAck(final P2PMessage message) {
     if (message.header.messageType == P2PPacketType.confirmation) {
-      _ackCompleters.remove(message.header.id)?.complete();
+      _ackCompleters
+          .remove(message.header.id)
+          ?.complete(message.payload.length);
       return true;
     }
     if (message.header.messageType == P2PPacketType.confirmable) {
@@ -32,13 +34,13 @@ mixin P2PHandlerAck on P2PRouterBase {
     return false;
   }
 
-  Future<void> sendDatagramConfirmable({
+  Future<int> sendDatagramConfirmable({
     required final int messageId,
     required final Uint8List datagram,
     required final Iterable<P2PFullAddress> addresses,
-    required final Duration ackTimeout,
+    final Duration? ackTimeout,
   }) {
-    final completer = Completer<void>();
+    final completer = Completer<int>();
     _ackCompleters[messageId] = completer;
     _sendAndRetry(
       datagram: datagram,
@@ -46,9 +48,9 @@ mixin P2PHandlerAck on P2PRouterBase {
       addresses: addresses,
     );
     return completer.future.timeout(
-      ackTimeout,
+      ackTimeout ?? requestTimeout * 2,
       onTimeout: () {
-        if (_ackCompleters.remove(messageId) == null) return;
+        if (_ackCompleters.remove(messageId) == null) return -1;
         throw TimeoutException('[$debugLabel] Ack timeout');
       },
     );
