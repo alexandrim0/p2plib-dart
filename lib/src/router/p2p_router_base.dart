@@ -71,11 +71,11 @@ class P2PRouterBase with P2PResolveHandler {
 
   /// returns null if message is processed and children have to return
   Future<P2PPacket?> onMessage(final P2PPacket packet) async {
-    // check minimal datagram length (for protocol number 0 for now)
+    // check minimal datagram length
     if (packet.datagram.length < P2PMessage.minimalLength) return null;
     // check if message is stale
-    final staleAt =
-        DateTime.now().subtract(requestTimeout).millisecondsSinceEpoch;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final staleAt = now - requestTimeout.inMilliseconds;
     if (packet.header.issuedAt < staleAt) return null;
     // drop echo message
     final srcPeerId = P2PMessage.getSrcPeerId(packet.datagram);
@@ -97,6 +97,9 @@ class P2PRouterBase with P2PResolveHandler {
         logger?.call(e.toString());
         return null; // exit on wrong signature
       }
+    } else {
+      // update peer address timestamp
+      _resolveCache[srcPeerId]?[packet.header.srcFullAddress!] = now;
     }
     // is message for me or to forward?
     final dstPeerId = P2PMessage.getDstPeerId(packet.datagram);

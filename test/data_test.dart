@@ -24,12 +24,10 @@ void main() async {
       final headerA = P2PPacketHeader(id: genRandomInt());
       final headerB = headerA.copyWith(
         messageType: P2PPacketType.confirmation,
-        protocolNumber: 3,
       );
       final headerC = P2PPacketHeader.fromBytes(headerA.toBytes());
 
       expect(headerA == headerB, false);
-      expect(headerB.toBytes()[1], 50); // 00110010
       expect(headerA == headerC, true);
     },
   );

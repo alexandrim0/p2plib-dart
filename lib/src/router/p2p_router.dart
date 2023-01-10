@@ -66,7 +66,6 @@ class P2PRouter extends P2PRouterBase with P2PHandlerAck, P2PHandlerLastSeen {
       throw Exception('[$debugLabel] Unknown route to $dstPeerId. ');
     }
     final header = P2PPacketHeader(
-      protocolNumber: P2PMessage.protocolNumber,
       messageType:
           isConfirmable ? P2PPacketType.confirmable : P2PPacketType.regular,
       id: messageId ?? genRandomInt(),
