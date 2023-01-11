@@ -21,7 +21,10 @@ mixin P2PHandlerLastSeen on P2PRouterBase {
       _lastSeenController.add(MapEntry<P2PPeerId, bool>(peerId, true));
       return true;
     } catch (_) {}
-    _lastSeenController.add(MapEntry<P2PPeerId, bool>(peerId, false));
+    _lastSeenController.add(MapEntry<P2PPeerId, bool>(
+      peerId,
+      getPeerStatus(peerId),
+    ));
     return false;
   }
 
