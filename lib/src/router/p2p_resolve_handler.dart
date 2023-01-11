@@ -3,7 +3,7 @@ part of 'router.dart';
 mixin P2PResolveHandler {
   final Map<P2PPeerId, Map<P2PFullAddress, int>> _resolveCache = {};
 
-  var peerAddressTTL = const Duration(minutes: 5);
+  var peerAddressTTL = const Duration(seconds: 30);
 
   /// Returns cached addresses or who can forward
   Iterable<P2PFullAddress> resolvePeerId(final P2PPeerId peerId) =>
