@@ -5,6 +5,8 @@ mixin P2PResolveHandler {
 
   var peerAddressTTL = const Duration(seconds: 30);
 
+  P2PPeerId get selfId;
+
   /// Returns cached addresses or who can forward
   Iterable<P2PFullAddress> resolvePeerId(final P2PPeerId peerId) =>
       getResolvedPeerId(peerId)?.keys ??
@@ -30,6 +32,7 @@ mixin P2PResolveHandler {
     final int? timestamp,
   }) {
     if (addresses.isEmpty) return;
+    if (peerId == selfId) return;
     final cachedAddresses = _resolveCache[peerId] ?? {};
     for (final address in addresses) {
       cachedAddresses[address] =

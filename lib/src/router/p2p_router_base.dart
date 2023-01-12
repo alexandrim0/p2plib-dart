@@ -3,7 +3,6 @@ part of 'router.dart';
 class P2PRouterBase with P2PResolveHandler {
   static const defaultTimeout = Duration(seconds: 2);
 
-  late final P2PPeerId selfId;
   final P2PCrypto crypto;
   final Iterable<P2PTransport> transports;
   final int defaultPort;
@@ -13,7 +12,11 @@ class P2PRouterBase with P2PResolveHandler {
   var requestTimeout = defaultTimeout;
   void Function(String)? logger;
 
+  late final P2PPeerId _selfId;
   var _isRun = false;
+
+  @override
+  P2PPeerId get selfId => _selfId;
 
   bool get isRun => _isRun;
   bool get isNotRun => !_isRun;
@@ -41,7 +44,7 @@ class P2PRouterBase with P2PResolveHandler {
 
   Future<P2PCryptoKeys> init([P2PCryptoKeys? keys]) async {
     final cryptoKeys = await crypto.init(keys);
-    selfId = P2PPeerId.fromKeys(
+    _selfId = P2PPeerId.fromKeys(
       encryptionKey: cryptoKeys.encPublicKey,
       signKey: cryptoKeys.signPublicKey,
     );
@@ -50,7 +53,7 @@ class P2PRouterBase with P2PResolveHandler {
 
   Future<void> start() async {
     if (_isRun) return;
-    logger?.call('[$debugLabel] Start listen $transports with key $selfId');
+    logger?.call('[$debugLabel] Start listen $transports with key $_selfId');
     if (transports.isEmpty) {
       throw Exception('[$debugLabel] Need at least one P2PTransport!');
     }
@@ -79,7 +82,7 @@ class P2PRouterBase with P2PResolveHandler {
     if (packet.header.issuedAt < staleAt) return null;
     // drop echo message
     final srcPeerId = P2PMessage.getSrcPeerId(packet.datagram);
-    if (srcPeerId == selfId) return null;
+    if (srcPeerId == _selfId) return null;
     // remember forwards count
     final forwardsCount = P2PPacketHeader.resetForwardsCount(packet.datagram);
     // if peer unknown then check signature and keep address if success
@@ -103,7 +106,7 @@ class P2PRouterBase with P2PResolveHandler {
     }
     // is message for me or to forward?
     final dstPeerId = P2PMessage.getDstPeerId(packet.datagram);
-    if (dstPeerId == selfId) return packet;
+    if (dstPeerId == _selfId) return packet;
     // check if forwards count exeeds
     if (forwardsCount >= maxForwardsCount) return null;
     // resolve peer address exclude source address to prevent echo
