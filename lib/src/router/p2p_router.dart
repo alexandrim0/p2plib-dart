@@ -47,6 +47,8 @@ class P2PRouter extends P2PRouterBase with P2PHandlerAck, P2PHandlerLastSeen {
     _processLastSeen(message);
     // exit if message is ack for mine message
     if (_processAck(message)) return null;
+    // drop empty messages (keepalive)
+    if (message.isEmpty) return null;
     // message is for user, send it to subscriber
     if (_messageController.hasListener) _messageController.add(message);
     return packet;

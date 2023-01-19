@@ -23,7 +23,11 @@ class P2PUdpTransport extends P2PTransport {
         callback!(P2PPacket(
           header: P2PPacketHeader.fromBytes(
             datagram.data,
-            P2PFullAddress(address: datagram.address, port: datagram.port),
+            P2PFullAddress(
+              address: datagram.address,
+              isLocal: fullAddress.isLocal,
+              port: datagram.port,
+            ),
           ),
           datagram: datagram.data,
         ));

@@ -6,10 +6,22 @@ export 'package:p2plib/p2plib.dart';
 
 const initTime = Duration(milliseconds: 250);
 final localAddress = InternetAddress.anyIPv4;
-final proxyAddress = P2PFullAddress(address: localAddress, port: 2022);
+final proxyAddress = P2PFullAddress(
+  address: localAddress,
+  isLocal: true,
+  port: 2022,
+);
 final proxyAddresses = [proxyAddress];
-final aliceAddress = P2PFullAddress(address: localAddress, port: 3022);
-final bobAddress = P2PFullAddress(address: localAddress, port: 4022);
+final aliceAddress = P2PFullAddress(
+  address: localAddress,
+  isLocal: true,
+  port: 3022,
+);
+final bobAddress = P2PFullAddress(
+  address: localAddress,
+  isLocal: true,
+  port: 4022,
+);
 final randomPeerId = P2PPeerId(value: getRandomBytes(P2PPeerId.length));
 final payload = getRandomBytes(64);
 final token = P2PToken(value: payload);

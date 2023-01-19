@@ -9,7 +9,6 @@ enum P2PPacketType { regular, confirmable, confirmation }
 class P2PPacketHeader {
   static const length = 16;
 
-  /// Returns forwards count and set it to zero for checking signature
   static int resetForwardsCount(Uint8List datagram) {
     final forwardsCount = datagram[0];
     datagram[0] = 0;
@@ -24,6 +23,7 @@ class P2PPacketHeader {
   final P2PPacketType messageType;
   final int issuedAt, id;
   final P2PFullAddress? srcFullAddress;
+  final int forwardsCount;
 
   @override
   int get hashCode => Object.hash(
@@ -46,6 +46,7 @@ class P2PPacketHeader {
     final int? issuedAt,
     required this.id,
     this.srcFullAddress,
+    this.forwardsCount = 0,
   }) : issuedAt = issuedAt ?? DateTime.now().millisecondsSinceEpoch;
 
   factory P2PPacketHeader.fromBytes(
@@ -62,6 +63,7 @@ class P2PPacketHeader {
       issuedAt: buffer[0] >> 16,
       id: buffer[1],
       srcFullAddress: srcFullAddress,
+      forwardsCount: datagram[0],
     );
   }
 

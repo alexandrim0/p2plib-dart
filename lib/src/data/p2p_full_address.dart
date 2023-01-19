@@ -2,9 +2,14 @@ part of 'data.dart';
 
 class P2PFullAddress {
   final InternetAddress address;
+  final bool isLocal;
   final int port;
 
-  const P2PFullAddress({required this.address, required this.port});
+  const P2PFullAddress({
+    required this.address,
+    required this.port,
+    required this.isLocal,
+  });
 
   @override
   bool operator ==(Object other) =>

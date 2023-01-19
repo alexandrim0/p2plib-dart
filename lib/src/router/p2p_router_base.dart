@@ -33,11 +33,13 @@ class P2PRouterBase with P2PResolveHandler {
               P2PUdpTransport(
                   fullAddress: P2PFullAddress(
                 address: InternetAddress.anyIPv4,
+                isLocal: false,
                 port: defaultPort,
               )),
               P2PUdpTransport(
                   fullAddress: P2PFullAddress(
                 address: InternetAddress.anyIPv6,
+                isLocal: false,
                 port: defaultPort,
               )),
             ];
@@ -83,11 +85,11 @@ class P2PRouterBase with P2PResolveHandler {
     // drop echo message
     final srcPeerId = P2PMessage.getSrcPeerId(packet.datagram);
     if (srcPeerId == _selfId) return null;
-    // remember forwards count
-    final forwardsCount = P2PPacketHeader.resetForwardsCount(packet.datagram);
     // if peer unknown then check signature and keep address if success
     if (_resolveCache[srcPeerId]?[packet.header.srcFullAddress] == null) {
       try {
+        // Set forwards count to zero for checking signature
+        P2PPacketHeader.resetForwardsCount(packet.datagram);
         await crypto.openSigned(srcPeerId.signPiblicKey, packet.datagram);
         addPeerAddress(
           peerId: srcPeerId,
@@ -108,7 +110,7 @@ class P2PRouterBase with P2PResolveHandler {
     final dstPeerId = P2PMessage.getDstPeerId(packet.datagram);
     if (dstPeerId == _selfId) return packet;
     // check if forwards count exeeds
-    if (forwardsCount >= maxForwardsCount) return null;
+    if (packet.header.forwardsCount >= maxForwardsCount) return null;
     // resolve peer address exclude source address to prevent echo
     final addresses = resolvePeerId(dstPeerId)
         .where((e) => e != packet.header.srcFullAddress);
@@ -119,7 +121,10 @@ class P2PRouterBase with P2PResolveHandler {
       );
     } else {
       // increment forwards count and forward message
-      P2PPacketHeader.setForwardsCount(forwardsCount + 1, packet.datagram);
+      P2PPacketHeader.setForwardsCount(
+        packet.header.forwardsCount + 1,
+        packet.datagram,
+      );
       sendDatagram(addresses: addresses, datagram: packet.datagram);
       logger?.call(
         '[$debugLabel] forwarded from ${packet.header.srcFullAddress} '

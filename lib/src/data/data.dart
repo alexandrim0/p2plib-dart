@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 
 export 'dart:typed_data' show Uint8List;
 
+part 'p2p_route.dart';
 part 'p2p_token.dart';
 part 'p2p_crypto.dart';
 part 'p2p_peer_id.dart';

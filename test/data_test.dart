@@ -63,11 +63,31 @@ void main() async {
       expect(addressA == addressB, true);
       expect(addressA == addressC, false);
 
-      final fullAddressA = P2PFullAddress(address: addressA, port: 5000);
-      final fullAddressB = P2PFullAddress(address: addressB, port: 5000);
-      final fullAddressC = P2PFullAddress(address: addressC, port: 5000);
-      final fullAddressD = P2PFullAddress(address: addressA, port: 5001);
-      final fullAddressE = P2PFullAddress(address: addressC, port: 5001);
+      final fullAddressA = P2PFullAddress(
+        address: addressA,
+        isLocal: true,
+        port: 5000,
+      );
+      final fullAddressB = P2PFullAddress(
+        address: addressB,
+        isLocal: true,
+        port: 5000,
+      );
+      final fullAddressC = P2PFullAddress(
+        address: addressC,
+        isLocal: true,
+        port: 5000,
+      );
+      final fullAddressD = P2PFullAddress(
+        address: addressA,
+        isLocal: true,
+        port: 5001,
+      );
+      final fullAddressE = P2PFullAddress(
+        address: addressC,
+        isLocal: true,
+        port: 5001,
+      );
 
       expect(fullAddressA.hashCode == fullAddressB.hashCode, true);
       expect(fullAddressA.hashCode == fullAddressC.hashCode, false);
