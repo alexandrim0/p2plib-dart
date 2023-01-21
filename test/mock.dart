@@ -38,8 +38,7 @@ Future<P2PRouterL2> createRouter({
 }) async {
   final router = P2PRouterL2(
     transports: [P2PUdpTransport(fullAddress: address)],
-    debugLabel: debugLabel,
-    logger: print,
+    logger: (message) => print('[$debugLabel] $message'),
   )..requestTimeout = const Duration(seconds: 2);
   final cryptoKeys = P2PCryptoKeys.empty();
   if (seedEnc != null) cryptoKeys.encSeed = seedEnc;
@@ -56,8 +55,7 @@ Future<Isolate> createProxy({
     (_) async {
       final router = P2PRouterL0(
         transports: [P2PUdpTransport(fullAddress: address ?? proxyAddress)],
-        debugLabel: debugLabel,
-        logger: print,
+        logger: (message) => print('[$debugLabel] $message'),
       )..requestTimeout = const Duration(seconds: 2);
       await router.init(P2PCryptoKeys.empty()
         ..encSeed = proxySeedEnc
@@ -70,6 +68,8 @@ Future<Isolate> createProxy({
   await Future.delayed(initTime);
   return isolate;
 }
+
+void log(debugLabel, message) => print('[$debugLabel] $message');
 
 final proxySeedEnc = Uint8List.fromList([
   182,

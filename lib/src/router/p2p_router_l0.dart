@@ -6,7 +6,6 @@ class P2PRouterL0 {
 
   final Map<P2PPeerId, P2PRoute> routes = {};
   final Iterable<P2PTransport> transports;
-  final String? debugLabel; // TBD: remove, should be part of logger
   final P2PCrypto crypto;
   final int port;
 
@@ -27,7 +26,6 @@ class P2PRouterL0 {
     final P2PCrypto? crypto,
     final Iterable<P2PTransport>? transports,
     this.port = defaultPort,
-    this.debugLabel,
     this.logger,
   })  : crypto = crypto ?? P2PCrypto(),
         transports = transports ??
@@ -57,9 +55,9 @@ class P2PRouterL0 {
 
   Future<void> start() async {
     if (_isRun) return;
-    logger?.call('[$debugLabel] Start listen $transports with key $_selfId');
+    logger?.call('Start listen $transports with key $_selfId');
     if (transports.isEmpty) {
-      throw Exception('[$debugLabel] Need at least one P2PTransport!');
+      throw Exception('Need at least one P2PTransport!');
     }
     for (final t in transports) {
       t.ttl = requestTimeout.inSeconds;
@@ -100,9 +98,7 @@ class P2PRouterL0 {
           peerId: srcPeerId,
           addresses: {packet.header.srcFullAddress!: now},
         );
-        logger?.call(
-          '[$debugLabel] Keep ${packet.header.srcFullAddress} for $srcPeerId',
-        );
+        logger?.call('Keep ${packet.header.srcFullAddress} for $srcPeerId');
       } catch (e) {
         logger?.call(e.toString());
         return null; // exit on wrong signature
@@ -124,7 +120,7 @@ class P2PRouterL0 {
         .where((e) => e != packet.header.srcFullAddress);
     if (addresses.isEmpty) {
       logger?.call(
-        '[$debugLabel] Unknown route to $dstPeerId. '
+        'Unknown route to $dstPeerId. '
         'Failed forwarding from ${packet.header.srcFullAddress}',
       );
     } else {
@@ -135,7 +131,7 @@ class P2PRouterL0 {
       );
       sendDatagram(addresses: addresses, datagram: packet.datagram);
       logger?.call(
-        '[$debugLabel] forwarded from ${packet.header.srcFullAddress} '
+        'forwarded from ${packet.header.srcFullAddress} '
         'to $addresses ${packet.datagram.length} bytes',
       );
     }

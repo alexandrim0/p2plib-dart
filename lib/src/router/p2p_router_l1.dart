@@ -14,12 +14,7 @@ class P2PRouterL1 extends P2PRouterL0 {
 
   Stream<P2PMessage> get messageStream => _messageController.stream;
 
-  P2PRouterL1({
-    super.crypto,
-    super.transports,
-    super.debugLabel,
-    super.logger,
-  }) {
+  P2PRouterL1({super.crypto, super.transports, super.logger}) {
     // clear recieved headers
     Timer.periodic(
       retryPeriod,
@@ -65,10 +60,10 @@ class P2PRouterL1 extends P2PRouterL0 {
     final Uint8List? payload,
     final Duration? ackTimeout,
   }) async {
-    if (isNotRun) throw Exception('[$debugLabel] P2PRouter is not running!');
+    if (isNotRun) throw Exception('P2PRouter is not running!');
     final addresses = resolvePeerId(dstPeerId);
     if (addresses.isEmpty) {
-      throw Exception('[$debugLabel] Unknown route to $dstPeerId. ');
+      throw Exception('Unknown route to $dstPeerId. ');
     }
     final header = P2PPacketHeader(
       messageType:
@@ -91,7 +86,7 @@ class P2PRouterL1 extends P2PRouterL0 {
       );
     } else {
       sendDatagram(addresses: addresses, datagram: datagram);
-      logger?.call('[$debugLabel] sent ${datagram.length} bytes to $addresses');
+      logger?.call('sent ${datagram.length} bytes to $addresses');
     }
     return header;
   }
@@ -113,7 +108,7 @@ class P2PRouterL1 extends P2PRouterL0 {
       ackTimeout ?? requestTimeout * 2,
       onTimeout: () {
         if (_ackCompleters.remove(messageId) == null) return -1;
-        throw TimeoutException('[$debugLabel] Ack timeout');
+        throw TimeoutException('Ack timeout');
       },
     );
   }
@@ -126,7 +121,7 @@ class P2PRouterL1 extends P2PRouterL0 {
     if (isRun && _ackCompleters.containsKey(messageId)) {
       sendDatagram(addresses: addresses, datagram: datagram);
       logger?.call(
-        '[$debugLabel] sent confirmable message, id: $messageId to $addresses',
+        'sent confirmable message, id: $messageId to $addresses',
       );
       Future.delayed(
         retryPeriod,

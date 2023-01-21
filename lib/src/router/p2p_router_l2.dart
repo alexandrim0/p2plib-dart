@@ -7,12 +7,7 @@ class P2PRouterL2 extends P2PRouterL1 {
   Stream<MapEntry<P2PPeerId, bool>> get lastSeenStream =>
       _lastSeenController.stream;
 
-  P2PRouterL2({
-    super.crypto,
-    super.transports,
-    super.debugLabel,
-    super.logger,
-  });
+  P2PRouterL2({super.crypto, super.transports, super.logger});
 
   /// returns null if message is processed and children have to return
   @override
