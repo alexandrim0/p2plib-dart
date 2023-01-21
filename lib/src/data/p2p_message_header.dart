@@ -21,9 +21,8 @@ class P2PPacketHeader {
   }
 
   final P2PPacketType messageType;
-  final int issuedAt, id;
+  final int forwardsCount, issuedAt, id;
   final P2PFullAddress? srcFullAddress;
-  final int forwardsCount;
 
   @override
   int get hashCode => Object.hash(

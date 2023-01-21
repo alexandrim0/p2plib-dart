@@ -1,30 +1,31 @@
 part of 'router.dart';
 
-class P2PRouterBase with P2PResolveHandler {
-  static const defaultTimeout = Duration(seconds: 2);
+class P2PRouterL0 {
+  static const defaultPort = 2022;
+  static const defaultTimeout = Duration(seconds: 3);
 
-  final P2PCrypto crypto;
+  final Map<P2PPeerId, P2PRoute> routes = {};
   final Iterable<P2PTransport> transports;
-  final int defaultPort;
-  final String? debugLabel;
+  final String? debugLabel; // TBD: remove, should be part of logger
+  final P2PCrypto crypto;
 
-  var maxForwardsCount = 1;
+  var peerAddressTTL = const Duration(seconds: 30);
   var requestTimeout = defaultTimeout;
+  var useForwardersCount = 2;
+  var maxForwardsCount = 1;
   void Function(String)? logger;
 
   late final P2PPeerId _selfId;
   var _isRun = false;
 
-  @override
-  P2PPeerId get selfId => _selfId;
-
   bool get isRun => _isRun;
   bool get isNotRun => !_isRun;
+  P2PPeerId get selfId => _selfId;
 
-  P2PRouterBase({
+  P2PRouterL0({
     final P2PCrypto? crypto,
     final Iterable<P2PTransport>? transports,
-    this.defaultPort = 2022,
+    final int defaultPort = defaultPort,
     this.debugLabel,
     this.logger,
   })  : crypto = crypto ?? P2PCrypto(),
@@ -78,22 +79,25 @@ class P2PRouterBase with P2PResolveHandler {
   Future<P2PPacket?> onMessage(final P2PPacket packet) async {
     // check minimal datagram length
     if (packet.datagram.length < P2PMessage.minimalLength) return null;
+
     // check if message is stale
     final now = DateTime.now().millisecondsSinceEpoch;
     final staleAt = now - requestTimeout.inMilliseconds;
     if (packet.header.issuedAt < staleAt) return null;
+
     // drop echo message
     final srcPeerId = P2PMessage.getSrcPeerId(packet.datagram);
     if (srcPeerId == _selfId) return null;
+
     // if peer unknown then check signature and keep address if success
-    if (_resolveCache[srcPeerId]?[packet.header.srcFullAddress] == null) {
+    if (routes[srcPeerId]?.addresses[packet.header.srcFullAddress] == null) {
       try {
         // Set forwards count to zero for checking signature
         P2PPacketHeader.resetForwardsCount(packet.datagram);
         await crypto.openSigned(srcPeerId.signPiblicKey, packet.datagram);
-        addPeerAddress(
+        routes[srcPeerId] = P2PRoute(
           peerId: srcPeerId,
-          addresses: [packet.header.srcFullAddress!],
+          addresses: {packet.header.srcFullAddress!: now},
         );
         logger?.call(
           '[$debugLabel] Keep ${packet.header.srcFullAddress} for $srcPeerId',
@@ -104,13 +108,16 @@ class P2PRouterBase with P2PResolveHandler {
       }
     } else {
       // update peer address timestamp
-      _resolveCache[srcPeerId]?[packet.header.srcFullAddress!] = now;
+      routes[srcPeerId]!.addresses[packet.header.srcFullAddress!] = now;
     }
+
     // is message for me or to forward?
     final dstPeerId = P2PMessage.getDstPeerId(packet.datagram);
     if (dstPeerId == _selfId) return packet;
+
     // check if forwards count exeeds
     if (packet.header.forwardsCount >= maxForwardsCount) return null;
+
     // resolve peer address exclude source address to prevent echo
     final addresses = resolvePeerId(dstPeerId)
         .where((e) => e != packet.header.srcFullAddress);
@@ -144,12 +151,19 @@ class P2PRouterBase with P2PResolveHandler {
     return datagram.length;
   }
 
-  Future<P2PPacketHeader> sendMessage({
-    final bool isConfirmable = false,
-    required final P2PPeerId dstPeerId,
-    final int? messageId,
-    final Uint8List? payload,
-    final Duration? ackTimeout,
-  }) =>
-      throw Exception('Must be implemented in children');
+  /// Returns cached addresses or who can forward
+  Iterable<P2PFullAddress> resolvePeerId(final P2PPeerId peerId) {
+    final route = routes[peerId];
+    if (route == null || route.isEmpty) {
+      final result = <P2PFullAddress>{};
+      for (final a in routes.values.where((e) => e.canForward)) {
+        result.addAll(a.addresses.keys);
+      }
+      return result.take(useForwardersCount);
+    } else {
+      return route.getActualAddresses(
+          staleBefore: DateTime.now().millisecondsSinceEpoch -
+              peerAddressTTL.inMilliseconds);
+    }
+  }
 }

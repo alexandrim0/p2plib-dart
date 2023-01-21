@@ -38,7 +38,7 @@ main() async {
         'Send packets to known hosts, no ack',
         () async {
           await Future.wait([aliceRouter.start(), bobRouter.start()]);
-          aliceRouter.addPeerAddress(
+          aliceRouter.addPeerAddresses(
             peerId: bobRouter.selfId,
             addresses: [bobAddress],
           );
@@ -59,7 +59,7 @@ main() async {
         'Send packets to known hosts with ack',
         () async {
           await Future.wait([aliceRouter.start(), bobRouter.start()]);
-          aliceRouter.addPeerAddress(
+          aliceRouter.addPeerAddresses(
             peerId: bobRouter.selfId,
             addresses: [bobAddress],
           );
@@ -84,7 +84,7 @@ main() async {
 
           expect(aliceRouter.getPeerStatus(bobRouter.selfId), false);
 
-          aliceRouter.addPeerAddress(
+          aliceRouter.addPeerAddresses(
             peerId: bobRouter.selfId,
             addresses: [bobAddress],
           );
@@ -98,7 +98,7 @@ main() async {
         () async {
           await Future.wait([aliceRouter.start(), bobRouter.start()]);
 
-          aliceRouter.addPeerAddress(
+          aliceRouter.addPeerAddresses(
             peerId: bobRouter.selfId,
             addresses: [bobAddress],
             timestamp: DateTime.now()
@@ -111,11 +111,14 @@ main() async {
           final subscription = aliceRouter.lastSeenStream
               .where((e) => e.key == bobRouter.selfId)
               .listen((e) => isOnline = e.value);
-          await aliceRouter.pingPeer(bobRouter.selfId);
+
+          expect(await aliceRouter.pingPeer(bobRouter.selfId), true);
+          await Future.delayed(initTime);
           expect(isOnline, true);
 
           bobRouter.stop();
-          await aliceRouter.pingPeer(bobRouter.selfId);
+          expect(await aliceRouter.pingPeer(bobRouter.selfId), false);
+
           await Future.delayed(aliceRouter.requestTimeout);
           expect(isOnline, false);
           expect(aliceRouter.getPeerStatus(bobRouter.selfId), false);
@@ -128,7 +131,7 @@ main() async {
         () async {
           await Future.wait([aliceRouter.start(), bobRouter.start()]);
 
-          aliceRouter.addPeerAddress(
+          aliceRouter.addPeerAddresses(
             peerId: bobRouter.selfId,
             addresses: [bobAddress],
             timestamp: DateTime.now()
@@ -139,6 +142,7 @@ main() async {
           expect(bobRouter.getPeerStatus(aliceRouter.selfId), false);
 
           expect(await aliceRouter.pingPeer(bobRouter.selfId), true);
+          await Future.delayed(initTime);
           expect(aliceRouter.getPeerStatus(bobRouter.selfId), true);
           expect(bobRouter.getPeerStatus(aliceRouter.selfId), true);
 
@@ -156,10 +160,7 @@ main() async {
       test(
         'Send packet to unknown host',
         () async {
-          aliceRouter.addPeerAddress(
-            peerId: proxyPeerId,
-            addresses: proxyAddresses,
-          );
+          aliceRouter.routes[proxyPeerId] = proxyRoute;
           await aliceRouter.start();
           expect(
             () async => await aliceRouter.sendMessage(
@@ -174,18 +175,12 @@ main() async {
       test(
         'Send packets to known hosts, no ack',
         () async {
-          aliceRouter.addPeerAddress(
-            peerId: proxyPeerId,
-            addresses: proxyAddresses,
-          );
-          bobRouter.addPeerAddress(
-            peerId: proxyPeerId,
-            addresses: proxyAddresses,
-          );
+          aliceRouter.routes[proxyPeerId] = proxyRoute;
+          bobRouter.routes[proxyPeerId] = proxyRoute;
           await Future.wait([aliceRouter.start(), bobRouter.start()]);
           await aliceRouter.sendMessage(dstPeerId: proxyPeerId);
-          await Future.delayed(initTime);
           await bobRouter.sendMessage(dstPeerId: proxyPeerId);
+          await Future.delayed(initTime);
 
           final completer = Completer<bool>();
           subscription.onData((message) {
@@ -204,14 +199,8 @@ main() async {
       test(
         'Send packets to known hosts with ack',
         () async {
-          aliceRouter.addPeerAddress(
-            peerId: proxyPeerId,
-            addresses: proxyAddresses,
-          );
-          bobRouter.addPeerAddress(
-            peerId: proxyPeerId,
-            addresses: proxyAddresses,
-          );
+          aliceRouter.routes[proxyPeerId] = proxyRoute;
+          bobRouter.routes[proxyPeerId] = proxyRoute;
           await Future.wait([aliceRouter.start(), bobRouter.start()]);
           await aliceRouter.sendMessage(dstPeerId: proxyPeerId);
           await Future.delayed(initTime);
@@ -235,14 +224,8 @@ main() async {
       test(
         'getPeerStatus',
         () async {
-          aliceRouter.addPeerAddress(
-            peerId: proxyPeerId,
-            addresses: proxyAddresses,
-          );
-          bobRouter.addPeerAddress(
-            peerId: proxyPeerId,
-            addresses: proxyAddresses,
-          );
+          aliceRouter.routes[proxyPeerId] = proxyRoute;
+          bobRouter.routes[proxyPeerId] = proxyRoute;
           await Future.wait([aliceRouter.start(), bobRouter.start()]);
           await Future.wait([
             aliceRouter.sendMessage(dstPeerId: proxyPeerId),
@@ -258,14 +241,8 @@ main() async {
       test(
         'trackPeer',
         () async {
-          aliceRouter.addPeerAddress(
-            peerId: proxyPeerId,
-            addresses: proxyAddresses,
-          );
-          bobRouter.addPeerAddress(
-            peerId: proxyPeerId,
-            addresses: proxyAddresses,
-          );
+          aliceRouter.routes[proxyPeerId] = proxyRoute;
+          bobRouter.routes[proxyPeerId] = proxyRoute;
           await Future.wait([aliceRouter.start(), bobRouter.start()]);
           await Future.wait([
             aliceRouter.sendMessage(dstPeerId: proxyPeerId),
@@ -277,7 +254,9 @@ main() async {
           final subscription = aliceRouter.lastSeenStream
               .where((e) => e.key == bobRouter.selfId)
               .listen((e) => isOnline = e.value);
-          await aliceRouter.pingPeer(bobRouter.selfId);
+
+          expect(await aliceRouter.pingPeer(bobRouter.selfId), true);
+          await Future.delayed(initTime);
           expect(isOnline, true);
 
           bobRouter.stop();
@@ -293,14 +272,8 @@ main() async {
       test(
         'onMessage gives online status',
         () async {
-          aliceRouter.addPeerAddress(
-            peerId: proxyPeerId,
-            addresses: proxyAddresses,
-          );
-          bobRouter.addPeerAddress(
-            peerId: proxyPeerId,
-            addresses: proxyAddresses,
-          );
+          aliceRouter.routes[proxyPeerId] = proxyRoute;
+          bobRouter.routes[proxyPeerId] = proxyRoute;
           await Future.wait([aliceRouter.start(), bobRouter.start()]);
           await Future.wait([
             aliceRouter.sendMessage(dstPeerId: proxyPeerId),
@@ -321,14 +294,8 @@ main() async {
       );
 
       test('do not forward on limit', () async {
-        aliceRouter.addPeerAddress(
-          peerId: proxyPeerId,
-          addresses: proxyAddresses,
-        );
-        bobRouter.addPeerAddress(
-          peerId: proxyPeerId,
-          addresses: proxyAddresses,
-        );
+        aliceRouter.routes[proxyPeerId] = proxyRoute;
+        bobRouter.routes[proxyPeerId] = proxyRoute;
         await Future.wait([aliceRouter.start(), bobRouter.start()]);
         await Future.wait([
           aliceRouter.sendMessage(dstPeerId: proxyPeerId),
@@ -349,7 +316,7 @@ main() async {
           await aliceRouter.sendDatagramConfirmable(
             messageId: header.id,
             datagram: datagram,
-            addresses: proxyAddresses,
+            addresses: [proxyAddress],
           ),
           0,
         );
@@ -369,7 +336,7 @@ main() async {
           () async => await aliceRouter.sendDatagramConfirmable(
             messageId: header2.id,
             datagram: datagram2,
-            addresses: proxyAddresses,
+            addresses: [proxyAddress],
           ),
           throwsA(isA<Exception>()),
         );
@@ -381,7 +348,7 @@ main() async {
   tearDown(() {
     aliceRouter.stop();
     bobRouter.stop();
-    aliceRouter.clearResolveCache();
-    bobRouter.clearResolveCache();
+    aliceRouter.routes.clear();
+    bobRouter.routes.clear();
   });
 }

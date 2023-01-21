@@ -5,13 +5,20 @@ import 'package:p2plib/p2plib.dart';
 export 'package:p2plib/p2plib.dart';
 
 const initTime = Duration(milliseconds: 250);
-final localAddress = InternetAddress.anyIPv4;
+final localAddress = InternetAddress.loopbackIPv4;
+final randomPeerId = P2PPeerId(value: getRandomBytes(P2PPeerId.length));
+final payload = getRandomBytes(64);
+final token = P2PToken(value: payload);
 final proxyAddress = P2PFullAddress(
   address: localAddress,
   isLocal: true,
   port: 2022,
 );
-final proxyAddresses = [proxyAddress];
+final proxyRoute = P2PRoute(
+  peerId: randomPeerId,
+  canForward: true,
+  addresses: {proxyAddress: DateTime.now().millisecondsSinceEpoch},
+);
 final aliceAddress = P2PFullAddress(
   address: localAddress,
   isLocal: true,
@@ -22,21 +29,18 @@ final bobAddress = P2PFullAddress(
   isLocal: true,
   port: 4022,
 );
-final randomPeerId = P2PPeerId(value: getRandomBytes(P2PPeerId.length));
-final payload = getRandomBytes(64);
-final token = P2PToken(value: payload);
 
-Future<P2PRouter> createRouter({
+Future<P2PRouterL2> createRouter({
   required final P2PFullAddress address,
   final Uint8List? seedEnc,
   final Uint8List? seedSign,
   final String? debugLabel,
 }) async {
-  final router = P2PRouter(
+  final router = P2PRouterL2(
     transports: [P2PUdpTransport(fullAddress: address)],
     debugLabel: debugLabel,
     logger: print,
-  );
+  )..requestTimeout = const Duration(seconds: 2);
   final cryptoKeys = P2PCryptoKeys.empty();
   if (seedEnc != null) cryptoKeys.encSeed = seedEnc;
   if (seedSign != null) cryptoKeys.signSeed = seedSign;
@@ -50,11 +54,11 @@ Future<Isolate> createProxy({
 }) async {
   final isolate = await Isolate.spawn(
     (_) async {
-      final router = P2PRouterBase(
+      final router = P2PRouterL0(
         transports: [P2PUdpTransport(fullAddress: address ?? proxyAddress)],
         debugLabel: debugLabel,
         logger: print,
-      );
+      )..requestTimeout = const Duration(seconds: 2);
       await router.init(P2PCryptoKeys.empty()
         ..encSeed = proxySeedEnc
         ..signSeed = proxySeedSign);

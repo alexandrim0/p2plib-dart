@@ -3,7 +3,7 @@ import 'package:p2plib/p2plib.dart';
 
 void main(List<String> args) async {
   if (args.contains('help')) _printHelpScreen();
-  final router = P2PRouterBase(defaultPort: _getPort(args));
+  final router = P2PRouterL0(defaultPort: _getPort(args));
   if (args.contains('log')) router.logger = stdout.writeln;
   await router.init();
   await router.start();

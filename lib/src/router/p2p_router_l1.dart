@@ -1,15 +1,20 @@
 part of 'router.dart';
 
-class P2PRouter extends P2PRouterBase with P2PHandlerAck, P2PHandlerLastSeen {
+class P2PRouterL1 extends P2PRouterL0 {
+  static const defaultPeriod = Duration(seconds: 1);
+
   final _messageController = StreamController<P2PMessage>();
-  final Set<P2PPacketHeader> _recieved = {};
+  final _ackCompleters = <int, Completer<int>>{};
+  final _recieved = <P2PPacketHeader>{}; // TBD: remove, use P2PRoute?
+
+  var retryPeriod = defaultPeriod;
 
   Iterable<P2PFullAddress> get selfAddresses =>
       transports.map((t) => t.fullAddress);
 
   Stream<P2PMessage> get messageStream => _messageController.stream;
 
-  P2PRouter({
+  P2PRouterL1({
     super.crypto,
     super.transports,
     super.debugLabel,
@@ -17,7 +22,7 @@ class P2PRouter extends P2PRouterBase with P2PHandlerAck, P2PHandlerLastSeen {
   }) {
     // clear recieved headers
     Timer.periodic(
-      requestTimeout,
+      retryPeriod,
       (_) {
         if (_recieved.isEmpty) return;
         final staleAt =
@@ -29,7 +34,7 @@ class P2PRouter extends P2PRouterBase with P2PHandlerAck, P2PHandlerLastSeen {
 
   @override
   void stop() {
-    _stopAckHandler();
+    _ackCompleters.clear();
     super.stop();
   }
 
@@ -44,7 +49,6 @@ class P2PRouter extends P2PRouterBase with P2PHandlerAck, P2PHandlerLastSeen {
     _recieved.add(packet.header);
     // check and remove signature, decrypt if not empty
     final message = await crypto.unseal(packet.datagram, packet.header);
-    _processLastSeen(message);
     // exit if message is ack for mine message
     if (_processAck(message)) return null;
     // drop empty messages (keepalive)
@@ -54,7 +58,6 @@ class P2PRouter extends P2PRouterBase with P2PHandlerAck, P2PHandlerLastSeen {
     return packet;
   }
 
-  @override
   Future<P2PPacketHeader> sendMessage({
     final bool isConfirmable = false,
     required final P2PPeerId dstPeerId,
@@ -91,5 +94,75 @@ class P2PRouter extends P2PRouterBase with P2PHandlerAck, P2PHandlerLastSeen {
       logger?.call('[$debugLabel] sent ${datagram.length} bytes to $addresses');
     }
     return header;
+  }
+
+  Future<int> sendDatagramConfirmable({
+    required final int messageId,
+    required final Uint8List datagram,
+    required final Iterable<P2PFullAddress> addresses,
+    final Duration? ackTimeout,
+  }) {
+    final completer = Completer<int>();
+    _ackCompleters[messageId] = completer;
+    _sendAndRetry(
+      datagram: datagram,
+      messageId: messageId,
+      addresses: addresses,
+    );
+    return completer.future.timeout(
+      ackTimeout ?? requestTimeout * 2,
+      onTimeout: () {
+        if (_ackCompleters.remove(messageId) == null) return -1;
+        throw TimeoutException('[$debugLabel] Ack timeout');
+      },
+    );
+  }
+
+  void _sendAndRetry({
+    required final int messageId,
+    required final Uint8List datagram,
+    required final Iterable<P2PFullAddress> addresses,
+  }) {
+    if (isRun && _ackCompleters.containsKey(messageId)) {
+      sendDatagram(addresses: addresses, datagram: datagram);
+      logger?.call(
+        '[$debugLabel] sent confirmable message, id: $messageId to $addresses',
+      );
+      Future.delayed(
+        retryPeriod,
+        () => _sendAndRetry(
+          datagram: datagram,
+          messageId: messageId,
+          addresses: addresses,
+        ),
+      );
+    }
+  }
+
+  /// returns true if message is processed
+  bool _processAck(final P2PMessage message) {
+    if (message.header.messageType == P2PPacketType.confirmation) {
+      _ackCompleters
+          .remove(message.header.id)
+          ?.complete(message.payload.length);
+      return true;
+    }
+    if (message.header.messageType == P2PPacketType.confirmable) {
+      crypto
+          .sign(P2PMessage(
+            header: message.header.copyWith(
+              messageType: P2PPacketType.confirmation,
+            ),
+            srcPeerId: selfId,
+            dstPeerId: message.srcPeerId,
+          ).toBytes())
+          .then(
+            (datagram) => sendDatagram(
+              addresses: [message.header.srcFullAddress!],
+              datagram: datagram,
+            ),
+          );
+    }
+    return false;
   }
 }
