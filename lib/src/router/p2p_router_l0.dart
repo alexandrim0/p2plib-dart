@@ -8,6 +8,7 @@ class P2PRouterL0 {
   final Iterable<P2PTransport> transports;
   final String? debugLabel; // TBD: remove, should be part of logger
   final P2PCrypto crypto;
+  final int port;
 
   var peerAddressTTL = const Duration(seconds: 30);
   var requestTimeout = defaultTimeout;
@@ -25,7 +26,7 @@ class P2PRouterL0 {
   P2PRouterL0({
     final P2PCrypto? crypto,
     final Iterable<P2PTransport>? transports,
-    final int defaultPort = defaultPort,
+    this.port = defaultPort,
     this.debugLabel,
     this.logger,
   })  : crypto = crypto ?? P2PCrypto(),
@@ -35,13 +36,13 @@ class P2PRouterL0 {
                   fullAddress: P2PFullAddress(
                 address: InternetAddress.anyIPv4,
                 isLocal: false,
-                port: defaultPort,
+                port: port,
               )),
               P2PUdpTransport(
                   fullAddress: P2PFullAddress(
                 address: InternetAddress.anyIPv6,
                 isLocal: false,
-                port: defaultPort,
+                port: port,
               )),
             ];
 
@@ -90,7 +91,7 @@ class P2PRouterL0 {
     if (srcPeerId == _selfId) return null;
 
     // if peer unknown then check signature and keep address if success
-    if (routes[srcPeerId]?.addresses[packet.header.srcFullAddress] == null) {
+    if (routes[srcPeerId]?.addresses[packet.header.srcFullAddress!] == null) {
       try {
         // Set forwards count to zero for checking signature
         P2PPacketHeader.resetForwardsCount(packet.datagram);
@@ -162,8 +163,8 @@ class P2PRouterL0 {
       return result.take(useForwardersCount);
     } else {
       return route.getActualAddresses(
-          staleBefore: DateTime.now().millisecondsSinceEpoch -
-              peerAddressTTL.inMilliseconds);
+          staleBefore:
+              DateTime.now().subtract(peerAddressTTL).millisecondsSinceEpoch);
     }
   }
 }

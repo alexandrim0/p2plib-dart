@@ -22,6 +22,15 @@ class P2PRoute {
   Iterable<P2PFullAddress> getActualAddresses({required int staleBefore}) =>
       addresses.entries.where((e) => e.value > staleBefore).map((e) => e.key);
 
+  void addAddress({
+    required final P2PFullAddress address,
+    required final int timestamp,
+    bool? canForward,
+  }) {
+    if (canForward != null) this.canForward = canForward;
+    addresses[address] = timestamp;
+  }
+
   void addAddresses({
     required final Iterable<P2PFullAddress> addresses,
     required final int timestamp,

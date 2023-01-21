@@ -25,6 +25,30 @@ class P2PRouterL2 extends P2PRouterL1 {
   }
 
   /// Add Address with port and timestamp for PeerId into cache
+  void addPeerAddress({
+    required final P2PPeerId peerId,
+    required final P2PFullAddress address,
+    bool canForward = false,
+    int? timestamp,
+  }) {
+    if (peerId == selfId) return;
+    timestamp ??= DateTime.now().millisecondsSinceEpoch;
+    if (routes.containsKey(peerId)) {
+      routes[peerId]!.addAddress(
+        address: address,
+        timestamp: timestamp,
+        canForward: canForward,
+      );
+    } else {
+      routes[peerId] = P2PRoute(
+        peerId: peerId,
+        canForward: canForward,
+        addresses: {address: timestamp},
+      );
+    }
+  }
+
+  /// Add Addresses with port and timestamp for PeerId into cache
   void addPeerAddresses({
     required final P2PPeerId peerId,
     required final Iterable<P2PFullAddress> addresses,
@@ -48,6 +72,8 @@ class P2PRouterL2 extends P2PRouterL1 {
       );
     }
   }
+
+  P2PRoute? forgetPeerId(final P2PPeerId peerId) => routes.remove(peerId);
 
   bool getPeerStatus(final P2PPeerId peerId) =>
       (routes[peerId]?.lastSeen ?? 0) + requestTimeout.inMilliseconds >
