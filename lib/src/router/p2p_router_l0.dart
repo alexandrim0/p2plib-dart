@@ -7,7 +7,6 @@ class P2PRouterL0 {
   final Map<P2PPeerId, P2PRoute> routes = {};
   final Iterable<P2PTransport> transports;
   final P2PCrypto crypto;
-  final int port;
 
   var peerAddressTTL = const Duration(seconds: 30);
   var requestTimeout = defaultTimeout;
@@ -25,7 +24,6 @@ class P2PRouterL0 {
   P2PRouterL0({
     final P2PCrypto? crypto,
     final Iterable<P2PTransport>? transports,
-    this.port = defaultPort,
     this.logger,
   })  : crypto = crypto ?? P2PCrypto(),
         transports = transports ??
@@ -34,13 +32,13 @@ class P2PRouterL0 {
                   fullAddress: P2PFullAddress(
                 address: InternetAddress.anyIPv4,
                 isLocal: false,
-                port: port,
+                port: defaultPort,
               )),
               P2PUdpTransport(
                   fullAddress: P2PFullAddress(
                 address: InternetAddress.anyIPv6,
                 isLocal: false,
-                port: port,
+                port: defaultPort,
               )),
             ];
 
