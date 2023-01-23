@@ -4,7 +4,7 @@ import 'package:p2plib/p2plib.dart';
 
 void main(List<String> args) async {
   if (args.contains('help')) _printHelpScreen();
-  final port = _getPort(args) ?? P2PRouterL0.defaultPort;
+  final port = _getPort(args) ?? P2PRouterBase.defaultPort;
   final router = P2PRouterL0(
     transports: [
       P2PUdpTransport(

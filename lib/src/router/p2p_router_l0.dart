@@ -1,78 +1,15 @@
 part of 'router.dart';
 
-class P2PRouterL0 {
-  static const defaultPort = 2022;
-  static const defaultTimeout = Duration(seconds: 3);
-
-  final Map<P2PPeerId, P2PRoute> routes = {};
-  final Iterable<P2PTransport> transports;
-  final P2PCrypto crypto;
-
+class P2PRouterL0 extends P2PRouterBase {
   var peerAddressTTL = const Duration(seconds: 30);
-  var requestTimeout = defaultTimeout;
+  var requestTimeout = P2PRouterBase.defaultTimeout;
   var useForwardersCount = 2;
   var maxForwardsCount = 1;
-  void Function(String)? logger;
 
-  late final P2PPeerId _selfId;
-  var _isRun = false;
-
-  bool get isRun => _isRun;
-  bool get isNotRun => !_isRun;
-  P2PPeerId get selfId => _selfId;
-
-  P2PRouterL0({
-    final P2PCrypto? crypto,
-    final Iterable<P2PTransport>? transports,
-    this.logger,
-  })  : crypto = crypto ?? P2PCrypto(),
-        transports = transports ??
-            [
-              P2PUdpTransport(
-                  fullAddress: P2PFullAddress(
-                address: InternetAddress.anyIPv4,
-                isLocal: false,
-                port: defaultPort,
-              )),
-              P2PUdpTransport(
-                  fullAddress: P2PFullAddress(
-                address: InternetAddress.anyIPv6,
-                isLocal: false,
-                port: defaultPort,
-              )),
-            ];
-
-  Future<P2PCryptoKeys> init([P2PCryptoKeys? keys]) async {
-    final cryptoKeys = await crypto.init(keys);
-    _selfId = P2PPeerId.fromKeys(
-      encryptionKey: cryptoKeys.encPublicKey,
-      signKey: cryptoKeys.signPublicKey,
-    );
-    return cryptoKeys;
-  }
-
-  Future<void> start() async {
-    if (_isRun) return;
-    logger?.call('Start listen $transports with key $_selfId');
-    if (transports.isEmpty) {
-      throw Exception('Need at least one P2PTransport!');
-    }
-    for (final t in transports) {
-      t.ttl = requestTimeout.inSeconds;
-      t.callback = onMessage;
-      await t.start();
-    }
-    _isRun = true;
-  }
-
-  void stop() {
-    _isRun = false;
-    for (final t in transports) {
-      t.stop();
-    }
-  }
+  P2PRouterL0({super.crypto, super.transports, super.logger});
 
   /// returns null if message is processed and children have to return
+  @override
   Future<P2PPacket?> onMessage(final P2PPacket packet) async {
     // check minimal datagram length
     if (packet.datagram.length < P2PMessage.minimalLength) return null;

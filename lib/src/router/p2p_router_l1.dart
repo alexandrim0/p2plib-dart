@@ -1,20 +1,22 @@
 part of 'router.dart';
 
 class P2PRouterL1 extends P2PRouterL0 {
-  static const defaultPeriod = Duration(seconds: 1);
-
   final _messageController = StreamController<P2PMessage>();
   final _ackCompleters = <int, Completer<int>>{};
   final _recieved = <P2PPacketHeader>{}; // TBD: remove, use P2PRoute?
 
-  var retryPeriod = defaultPeriod;
+  var retryPeriod = P2PRouterBase.defaultPeriod;
 
   Iterable<P2PFullAddress> get selfAddresses =>
       transports.map((t) => t.fullAddress);
 
   Stream<P2PMessage> get messageStream => _messageController.stream;
 
-  P2PRouterL1({super.crypto, super.transports, super.logger}) {
+  P2PRouterL1({super.crypto, super.transports, super.logger});
+
+  @override
+  Future<P2PCryptoKeys> init([P2PCryptoKeys? keys]) async {
+    final cryptoKeys = await super.init(keys);
     // clear recieved headers
     Timer.periodic(
       retryPeriod,
@@ -25,6 +27,7 @@ class P2PRouterL1 extends P2PRouterL0 {
         _recieved.removeWhere((header) => header.issuedAt < staleAt);
       },
     );
+    return cryptoKeys;
   }
 
   @override

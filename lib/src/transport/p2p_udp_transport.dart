@@ -1,6 +1,6 @@
 part of 'transport.dart';
 
-class P2PUdpTransport extends P2PTransport {
+class P2PUdpTransport extends P2PTransportBase {
   RawDatagramSocket? _socket;
 
   P2PUdpTransport({required super.fullAddress, super.callback, super.ttl});
