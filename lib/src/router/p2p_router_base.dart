@@ -5,6 +5,7 @@ abstract class P2PRouterBase {
   static const defaultPeriod = Duration(seconds: 1);
   static const defaultTimeout = Duration(seconds: 3);
 
+  // TBD: decide where to remove stale routes
   final Map<P2PPeerId, P2PRoute> routes = {};
   final Iterable<P2PTransportBase> transports;
   final P2PCrypto crypto;
@@ -68,6 +69,15 @@ abstract class P2PRouterBase {
     _isRun = false;
     for (final t in transports) {
       t.stop();
+    }
+  }
+
+  void sendDatagram({
+    required final Iterable<P2PFullAddress> addresses,
+    required final Uint8List datagram,
+  }) {
+    for (final t in transports) {
+      t.send(addresses, datagram);
     }
   }
 

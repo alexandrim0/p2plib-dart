@@ -19,9 +19,6 @@ class P2PRoute {
     Map<P2PFullAddress, int>? addresses,
   }) : addresses = addresses ?? {};
 
-  Iterable<P2PFullAddress> getActualAddresses({required int staleBefore}) =>
-      addresses.entries.where((e) => e.value > staleBefore).map((e) => e.key);
-
   void addAddress({
     required final P2PFullAddress address,
     required final int timestamp,
@@ -41,4 +38,10 @@ class P2PRoute {
       this.addresses[a] = timestamp;
     }
   }
+
+  Iterable<P2PFullAddress> getActualAddresses({required int staleBefore}) =>
+      addresses.entries.where((e) => e.value > staleBefore).map((e) => e.key);
+
+  void removeStaleAddresses({required int staleBefore}) =>
+      addresses.removeWhere((_, v) => v > staleBefore);
 }

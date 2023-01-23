@@ -1,5 +1,6 @@
 part of 'router.dart';
 
+// This layer should be fast as possible and can be used as relay only node
 class P2PRouterL0 extends P2PRouterBase {
   var peerAddressTTL = const Duration(seconds: 30);
   var requestTimeout = P2PRouterBase.defaultTimeout;
@@ -24,23 +25,23 @@ class P2PRouterL0 extends P2PRouterBase {
     if (srcPeerId == _selfId) return null;
 
     // if peer unknown then check signature and keep address if success
-    if (routes[srcPeerId]?.addresses[packet.header.srcFullAddress!] == null) {
+    if (routes[srcPeerId]?.addresses[packet.srcFullAddress] == null) {
       try {
         // Set forwards count to zero for checking signature
         P2PPacketHeader.resetForwardsCount(packet.datagram);
         await crypto.openSigned(srcPeerId.signPiblicKey, packet.datagram);
         routes[srcPeerId] = P2PRoute(
           peerId: srcPeerId,
-          addresses: {packet.header.srcFullAddress!: now},
+          addresses: {packet.srcFullAddress: now},
         );
-        logger?.call('Keep ${packet.header.srcFullAddress} for $srcPeerId');
+        logger?.call('Keep ${packet.srcFullAddress} for $srcPeerId');
       } catch (e) {
         logger?.call(e.toString());
         return null; // exit on wrong signature
       }
     } else {
       // update peer address timestamp
-      routes[srcPeerId]!.addresses[packet.header.srcFullAddress!] = now;
+      routes[srcPeerId]!.addresses[packet.srcFullAddress] = now;
     }
 
     // is message for me or to forward?
@@ -51,12 +52,12 @@ class P2PRouterL0 extends P2PRouterBase {
     if (packet.header.forwardsCount >= maxForwardsCount) return null;
 
     // resolve peer address exclude source address to prevent echo
-    final addresses = resolvePeerId(dstPeerId)
-        .where((e) => e != packet.header.srcFullAddress);
+    final addresses =
+        resolvePeerId(dstPeerId).where((e) => e != packet.srcFullAddress);
     if (addresses.isEmpty) {
       logger?.call(
         'Unknown route to $dstPeerId. '
-        'Failed forwarding from ${packet.header.srcFullAddress}',
+        'Failed forwarding from ${packet.srcFullAddress}',
       );
     } else {
       // increment forwards count and forward message
@@ -66,21 +67,11 @@ class P2PRouterL0 extends P2PRouterBase {
       );
       sendDatagram(addresses: addresses, datagram: packet.datagram);
       logger?.call(
-        'forwarded from ${packet.header.srcFullAddress} '
+        'forwarded from ${packet.srcFullAddress} '
         'to $addresses ${packet.datagram.length} bytes',
       );
     }
     return null;
-  }
-
-  int sendDatagram({
-    required final Iterable<P2PFullAddress> addresses,
-    required final Uint8List datagram,
-  }) {
-    for (final t in transports) {
-      t.send(addresses, datagram);
-    }
-    return datagram.length;
   }
 
   /// Returns cached addresses or who can forward

@@ -22,7 +22,6 @@ class P2PPacketHeader {
 
   final P2PPacketType messageType;
   final int forwardsCount, issuedAt, id;
-  final P2PFullAddress? srcFullAddress;
 
   @override
   int get hashCode => Object.hash(
@@ -44,14 +43,10 @@ class P2PPacketHeader {
     this.messageType = P2PPacketType.regular,
     final int? issuedAt,
     required this.id,
-    this.srcFullAddress,
     this.forwardsCount = 0,
   }) : issuedAt = issuedAt ?? DateTime.now().millisecondsSinceEpoch;
 
-  factory P2PPacketHeader.fromBytes(
-    final Uint8List datagram, [
-    final P2PFullAddress? srcFullAddress,
-  ]) {
+  factory P2PPacketHeader.fromBytes(final Uint8List datagram) {
     final messageType = datagram[1];
     if (messageType > P2PPacketType.values.length) {
       throw const FormatException('Packet type is wrong!');
@@ -61,7 +56,6 @@ class P2PPacketHeader {
       messageType: P2PPacketType.values[messageType],
       issuedAt: buffer[0] >> 16,
       id: buffer[1],
-      srcFullAddress: srcFullAddress,
       forwardsCount: datagram[0],
     );
   }
@@ -85,6 +79,5 @@ class P2PPacketHeader {
         messageType: messageType ?? this.messageType,
         issuedAt: issuedAt ?? this.issuedAt,
         id: id ?? this.id,
-        srcFullAddress: srcFullAddress ?? this.srcFullAddress,
       );
 }

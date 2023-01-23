@@ -21,6 +21,7 @@ class P2PRouterL1 extends P2PRouterL0 {
     Timer.periodic(
       retryPeriod,
       (_) {
+        if (isNotRun) return;
         if (_recieved.isEmpty) return;
         final staleAt =
             DateTime.now().subtract(requestTimeout).millisecondsSinceEpoch;
@@ -48,7 +49,7 @@ class P2PRouterL1 extends P2PRouterL0 {
     // check and remove signature, decrypt if not empty
     final message = await crypto.unseal(packet.datagram, packet.header);
     // exit if message is ack for mine message
-    if (_processAck(message)) return null;
+    if (_processAck(message, packet.srcFullAddress)) return null;
     // drop empty messages (keepalive)
     if (message.isEmpty) return null;
     // message is for user, send it to subscriber
@@ -64,10 +65,10 @@ class P2PRouterL1 extends P2PRouterL0 {
     final Duration? ackTimeout,
   }) async {
     if (isNotRun) throw Exception('P2PRouter is not running!');
+
     final addresses = resolvePeerId(dstPeerId);
-    if (addresses.isEmpty) {
-      throw Exception('Unknown route to $dstPeerId. ');
-    }
+    if (addresses.isEmpty) throw Exception('Unknown route to $dstPeerId. ');
+
     final header = P2PPacketHeader(
       messageType:
           isConfirmable ? P2PPacketType.confirmable : P2PPacketType.regular,
@@ -94,6 +95,7 @@ class P2PRouterL1 extends P2PRouterL0 {
     return header;
   }
 
+  // TBD: make as Future<void>
   Future<int> sendDatagramConfirmable({
     required final int messageId,
     required final Uint8List datagram,
@@ -108,9 +110,9 @@ class P2PRouterL1 extends P2PRouterL0 {
       addresses: addresses,
     );
     return completer.future.timeout(
-      ackTimeout ?? requestTimeout * 2,
+      ackTimeout ?? requestTimeout,
       onTimeout: () {
-        if (_ackCompleters.remove(messageId) == null) return -1;
+        if (_ackCompleters.remove(messageId) == null) return messageId;
         throw TimeoutException('Ack timeout');
       },
     );
@@ -138,7 +140,7 @@ class P2PRouterL1 extends P2PRouterL0 {
   }
 
   /// returns true if message is processed
-  bool _processAck(final P2PMessage message) {
+  bool _processAck(final P2PMessage message, final P2PFullAddress srcAddress) {
     if (message.header.messageType == P2PPacketType.confirmation) {
       _ackCompleters
           .remove(message.header.id)
@@ -156,7 +158,7 @@ class P2PRouterL1 extends P2PRouterL0 {
           ).toBytes())
           .then(
             (datagram) => sendDatagram(
-              addresses: [message.header.srcFullAddress!],
+              addresses: [srcAddress],
               datagram: datagram,
             ),
           );
