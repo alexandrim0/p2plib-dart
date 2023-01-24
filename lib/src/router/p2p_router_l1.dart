@@ -1,9 +1,11 @@
 part of 'router.dart';
 
+/// This layer do enhanced protocol features like ack, dedup and keepalive
+/// It can send and process messages, so can be used as advanced relay node
+/// or as simple client
 class P2PRouterL1 extends P2PRouterL0 {
   final _messageController = StreamController<P2PMessage>();
   final _ackCompleters = <int, Completer<int>>{};
-  final _recieved = <P2PPacketHeader>{}; // TBD: remove, use P2PRoute?
 
   var retryPeriod = P2PRouterBase.defaultPeriod;
 
@@ -17,15 +19,24 @@ class P2PRouterL1 extends P2PRouterL0 {
   @override
   Future<P2PCryptoKeys> init([P2PCryptoKeys? keys]) async {
     final cryptoKeys = await super.init(keys);
-    // clear recieved headers
     Timer.periodic(
-      retryPeriod,
+      keepalivePeriod,
       (_) {
         if (isNotRun) return;
-        if (_recieved.isEmpty) return;
+        if (routes.isEmpty) return;
+        // clear recieved headers
         final staleAt =
             DateTime.now().subtract(requestTimeout).millisecondsSinceEpoch;
-        _recieved.removeWhere((header) => header.issuedAt < staleAt);
+        for (final route in routes.values) {
+          route.dropStalePacketHeader(staleAt: staleAt);
+        }
+        // send keepalive messages
+        for (final route in routes.values) {
+          sendMessage(
+            dstPeerId: route.peerId,
+            useAddresses: route.addresses.keys.where((a) => a.isNotLocal),
+          );
+        }
       },
     );
     return cryptoKeys;
@@ -43,11 +54,13 @@ class P2PRouterL1 extends P2PRouterL0 {
     // exit if parent done all needed work
     if (await super.onMessage(packet) == null) return null;
     // drop duplicate
-    if (_recieved.contains(packet.header)) return null;
-    // remember to prevent duplicates processing
-    _recieved.add(packet.header);
+    for (final r in routes.values) {
+      if (r.lastPacketHeader == packet.header) return null;
+    }
     // check and remove signature, decrypt if not empty
     final message = await crypto.unseal(packet.datagram, packet.header);
+    // remember header to prevent duplicates processing
+    routes[message.srcPeerId]?.lastPacketHeader = packet.header;
     // exit if message is ack for mine message
     if (_processAck(message, packet.srcFullAddress)) return null;
     // drop empty messages (keepalive)
@@ -57,16 +70,18 @@ class P2PRouterL1 extends P2PRouterL0 {
     return packet;
   }
 
+  /// Send message. If useAddress is not null then use this else resolve peerId
   Future<P2PPacketHeader> sendMessage({
     final bool isConfirmable = false,
     required final P2PPeerId dstPeerId,
     final int? messageId,
     final Uint8List? payload,
     final Duration? ackTimeout,
+    final Iterable<P2PFullAddress>? useAddresses,
   }) async {
     if (isNotRun) throw Exception('P2PRouter is not running!');
 
-    final addresses = resolvePeerId(dstPeerId);
+    final addresses = useAddresses ?? resolvePeerId(dstPeerId);
     if (addresses.isEmpty) throw Exception('Unknown route to $dstPeerId. ');
 
     final header = P2PPacketHeader(

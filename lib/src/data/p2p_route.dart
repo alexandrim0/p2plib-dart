@@ -5,7 +5,7 @@ class P2PRoute {
 
   bool canForward;
   Map<P2PFullAddress, int> addresses;
-  P2PPacketHeader? lastPacketHeader; // TBD: decide use or drop
+  P2PPacketHeader? lastPacketHeader;
 
   bool get isEmpty => addresses.isEmpty;
   bool get isNotEmpty => addresses.isNotEmpty;
@@ -39,9 +39,13 @@ class P2PRoute {
     }
   }
 
-  Iterable<P2PFullAddress> getActualAddresses({required int staleBefore}) =>
-      addresses.entries.where((e) => e.value > staleBefore).map((e) => e.key);
+  Iterable<P2PFullAddress> getActualAddresses({required int staleAt}) =>
+      addresses.entries.where((e) => e.value > staleAt).map((e) => e.key);
 
-  void removeStaleAddresses({required int staleBefore}) =>
-      addresses.removeWhere((_, v) => v > staleBefore);
+  void removeStaleAddresses({required int staleAt}) =>
+      addresses.removeWhere((_, t) => t > staleAt);
+
+  void dropStalePacketHeader({required int staleAt}) {
+    if (lastSeen < staleAt) lastPacketHeader = null;
+  }
 }

@@ -297,11 +297,11 @@ main() async {
         aliceRouter.routes[proxyPeerId] = proxyRoute;
         bobRouter.routes[proxyPeerId] = proxyRoute;
         await Future.wait([aliceRouter.start(), bobRouter.start()]);
-        await Future.wait([
-          aliceRouter.sendMessage(dstPeerId: proxyPeerId),
-          bobRouter.sendMessage(dstPeerId: proxyPeerId),
-          Future.delayed(initTime),
-        ]);
+        await aliceRouter.sendMessage(dstPeerId: proxyPeerId);
+        await Future.delayed(initTime);
+        await bobRouter.sendMessage(dstPeerId: proxyPeerId);
+        await Future.delayed(initTime);
+
         final header = P2PPacketHeader(
           id: genRandomInt(),
           messageType: P2PPacketType.confirmable,

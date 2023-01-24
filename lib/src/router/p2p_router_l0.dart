@@ -1,13 +1,33 @@
 part of 'router.dart';
 
-// This layer should be fast as possible and can be used as relay only node
+/// This layer should be fast as possible and can be used as relay only node.
+/// It can recieve, send and forward datagrams
 class P2PRouterL0 extends P2PRouterBase {
-  var peerAddressTTL = const Duration(seconds: 30);
+  var keepalivePeriod = P2PRouterBase.defaultAddressTTL ~/ 2;
+  var peerAddressTTL = P2PRouterBase.defaultAddressTTL;
   var requestTimeout = P2PRouterBase.defaultTimeout;
   var useForwardersCount = 2;
   var maxForwardsCount = 1;
 
   P2PRouterL0({super.crypto, super.transports, super.logger});
+
+  @override
+  Future<P2PCryptoKeys> init([final P2PCryptoKeys? keys]) async {
+    final cryptoKeys = await super.init(keys);
+    // remove stale records
+    Timer.periodic(
+      keepalivePeriod,
+      (_) {
+        if (isNotRun) return;
+        if (routes.isEmpty) return;
+        final staleAt =
+            DateTime.now().subtract(peerAddressTTL).millisecondsSinceEpoch;
+        routes.forEach((_, r) => r.removeStaleAddresses(staleAt: staleAt));
+        routes.removeWhere((_, r) => r.isEmpty);
+      },
+    );
+    return cryptoKeys;
+  }
 
   /// returns null if message is processed and children have to return
   @override
@@ -85,7 +105,7 @@ class P2PRouterL0 extends P2PRouterBase {
       return result.take(useForwardersCount);
     } else {
       return route.getActualAddresses(
-          staleBefore:
+          staleAt:
               DateTime.now().subtract(peerAddressTTL).millisecondsSinceEpoch);
     }
   }

@@ -5,6 +5,8 @@ class P2PFullAddress {
   final bool isLocal;
   final int port;
 
+  bool get isNotLocal => !isLocal;
+
   const P2PFullAddress({
     required this.address,
     required this.port,

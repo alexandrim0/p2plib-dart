@@ -1,11 +1,12 @@
 part of 'router.dart';
 
+/// Interface class with base functions such as init(), start(), stop()
 abstract class P2PRouterBase {
   static const defaultPort = 2022;
   static const defaultPeriod = Duration(seconds: 1);
   static const defaultTimeout = Duration(seconds: 3);
+  static const defaultAddressTTL = Duration(seconds: 30);
 
-  // TBD: decide where to remove stale routes
   final Map<P2PPeerId, P2PRoute> routes = {};
   final Iterable<P2PTransportBase> transports;
   final P2PCrypto crypto;
@@ -42,7 +43,7 @@ abstract class P2PRouterBase {
               )),
             ];
 
-  Future<P2PCryptoKeys> init([P2PCryptoKeys? keys]) async {
+  Future<P2PCryptoKeys> init([final P2PCryptoKeys? keys]) async {
     final cryptoKeys = await crypto.init(keys);
     _selfId = P2PPeerId.fromKeys(
       encryptionKey: cryptoKeys.encPublicKey,
@@ -53,7 +54,6 @@ abstract class P2PRouterBase {
 
   Future<void> start() async {
     if (_isRun) return;
-    logger?.call('Start listen $transports with key $_selfId');
     if (transports.isEmpty) {
       throw Exception('Need at least one P2PTransport!');
     }
@@ -63,6 +63,7 @@ abstract class P2PRouterBase {
       await t.start();
     }
     _isRun = true;
+    logger?.call('Start listen $transports with key $_selfId');
   }
 
   void stop() {
