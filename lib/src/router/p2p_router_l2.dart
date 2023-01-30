@@ -1,5 +1,6 @@
 part of 'router.dart';
 
+/// Enhanced router with more high level API for building rich client
 class P2PRouterL2 extends P2PRouterL1 {
   final _lastSeenController =
       StreamController<MapEntry<P2PPeerId, bool>>.broadcast();
