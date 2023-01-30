@@ -4,9 +4,7 @@ import 'mock.dart';
 
 main() async {
   final crypto = P2PCrypto();
-  await crypto.init(P2PCryptoKeys.empty()
-    ..encSeed = proxySeedEnc
-    ..signSeed = proxySeedSign);
+  await crypto.init(P2PCryptoKeys.empty()..seed = proxySeed);
   final encPublicKey = crypto.cryptoKeys.encPublicKey;
   final signPublicKey = crypto.cryptoKeys.signPublicKey;
   final message = P2PMessage(
@@ -26,7 +24,7 @@ main() async {
             encryptionKey: encPublicKey,
             signKey: signPublicKey,
           ).toString(),
-          proxyPeerIdAsBase64,
+          proxyPeerId.toString(),
         ),
       );
       test(
@@ -36,7 +34,7 @@ main() async {
           expect(await crypto.unseal(await crypto.seal(message)), message);
 
           // message with payload
-          final m = message.copyWith(payload: payload);
+          final m = message.copyWith(payload: randomPayload);
           expect(await crypto.unseal(await crypto.seal(m)), m);
         },
       );
@@ -46,22 +44,23 @@ main() async {
         () async {
           final encryptedData = await crypto.encrypt(
             encPublicKey,
-            payload,
+            randomPayload,
           );
           final decryptedData = await crypto.decrypt(encryptedData);
-          expect(P2PToken(value: payload), P2PToken(value: decryptedData));
+          expect(
+              P2PToken(value: randomPayload), P2PToken(value: decryptedData));
         },
       );
 
       test(
         'P2PCrypto sign/unsign',
         () async {
-          final signedData = await crypto.sign(payload);
+          final signedData = await crypto.sign(randomPayload);
           final unsignedData = await crypto.openSigned(
             signPublicKey,
             signedData,
           );
-          expect(P2PToken(value: payload), P2PToken(value: unsignedData));
+          expect(P2PToken(value: randomPayload), P2PToken(value: unsignedData));
         },
       );
     },
@@ -73,7 +72,7 @@ main() async {
       test(
         'P2PCrypto stress test: seal/unseal',
         () async {
-          final m = message.copyWith(payload: payload);
+          final m = message.copyWith(payload: randomPayload);
           for (var i = 0; i < stressCount; i++) {
             await crypto.unseal(await crypto.seal(m));
           }
@@ -86,7 +85,7 @@ main() async {
           for (var i = 0; i < stressCount; i++) {
             await crypto.decrypt(await crypto.encrypt(
               encPublicKey,
-              payload,
+              randomPayload,
             ));
           }
         },
@@ -98,7 +97,7 @@ main() async {
           for (var i = 0; i < stressCount; i++) {
             await crypto.openSigned(
               signPublicKey,
-              await crypto.sign(payload),
+              await crypto.sign(randomPayload),
             );
           }
         },

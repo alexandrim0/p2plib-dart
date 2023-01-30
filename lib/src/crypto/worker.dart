@@ -16,15 +16,15 @@ void cryptoWorker(final P2PCryptoTask initialTask) async {
       ? P2PCryptoKeys.empty()
       : initialTask.extra as P2PCryptoKeys;
 
+  if (cryptoKeys.seed.isEmpty) {
+    cryptoKeys.seed = sodium.randombytes.buf(sodium.randombytes.seedBytes);
+  }
+
   // use given encryption key pair or create it from given or generated seed
   if (cryptoKeys.encPrivateKey.isEmpty || cryptoKeys.encPublicKey.isEmpty) {
-    if (cryptoKeys.encSeed.isEmpty) {
-      cryptoKeys.encSeed = sodium.randombytes.buf(sodium.randombytes.seedBytes);
-    }
-    encKeyPair = box.seedKeyPair(SecureKey.fromList(
-      sodium,
-      cryptoKeys.encSeed,
-    ));
+    encKeyPair = box.seedKeyPair(
+      SecureKey.fromList(sodium, cryptoKeys.seed),
+    );
     cryptoKeys.encPublicKey = encKeyPair.publicKey;
     cryptoKeys.encPrivateKey = encKeyPair.secretKey.extractBytes();
   } else {
@@ -35,14 +35,9 @@ void cryptoWorker(final P2PCryptoTask initialTask) async {
   }
   // use given sign key pair or create it from given or generated seed
   if (cryptoKeys.signPrivateKey.isEmpty || cryptoKeys.signPublicKey.isEmpty) {
-    if (cryptoKeys.signSeed.isEmpty) {
-      cryptoKeys.signSeed =
-          sodium.randombytes.buf(sodium.randombytes.seedBytes);
-    }
-    signKeyPair = sign.seedKeyPair(SecureKey.fromList(
-      sodium,
-      cryptoKeys.signSeed,
-    ));
+    signKeyPair = sign.seedKeyPair(
+      SecureKey.fromList(sodium, cryptoKeys.seed),
+    );
     cryptoKeys.signPublicKey = signKeyPair.publicKey;
     cryptoKeys.signPrivateKey = signKeyPair.secretKey.extractBytes();
   } else {

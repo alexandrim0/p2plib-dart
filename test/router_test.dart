@@ -297,6 +297,7 @@ main() async {
         aliceRouter.routes[proxyPeerId] = proxyRoute;
         bobRouter.routes[proxyPeerId] = proxyRoute;
         await Future.wait([aliceRouter.start(), bobRouter.start()]);
+        await Future.delayed(initTime);
         await aliceRouter.sendMessage(dstPeerId: proxyPeerId);
         await Future.delayed(initTime);
         await bobRouter.sendMessage(dstPeerId: proxyPeerId);

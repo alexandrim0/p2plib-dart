@@ -23,29 +23,23 @@ class P2PCryptoTask {
   });
 }
 
-/// seed and publicKey is Uint8List(32), privateKey is Uint8List(64)
+/// seed, public keys and encPrivateKey is Uint8List(32)
+/// signPrivateKey is Uint8List(64)
 class P2PCryptoKeys {
-  Uint8List encSeed,
-      encPublicKey,
-      encPrivateKey,
-      signSeed,
-      signPublicKey,
-      signPrivateKey;
+  Uint8List seed, encPublicKey, encPrivateKey, signPublicKey, signPrivateKey;
 
   P2PCryptoKeys({
-    required this.encSeed,
+    required this.seed,
     required this.encPublicKey,
     required this.encPrivateKey,
-    required this.signSeed,
     required this.signPublicKey,
     required this.signPrivateKey,
   });
 
   factory P2PCryptoKeys.empty() => P2PCryptoKeys(
-        encSeed: emptyUint8List,
+        seed: emptyUint8List,
         encPublicKey: emptyUint8List,
         encPrivateKey: emptyUint8List,
-        signSeed: emptyUint8List,
         signPublicKey: emptyUint8List,
         signPrivateKey: emptyUint8List,
       );
