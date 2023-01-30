@@ -26,15 +26,19 @@ void main(List<String> args) async {
   final keys = await router.init(
     seed == null ? null : (P2PCryptoKeys.empty()..seed = base64Decode(seed)),
   );
-  if (args.contains('show_keys')) {
+  if (args.contains('show_seed')) {
     stdout.writeln('seed: ${base64UrlEncode(keys.seed)}');
   }
+  stdout.writeln(base64UrlEncode(P2PPeerId.fromKeys(
+    encryptionKey: keys.encPublicKey,
+    signKey: keys.signPublicKey,
+  ).value));
   await router.start();
 }
 
 void _printHelpScreen() {
   stdout.writeln('Run with "log" parameter to write logs to stdout\n');
-  stdout.writeln('Run with "seed" parameter to generate seed\n');
+  stdout.writeln('Run with "show_seed" parameter to generate seed\n');
   stdout.writeln(
       '\tuse env var "P2P_SEED" to set seed or it will be generated\n');
   stdout.writeln('Run with "port [1025-65535]" parameter to set listen port\n');
