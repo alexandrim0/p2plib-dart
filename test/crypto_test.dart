@@ -77,6 +77,7 @@ main() async {
             await crypto.unseal(await crypto.seal(m));
           }
         },
+        timeout: Timeout(Duration(minutes: 1)),
       );
 
       test(
@@ -89,6 +90,7 @@ main() async {
             ));
           }
         },
+        timeout: Timeout(Duration(minutes: 1)),
       );
 
       test(

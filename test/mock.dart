@@ -9,21 +9,16 @@ const initTime = Duration(milliseconds: 250);
 final localAddress = InternetAddress.loopbackIPv4;
 final randomPeerId = P2PPeerId(value: getRandomBytes(P2PPeerId.length));
 final randomPayload = getRandomBytes(64);
+final token = P2PToken(value: randomPayload);
 final proxySeed = base64Decode('tuTfQVH3qgHZ751JtEja_ZbkY-EF0cbRzVDDO_HNrmY=');
 final proxyPeerId = P2PPeerId(
   value: base64Decode(
       'xD_eApw8bN2EDDirUzCoEsOpSbGXfFD0WYr7q7hWjVUARgW4EQ7CTjMT_SqAfItrfS4BGl6sU-rnSWCwuOtv3Q=='),
 );
-final token = P2PToken(value: randomPayload);
 final proxyAddress = P2PFullAddress(
   address: localAddress,
   isLocal: true,
   port: 2022,
-);
-final proxyRoute = P2PRoute(
-  peerId: proxyPeerId,
-  canForward: true,
-  addresses: {proxyAddress: DateTime.now().millisecondsSinceEpoch},
 );
 final aliceAddress = P2PFullAddress(
   address: localAddress,
@@ -35,6 +30,12 @@ final bobAddress = P2PFullAddress(
   isLocal: true,
   port: 4022,
 );
+
+P2PRoute getProxyRoute() => P2PRoute(
+      peerId: proxyPeerId,
+      canForward: true,
+      addresses: {proxyAddress: DateTime.now().millisecondsSinceEpoch},
+    );
 
 void log(debugLabel, message) => print('[$debugLabel] $message');
 

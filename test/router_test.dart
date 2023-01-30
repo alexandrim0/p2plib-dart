@@ -160,7 +160,7 @@ main() async {
       test(
         'Send packet to unknown host',
         () async {
-          aliceRouter.routes[proxyPeerId] = proxyRoute;
+          aliceRouter.routes[proxyPeerId] = getProxyRoute();
           await aliceRouter.start();
           expect(
             () async => await aliceRouter.sendMessage(
@@ -175,6 +175,7 @@ main() async {
       test(
         'Send packets to known hosts, no ack',
         () async {
+          final proxyRoute = getProxyRoute();
           aliceRouter.routes[proxyPeerId] = proxyRoute;
           bobRouter.routes[proxyPeerId] = proxyRoute;
           await Future.wait([aliceRouter.start(), bobRouter.start()]);
@@ -199,6 +200,7 @@ main() async {
       test(
         'Send packets to known hosts with ack',
         () async {
+          final proxyRoute = getProxyRoute();
           aliceRouter.routes[proxyPeerId] = proxyRoute;
           bobRouter.routes[proxyPeerId] = proxyRoute;
           await Future.wait([aliceRouter.start(), bobRouter.start()]);
@@ -224,6 +226,7 @@ main() async {
       test(
         'getPeerStatus',
         () async {
+          final proxyRoute = getProxyRoute();
           aliceRouter.routes[proxyPeerId] = proxyRoute;
           bobRouter.routes[proxyPeerId] = proxyRoute;
           await Future.wait([aliceRouter.start(), bobRouter.start()]);
@@ -241,6 +244,7 @@ main() async {
       test(
         'trackPeer',
         () async {
+          final proxyRoute = getProxyRoute();
           aliceRouter.routes[proxyPeerId] = proxyRoute;
           bobRouter.routes[proxyPeerId] = proxyRoute;
           await Future.wait([aliceRouter.start(), bobRouter.start()]);
@@ -272,14 +276,15 @@ main() async {
       test(
         'onMessage gives online status',
         () async {
+          final proxyRoute = getProxyRoute();
           aliceRouter.routes[proxyPeerId] = proxyRoute;
           bobRouter.routes[proxyPeerId] = proxyRoute;
           await Future.wait([aliceRouter.start(), bobRouter.start()]);
-          await Future.wait([
-            aliceRouter.sendMessage(dstPeerId: proxyPeerId),
-            bobRouter.sendMessage(dstPeerId: proxyPeerId),
-            Future.delayed(initTime),
-          ]);
+          await Future.delayed(initTime);
+          await aliceRouter.sendMessage(dstPeerId: proxyPeerId);
+          await Future.delayed(initTime);
+          await bobRouter.sendMessage(dstPeerId: proxyPeerId);
+
           expect(aliceRouter.getPeerStatus(bobRouter.selfId), false);
           expect(bobRouter.getPeerStatus(aliceRouter.selfId), false);
 
@@ -294,6 +299,7 @@ main() async {
       );
 
       test('do not forward on limit', () async {
+        final proxyRoute = getProxyRoute();
         aliceRouter.routes[proxyPeerId] = proxyRoute;
         bobRouter.routes[proxyPeerId] = proxyRoute;
         await Future.wait([aliceRouter.start(), bobRouter.start()]);

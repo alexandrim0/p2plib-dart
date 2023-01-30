@@ -39,11 +39,19 @@ class P2PRoute {
     }
   }
 
-  Iterable<P2PFullAddress> getActualAddresses({required int staleAt}) =>
-      addresses.entries.where((e) => e.value > staleAt).map((e) => e.key);
+  Iterable<P2PFullAddress> getActualAddresses({
+    required int staleAt,
+    bool preserveLocal = false,
+  }) =>
+      addresses.entries
+          .where((e) => preserveLocal ? e.key.isLocal : e.value > staleAt)
+          .map((e) => e.key);
 
-  void removeStaleAddresses({required int staleAt}) =>
-      addresses.removeWhere((_, t) => t > staleAt);
+  void removeStaleAddresses({
+    required int staleAt,
+    bool preserveLocal = false,
+  }) =>
+      addresses.removeWhere((a, t) => preserveLocal ? !a.isLocal : t < staleAt);
 
   void dropStalePacketHeader({required int staleAt}) {
     if (lastSeen < staleAt) lastPacketHeader = null;

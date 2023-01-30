@@ -101,4 +101,51 @@ void main() async {
       expect(fullAddressD == fullAddressE, false);
     },
   );
+
+  test(
+    'getActualAddresses, removeStaleAddresses',
+    () {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final staleAt = now - 3000;
+      final actualAddress = P2PFullAddress(
+        address: localAddress,
+        isLocal: true,
+        port: 1234,
+      );
+      final staleAddress = P2PFullAddress(
+        address: localAddress,
+        isLocal: true,
+        port: 4321,
+      );
+      final route = P2PRoute(
+        peerId: proxyPeerId,
+        addresses: {
+          aliceAddress: now,
+          bobAddress: now,
+          actualAddress: now,
+          staleAddress: staleAt - 1,
+        },
+      );
+
+      final actualAddresses = route.getActualAddresses(
+        staleAt: staleAt,
+        preserveLocal: false,
+      );
+      expect(actualAddresses.contains(actualAddress), true);
+      expect(actualAddresses.contains(staleAddress), false);
+
+      final actualAddressesLocalsPreserved = route.getActualAddresses(
+        staleAt: staleAt,
+        preserveLocal: true,
+      );
+      expect(actualAddressesLocalsPreserved.contains(actualAddress), true);
+      expect(actualAddressesLocalsPreserved.contains(staleAddress), true);
+
+      route.removeStaleAddresses(staleAt: staleAt, preserveLocal: true);
+      expect(route.addresses.containsKey(staleAddress), true);
+
+      route.removeStaleAddresses(staleAt: staleAt, preserveLocal: false);
+      expect(route.addresses.containsKey(staleAddress), false);
+    },
+  );
 }

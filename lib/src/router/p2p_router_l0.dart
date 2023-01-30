@@ -6,6 +6,7 @@ class P2PRouterL0 extends P2PRouterBase {
   var keepalivePeriod = P2PRouterBase.defaultAddressTTL ~/ 2;
   var peerAddressTTL = P2PRouterBase.defaultAddressTTL;
   var requestTimeout = P2PRouterBase.defaultTimeout;
+  var preserveLocalAddress = false; // More efficient for relay node
   var useForwardersCount = 2;
   var maxForwardsCount = 1;
 
@@ -22,7 +23,10 @@ class P2PRouterL0 extends P2PRouterBase {
         if (routes.isEmpty) return;
         final staleAt =
             DateTime.now().subtract(peerAddressTTL).millisecondsSinceEpoch;
-        routes.forEach((_, r) => r.removeStaleAddresses(staleAt: staleAt));
+        routes.forEach((_, r) => r.removeStaleAddresses(
+              staleAt: staleAt,
+              preserveLocal: preserveLocalAddress,
+            ));
         routes.removeWhere((_, r) => r.isEmpty);
       },
     );
@@ -105,8 +109,9 @@ class P2PRouterL0 extends P2PRouterBase {
       return result.take(useForwardersCount);
     } else {
       return route.getActualAddresses(
-          staleAt:
-              DateTime.now().subtract(peerAddressTTL).millisecondsSinceEpoch);
+        staleAt: DateTime.now().subtract(peerAddressTTL).millisecondsSinceEpoch,
+        preserveLocal: preserveLocalAddress,
+      );
     }
   }
 }

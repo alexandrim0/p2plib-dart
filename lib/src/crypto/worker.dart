@@ -8,8 +8,6 @@ import '/src/data/data.dart';
 
 void cryptoWorker(final P2PCryptoTask initialTask) async {
   final sodium = await SodiumInit.init(_loadSodium());
-  late final KeyPair encKeyPair;
-  late final KeyPair signKeyPair;
   final box = sodium.crypto.box;
   final sign = sodium.crypto.sign;
   final cryptoKeys = initialTask.extra == null
@@ -19,6 +17,8 @@ void cryptoWorker(final P2PCryptoTask initialTask) async {
   if (cryptoKeys.seed.isEmpty) {
     cryptoKeys.seed = sodium.randombytes.buf(sodium.randombytes.seedBytes);
   }
+  late final KeyPair encKeyPair;
+  late final KeyPair signKeyPair;
 
   // use given encryption key pair or create it from given or generated seed
   if (cryptoKeys.encPrivateKey.isEmpty || cryptoKeys.encPublicKey.isEmpty) {
