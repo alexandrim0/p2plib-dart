@@ -43,15 +43,19 @@ class P2PRoute {
     required int staleAt,
     bool preserveLocal = false,
   }) =>
-      addresses.entries
-          .where((e) => preserveLocal ? e.key.isLocal : e.value > staleAt)
-          .map((e) => e.key);
+      addresses.entries.where((e) {
+        if (preserveLocal && e.key.isLocal) return true;
+        return e.value > staleAt;
+      }).map((e) => e.key);
 
   void removeStaleAddresses({
     required int staleAt,
     bool preserveLocal = false,
   }) =>
-      addresses.removeWhere((a, t) => preserveLocal ? !a.isLocal : t < staleAt);
+      addresses.removeWhere((a, t) {
+        if (preserveLocal && a.isLocal) return false;
+        return t < staleAt;
+      });
 
   void dropStalePacketHeader({required int staleAt}) {
     if (lastSeen < staleAt) lastPacketHeader = null;

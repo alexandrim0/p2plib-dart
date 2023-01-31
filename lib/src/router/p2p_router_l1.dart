@@ -19,23 +19,29 @@ class P2PRouterL1 extends P2PRouterL0 {
   @override
   Future<P2PCryptoKeys> init([P2PCryptoKeys? keys]) async {
     final cryptoKeys = await super.init(keys);
+    // clear recieved headers
     Timer.periodic(
-      keepalivePeriod,
+      peerAddressTTL,
       (_) {
         if (isNotRun) return;
         if (routes.isEmpty) return;
-        // clear recieved headers
         final staleAt =
             DateTime.now().subtract(requestTimeout).millisecondsSinceEpoch;
         for (final route in routes.values) {
           route.dropStalePacketHeader(staleAt: staleAt);
         }
-        // send keepalive messages
+      },
+    );
+    // send keepalive messages
+    Timer.periodic(
+      keepalivePeriod,
+      (_) {
+        if (isNotRun) return;
+        if (routes.isEmpty) return;
         for (final route in routes.values) {
-          sendMessage(
-            dstPeerId: route.peerId,
-            useAddresses: route.addresses.keys.where((a) => a.isNotLocal),
-          );
+          final addresses = route.addresses.keys.where((a) => a.isNotLocal);
+          if (addresses.isEmpty) continue;
+          sendMessage(dstPeerId: route.peerId, useAddresses: addresses);
         }
       },
     );
@@ -105,7 +111,7 @@ class P2PRouterL1 extends P2PRouterL0 {
       );
     } else {
       sendDatagram(addresses: addresses, datagram: datagram);
-      logger?.call('sent ${datagram.length} bytes to $addresses');
+      _log('sent ${datagram.length} bytes to $addresses');
     }
     return header;
   }
@@ -140,9 +146,7 @@ class P2PRouterL1 extends P2PRouterL0 {
   }) {
     if (isRun && _ackCompleters.containsKey(messageId)) {
       sendDatagram(addresses: addresses, datagram: datagram);
-      logger?.call(
-        'sent confirmable message, id: $messageId to $addresses',
-      );
+      _log('sent confirmable message, id: $messageId to $addresses');
       Future.delayed(
         retryPeriod,
         () => _sendAndRetry(

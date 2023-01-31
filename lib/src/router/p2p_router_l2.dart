@@ -27,7 +27,7 @@ class P2PRouterL2 extends P2PRouterL1 {
   void addPeerAddress({
     required final P2PPeerId peerId,
     required final P2PFullAddress address,
-    bool canForward = false,
+    bool? canForward,
     int? timestamp,
   }) {
     if (peerId == selfId) return;
@@ -41,7 +41,7 @@ class P2PRouterL2 extends P2PRouterL1 {
     } else {
       routes[peerId] = P2PRoute(
         peerId: peerId,
-        canForward: canForward,
+        canForward: canForward ?? false,
         addresses: {address: timestamp},
       );
     }
@@ -51,7 +51,7 @@ class P2PRouterL2 extends P2PRouterL1 {
   void addPeerAddresses({
     required final P2PPeerId peerId,
     required final Iterable<P2PFullAddress> addresses,
-    bool canForward = false,
+    bool? canForward,
     int? timestamp,
   }) {
     if (addresses.isEmpty) return;
@@ -66,7 +66,7 @@ class P2PRouterL2 extends P2PRouterL1 {
     } else {
       routes[peerId] = P2PRoute(
         peerId: peerId,
-        canForward: canForward,
+        canForward: canForward ?? false,
         addresses: {for (final a in addresses) a: timestamp},
       );
     }

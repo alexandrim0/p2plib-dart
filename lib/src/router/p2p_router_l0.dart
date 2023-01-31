@@ -17,17 +17,22 @@ class P2PRouterL0 extends P2PRouterBase {
     final cryptoKeys = await super.init(keys);
     // remove stale records
     Timer.periodic(
-      keepalivePeriod,
+      peerAddressTTL,
       (_) {
         if (isNotRun) return;
         if (routes.isEmpty) return;
-        final staleAt =
-            DateTime.now().subtract(peerAddressTTL).millisecondsSinceEpoch;
+        final staleAt = DateTime.now()
+            .subtract(peerAddressTTL)
+            .add(const Duration(milliseconds: 100))
+            .millisecondsSinceEpoch;
         routes.forEach((_, r) => r.removeStaleAddresses(
               staleAt: staleAt,
               preserveLocal: preserveLocalAddress,
             ));
+        final routesCount = routes.length;
         routes.removeWhere((_, r) => r.isEmpty);
+        final removedCount = routesCount - routes.length;
+        if (removedCount > 0) _log('remove $removedCount empty routes');
       },
     );
     return cryptoKeys;
@@ -58,9 +63,9 @@ class P2PRouterL0 extends P2PRouterBase {
           peerId: srcPeerId,
           addresses: {packet.srcFullAddress: now},
         );
-        logger?.call('Keep ${packet.srcFullAddress} for $srcPeerId');
+        _log('Keep ${packet.srcFullAddress} for $srcPeerId');
       } catch (e) {
-        logger?.call(e.toString());
+        _log(e.toString());
         return null; // exit on wrong signature
       }
     } else {
@@ -79,7 +84,7 @@ class P2PRouterL0 extends P2PRouterBase {
     final addresses =
         resolvePeerId(dstPeerId).where((e) => e != packet.srcFullAddress);
     if (addresses.isEmpty) {
-      logger?.call(
+      _log(
         'Unknown route to $dstPeerId. '
         'Failed forwarding from ${packet.srcFullAddress}',
       );
@@ -90,7 +95,7 @@ class P2PRouterL0 extends P2PRouterBase {
         packet.datagram,
       );
       sendDatagram(addresses: addresses, datagram: packet.datagram);
-      logger?.call(
+      _log(
         'forwarded from ${packet.srcFullAddress} '
         'to $addresses ${packet.datagram.length} bytes',
       );

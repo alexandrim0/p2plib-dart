@@ -63,7 +63,7 @@ abstract class P2PRouterBase {
       await t.start();
     }
     _isRun = true;
-    logger?.call('Start listen $transports with key $_selfId');
+    _log('Start listen $transports with key $_selfId');
   }
 
   void stop() {
@@ -84,4 +84,6 @@ abstract class P2PRouterBase {
 
   /// returns null if message is processed and children have to return
   Future<P2PPacket?> onMessage(final P2PPacket packet);
+
+  void _log(Object message) => logger?.call(message.toString());
 }
