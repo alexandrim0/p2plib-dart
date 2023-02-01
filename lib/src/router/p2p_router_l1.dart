@@ -2,17 +2,13 @@ part of 'router.dart';
 
 /// This layer do enhanced protocol features like ack, dedup and keepalive
 /// It can send and process messages, so can be used as advanced relay node
-/// or as simple client
 class P2PRouterL1 extends P2PRouterL0 {
-  final _messageController = StreamController<P2PMessage>();
   final _ackCompleters = <int, Completer<int>>{};
 
   var retryPeriod = P2PRouterBase.defaultPeriod;
 
   Iterable<P2PFullAddress> get selfAddresses =>
       transports.map((t) => t.fullAddress);
-
-  Stream<P2PMessage> get messageStream => _messageController.stream;
 
   P2PRouterL1({super.crypto, super.transports, super.logger});
 
@@ -56,10 +52,7 @@ class P2PRouterL1 extends P2PRouterL0 {
     routes[message.srcPeerId]?.lastPacketHeader = packet.header;
     // exit if message is ack for mine message
     if (_processAck(message, packet.srcFullAddress)) return null;
-    // drop empty messages (keepalive)
-    if (message.isEmpty) return null;
-    // message is for user, send it to subscriber
-    if (_messageController.hasListener) _messageController.add(message);
+    packet.message = message;
     return packet;
   }
 

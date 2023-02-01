@@ -25,10 +25,14 @@ void main() async {
       final headerB = headerA.copyWith(
         messageType: P2PPacketType.confirmation,
       );
-      final headerC = P2PPacketHeader.fromBytes(headerA.toBytes());
+      final headerC = headerA.copyWith(
+        id: genRandomInt(),
+      );
+      final headerD = P2PPacketHeader.fromBytes(headerA.toBytes());
 
-      expect(headerA == headerB, false);
-      expect(headerA == headerC, true);
+      expect(headerA == headerB, true);
+      expect(headerA == headerC, false);
+      expect(headerA == headerD, true);
     },
   );
 

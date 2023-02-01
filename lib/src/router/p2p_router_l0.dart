@@ -44,20 +44,23 @@ class P2PRouterL0 extends P2PRouterBase {
     // check minimal datagram length
     if (packet.datagram.length < P2PMessage.minimalLength) return null;
 
+    packet.header = P2PPacketHeader.fromBytes(packet.datagram);
+
     // check if message is stale
     final now = DateTime.now().millisecondsSinceEpoch;
     final staleAt = now - requestTimeout.inMilliseconds;
-    if (packet.header.issuedAt < staleAt) return null;
+    if (packet.header!.issuedAt < staleAt) return null;
 
     // drop echo message
     final srcPeerId = P2PMessage.getSrcPeerId(packet.datagram);
     if (srcPeerId == _selfId) return null;
 
+    // Remember forwards count and reset for checking signature
+    final forwardsCount = P2PPacketHeader.resetForwardsCount(packet.datagram);
+
     // if peer unknown then check signature and keep address if success
     if (routes[srcPeerId]?.addresses[packet.srcFullAddress] == null) {
       try {
-        // Set forwards count to zero for checking signature
-        P2PPacketHeader.resetForwardsCount(packet.datagram);
         await crypto.openSigned(srcPeerId.signPiblicKey, packet.datagram);
         routes[srcPeerId] = P2PRoute(
           peerId: srcPeerId,
@@ -79,7 +82,7 @@ class P2PRouterL0 extends P2PRouterBase {
     if (dstPeerId == _selfId) return packet;
 
     // check if forwards count exeeds
-    if (packet.header.forwardsCount >= maxForwardsCount) return null;
+    if (forwardsCount >= maxForwardsCount) return null;
 
     // resolve peer address exclude source address to prevent echo
     final addresses =
@@ -92,7 +95,7 @@ class P2PRouterL0 extends P2PRouterBase {
     } else {
       // increment forwards count and forward message
       P2PPacketHeader.setForwardsCount(
-        packet.header.forwardsCount + 1,
+        forwardsCount + 1,
         packet.datagram,
       );
       sendDatagram(addresses: addresses, datagram: packet.datagram);

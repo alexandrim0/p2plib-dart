@@ -26,7 +26,6 @@ class P2PUdpTransport extends P2PTransportBase {
             isLocal: fullAddress.isLocal,
             port: datagram.port,
           ),
-          header: P2PPacketHeader.fromBytes(datagram.data),
           datagram: datagram.data,
         ));
       },
