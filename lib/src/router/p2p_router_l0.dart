@@ -71,6 +71,7 @@ class P2PRouterL0 extends P2PRouterBase {
     } else {
       // update peer address timestamp
       routes[srcPeerId]!.addresses[packet.srcFullAddress] = now;
+      _log('Update lastseen of ${packet.srcFullAddress} for $srcPeerId');
     }
 
     // is message for me or to forward?

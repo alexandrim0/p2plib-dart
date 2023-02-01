@@ -56,8 +56,4 @@ class P2PRoute {
         if (preserveLocal && a.isLocal) return false;
         return t < staleAt;
       });
-
-  void dropStalePacketHeader({required int staleAt}) {
-    if (lastSeen < staleAt) lastPacketHeader = null;
-  }
 }

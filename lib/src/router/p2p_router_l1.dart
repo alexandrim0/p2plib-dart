@@ -19,19 +19,6 @@ class P2PRouterL1 extends P2PRouterL0 {
   @override
   Future<P2PCryptoKeys> init([P2PCryptoKeys? keys]) async {
     final cryptoKeys = await super.init(keys);
-    // clear recieved headers
-    Timer.periodic(
-      peerAddressTTL,
-      (_) {
-        if (isNotRun) return;
-        if (routes.isEmpty) return;
-        final staleAt =
-            DateTime.now().subtract(requestTimeout).millisecondsSinceEpoch;
-        for (final route in routes.values) {
-          route.dropStalePacketHeader(staleAt: staleAt);
-        }
-      },
-    );
     // send keepalive messages
     Timer.periodic(
       keepalivePeriod,
