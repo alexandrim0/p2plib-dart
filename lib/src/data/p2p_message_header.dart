@@ -9,19 +9,13 @@ enum P2PPacketType { regular, confirmable, confirmation }
 class P2PPacketHeader {
   static const length = 16;
 
-  static int resetForwardsCount(Uint8List datagram) {
-    final forwardsCount = datagram[0];
-    datagram[0] = 0;
-    return forwardsCount;
-  }
-
   static Uint8List setForwardsCount(int count, Uint8List datagram) {
     datagram[0] = count;
     return datagram;
   }
 
   final P2PPacketType messageType;
-  final int issuedAt, id;
+  final int forwardsCount, issuedAt, id;
 
   @override
   int get hashCode => Object.hash(
@@ -38,6 +32,7 @@ class P2PPacketHeader {
       id == other.id;
 
   P2PPacketHeader({
+    this.forwardsCount = 0,
     this.messageType = P2PPacketType.regular,
     final int? issuedAt,
     required this.id,
@@ -50,6 +45,7 @@ class P2PPacketHeader {
     }
     final buffer = datagram.buffer.asInt64List(0, 2);
     return P2PPacketHeader(
+      forwardsCount: datagram[0],
       messageType: P2PPacketType.values[messageType],
       issuedAt: buffer[0] >> 16,
       id: buffer[1],
