@@ -2,8 +2,8 @@ part of 'data.dart';
 
 class P2PPacket {
   final P2PFullAddress srcFullAddress;
-  final Uint8List datagram;
   final P2PPacketHeader header;
+  final Uint8List datagram;
   P2PMessage? message;
 
   P2PPacket({

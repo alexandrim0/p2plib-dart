@@ -21,13 +21,13 @@ class P2PRouterL2 extends P2PRouterL1 {
   Future<P2PPacket?> onMessage(final P2PPacket packet) async {
     // exit if parent done all needed work
     if (await super.onMessage(packet) == null) return null;
+    // update peer status
+    _lastSeenController
+        .add(MapEntry<P2PPeerId, bool>(packet.message!.srcPeerId, true));
     // drop empty messages (keepalive)
     if (packet.message!.isEmpty) return null;
     // message is for user, send it to subscriber
     if (_messageController.hasListener) _messageController.add(packet.message!);
-    // update peer status
-    _lastSeenController
-        .add(MapEntry<P2PPeerId, bool>(packet.message!.srcPeerId, true));
     return packet;
   }
 
