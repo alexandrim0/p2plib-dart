@@ -9,6 +9,7 @@ class P2PRouterL0 extends P2PRouterBase {
   var preserveLocalAddress = false; // More efficient for relay node
   var useForwardersCount = 2;
   var maxForwardsCount = 1;
+  var maxStoredHeaders = 0;
 
   P2PRouterL0({super.crypto, super.transports, super.logger});
 
@@ -44,51 +45,62 @@ class P2PRouterL0 extends P2PRouterBase {
     // check minimal datagram length
     if (packet.datagram.length < P2PMessage.minimalLength) return null;
 
-    // check if message is stale
     final now = DateTime.now().millisecondsSinceEpoch;
     final staleAt = now - requestTimeout.inMilliseconds;
+    // check if message is stale
     if (packet.header.issuedAt < staleAt) return null;
 
+    packet.srcPeerId = P2PMessage.getSrcPeerId(packet.datagram);
     // drop echo message
-    final srcPeerId = P2PMessage.getSrcPeerId(packet.datagram);
-    if (srcPeerId == _selfId) return null;
+    if (packet.srcPeerId == _selfId) return null;
+
+    final route = routes[packet.srcPeerId];
+    if (maxStoredHeaders > 0) {
+      // drop duplicate
+      if (route?.lastPacketHeader == packet.header) return null;
+      // remember header to prevent duplicates processing
+      routes[packet.srcPeerId]?.lastPacketHeader = packet.header;
+    }
 
     // if peer unknown then check signature and keep address if success
-    if (routes[srcPeerId]?.addresses[packet.srcFullAddress] == null) {
+    if (route?.addresses[packet.srcFullAddress] == null) {
       try {
         await crypto.openSigned(
-          srcPeerId.signPiblicKey,
+          packet.srcPeerId!.signPiblicKey,
           // reset for checking signature
           P2PPacketHeader.setForwardsCount(0, packet.datagram),
         );
-        routes[srcPeerId] = P2PRoute(
-          peerId: srcPeerId,
+        routes[packet.srcPeerId!] = P2PRoute(
+          peerId: packet.srcPeerId!,
           addresses: {packet.srcFullAddress: now},
         );
-        _log('Keep ${packet.srcFullAddress} for $srcPeerId');
+        _log('Keep ${packet.srcFullAddress} for ${packet.srcPeerId}');
       } catch (e) {
         _log(e.toString());
         return null; // exit on wrong signature
       }
     } else {
       // update peer address timestamp
-      routes[srcPeerId]!.addresses[packet.srcFullAddress] = now;
-      _log('Update lastseen of ${packet.srcFullAddress} for $srcPeerId');
+      routes[packet.srcPeerId]!.addresses[packet.srcFullAddress] = now;
+      _log(
+        'Update lastseen of ${packet.srcFullAddress} for ${packet.srcPeerId!}',
+      );
     }
 
     // is message for me or to forward?
-    final dstPeerId = P2PMessage.getDstPeerId(packet.datagram);
-    if (dstPeerId == _selfId) return packet;
+    packet.dstPeerId = P2PMessage.getDstPeerId(packet.datagram);
+    if (packet.dstPeerId == _selfId) return packet;
 
     // check if forwards count exeeds
     if (packet.header.forwardsCount >= maxForwardsCount) return null;
 
     // resolve peer address exclude source address to prevent echo
-    final addresses =
-        resolvePeerId(dstPeerId).where((e) => e != packet.srcFullAddress);
+    final addresses = resolvePeerId(packet.dstPeerId!)
+        .where((e) => e != packet.srcFullAddress);
+
     if (addresses.isEmpty) {
       _log(
-        'Unknown route to $dstPeerId. '
+        'Unknown route to ${packet.dstPeerId}. '
         'Failed forwarding from ${packet.srcFullAddress}',
       );
     } else {

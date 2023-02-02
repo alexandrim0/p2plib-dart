@@ -14,6 +14,7 @@ class P2PRouterL2 extends P2PRouterL1 {
   P2PRouterL2({super.crypto, super.transports, super.logger}) {
     // More convenient for endpoint client
     preserveLocalAddress = true;
+    maxStoredHeaders = 10;
   }
 
   /// returns null if message is processed and children have to return

@@ -4,6 +4,7 @@ class P2PPacket {
   final P2PFullAddress srcFullAddress;
   final P2PPacketHeader header;
   final Uint8List datagram;
+  P2PPeerId? srcPeerId, dstPeerId;
   P2PMessage? message;
 
   P2PPacket({

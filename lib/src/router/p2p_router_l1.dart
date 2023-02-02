@@ -33,6 +33,9 @@ class P2PRouterL1 extends P2PRouterL0 {
 
   @override
   void stop() {
+    for (final c in _ackCompleters.values) {
+      c.complete(0);
+    }
     _ackCompleters.clear();
     super.stop();
   }
@@ -42,17 +45,10 @@ class P2PRouterL1 extends P2PRouterL0 {
   Future<P2PPacket?> onMessage(final P2PPacket packet) async {
     // exit if parent done all needed work
     if (await super.onMessage(packet) == null) return null;
-    // drop duplicate
-    for (final r in routes.values) {
-      if (r.lastPacketHeader == packet.header) return null;
-    }
     // check and remove signature, decrypt if not empty
-    final message = await crypto.unseal(packet.datagram, packet.header);
-    // remember header to prevent duplicates processing
-    routes[message.srcPeerId]?.lastPacketHeader = packet.header;
+    packet.message = await crypto.unseal(packet.datagram, packet.header);
     // exit if message is ack for mine message
-    if (_processAck(message, packet.srcFullAddress)) return null;
-    packet.message = message;
+    if (_processAck(packet.message!, packet.srcFullAddress)) return null;
     return packet;
   }
 
@@ -155,12 +151,7 @@ class P2PRouterL1 extends P2PRouterL0 {
             srcPeerId: selfId,
             dstPeerId: message.srcPeerId,
           ).toBytes())
-          .then(
-            (datagram) => sendDatagram(
-              addresses: [srcAddress],
-              datagram: datagram,
-            ),
-          );
+          .then((d) => sendDatagram(addresses: [srcAddress], datagram: d));
     }
     return false;
   }
