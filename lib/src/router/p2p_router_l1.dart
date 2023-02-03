@@ -7,7 +7,7 @@ part of 'router.dart';
 class P2PRouterL1 extends P2PRouterL0 {
   var retryPeriod = P2PRouterBase.defaultPeriod;
 
-  final _ackCompleters = <int, Completer<int>>{};
+  final _ackCompleters = <int, Completer<void>>{};
 
   P2PRouterL1({
     super.crypto,
@@ -41,8 +41,8 @@ class P2PRouterL1 extends P2PRouterL0 {
   @override
   void stop() {
     for (final c in _ackCompleters.values) {
-      c.complete(0);
-      // c.completeError(TimeoutException('Router has been stopped'));
+      // c.complete();
+      c.completeError(TimeoutException('Router has been stopped'));
     }
     _ackCompleters.clear();
     super.stop();
@@ -105,14 +105,13 @@ class P2PRouterL1 extends P2PRouterL0 {
     return header;
   }
 
-  // TBD: make as Future<void>
-  Future<int> sendDatagramConfirmable({
+  Future<void> sendDatagramConfirmable({
     required final int messageId,
     required final Uint8List datagram,
     required final Iterable<P2PFullAddress> addresses,
     final Duration? ackTimeout,
   }) {
-    final completer = Completer<int>();
+    final completer = Completer<void>();
     _ackCompleters[messageId] = completer;
     _sendAndRetry(
       datagram: datagram,
@@ -146,9 +145,7 @@ class P2PRouterL1 extends P2PRouterL0 {
   // TBD: remove
   bool _processAck(final P2PMessage message, final P2PFullAddress srcAddress) {
     if (message.header.messageType == P2PPacketType.confirmation) {
-      _ackCompleters
-          .remove(message.header.id)
-          ?.complete(message.payload.length);
+      _ackCompleters.remove(message.header.id)?.complete();
       return true;
     }
     if (message.header.messageType == P2PPacketType.confirmable) {

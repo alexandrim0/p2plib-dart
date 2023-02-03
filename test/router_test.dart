@@ -347,13 +347,13 @@ main() async {
           dstPeerId: bobRouter.selfId,
         ).toBytes());
 
-        expect(
-          await aliceRouter.sendDatagramConfirmable(
+        await expectLater(
+          aliceRouter.sendDatagramConfirmable(
             messageId: header.id,
             datagram: datagram,
             addresses: [proxyAddress],
           ),
-          0,
+          completes,
         );
 
         final header2 = P2PPacketHeader(
@@ -367,8 +367,8 @@ main() async {
         ).toBytes());
         datagram2[0] = 2;
 
-        expect(
-          () async => await aliceRouter.sendDatagramConfirmable(
+        await expectLater(
+          aliceRouter.sendDatagramConfirmable(
             messageId: header2.id,
             datagram: datagram2,
             addresses: [proxyAddress],
