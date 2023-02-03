@@ -1,10 +1,10 @@
 part of 'router.dart';
 
-/// This layer do enhanced protocol features like confirmation and keepalive
-/// It can send and process messages, so can be used as advanced relay node
-class P2PRouterL1 extends P2PRouterL0 {
-  final Duration keepalivePeriod;
+/// This layer do enhanced protocol features like confirmation and keepalive.
+/// It can send and process messages, so can be used as advanced relay node.
+/// Also it can be an base class for poor client.
 
+class P2PRouterL1 extends P2PRouterL0 {
   var retryPeriod = P2PRouterBase.defaultPeriod;
 
   final _ackCompleters = <int, Completer<int>>{};
@@ -12,8 +12,8 @@ class P2PRouterL1 extends P2PRouterL0 {
   P2PRouterL1({
     super.crypto,
     super.transports,
+    super.keepalivePeriod,
     super.logger,
-    this.keepalivePeriod = const Duration(seconds: 15),
   });
 
   Iterable<P2PFullAddress> get selfAddresses =>
@@ -26,12 +26,12 @@ class P2PRouterL1 extends P2PRouterL0 {
     Timer.periodic(
       keepalivePeriod,
       (_) {
-        if (isNotRun) return;
-        if (routes.isEmpty) return;
+        if (isNotRun || routes.isEmpty) return;
         for (final route in routes.values) {
           final addresses = route.addresses.keys.where((a) => a.isNotLocal);
-          if (addresses.isEmpty) continue;
-          sendMessage(dstPeerId: route.peerId, useAddresses: addresses);
+          if (addresses.isNotEmpty) {
+            sendMessage(dstPeerId: route.peerId, useAddresses: addresses);
+          }
         }
       },
     );
@@ -143,7 +143,7 @@ class P2PRouterL1 extends P2PRouterL0 {
     }
   }
 
-  /// returns true if message is processed
+  // TBD: remove
   bool _processAck(final P2PMessage message, final P2PFullAddress srcAddress) {
     if (message.header.messageType == P2PPacketType.confirmation) {
       _ackCompleters

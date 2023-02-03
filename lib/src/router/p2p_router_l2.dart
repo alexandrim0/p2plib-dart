@@ -1,6 +1,7 @@
 part of 'router.dart';
 
 /// Enhanced router with more high level API for building rich client
+
 class P2PRouterL2 extends P2PRouterL1 {
   final _messageController = StreamController<P2PMessage>();
   final _lastSeenController =
@@ -9,8 +10,8 @@ class P2PRouterL2 extends P2PRouterL1 {
   P2PRouterL2({
     super.crypto,
     super.transports,
-    super.logger,
     super.keepalivePeriod,
+    super.logger,
   }) {
     // More convenient for endpoint client
     preserveLocalAddress = true;
@@ -45,11 +46,11 @@ class P2PRouterL2 extends P2PRouterL1 {
   void addPeerAddress({
     required final P2PPeerId peerId,
     required final P2PFullAddress address,
-    bool? canForward,
+    final bool? canForward,
     int? timestamp,
   }) {
     if (peerId == selfId) return;
-    timestamp ??= DateTime.now().millisecondsSinceEpoch;
+    timestamp ??= _now;
     if (routes.containsKey(peerId)) {
       routes[peerId]!.addAddress(
         address: address,
@@ -69,12 +70,11 @@ class P2PRouterL2 extends P2PRouterL1 {
   void addPeerAddresses({
     required final P2PPeerId peerId,
     required final Iterable<P2PFullAddress> addresses,
-    bool? canForward,
+    final bool? canForward,
     int? timestamp,
   }) {
-    if (addresses.isEmpty) return;
-    if (peerId == selfId) return;
-    timestamp ??= DateTime.now().millisecondsSinceEpoch;
+    if (addresses.isEmpty || peerId == selfId) return;
+    timestamp ??= _now;
     if (routes.containsKey(peerId)) {
       routes[peerId]!.addAddresses(
         addresses: addresses,
@@ -89,12 +89,6 @@ class P2PRouterL2 extends P2PRouterL1 {
       );
     }
   }
-
-  P2PRoute? forgetPeerId(final P2PPeerId peerId) => routes.remove(peerId);
-
-  bool getPeerStatus(final P2PPeerId peerId) =>
-      (routes[peerId]?.lastSeen ?? 0) + requestTimeout.inMilliseconds >
-      DateTime.now().millisecondsSinceEpoch;
 
   Future<bool> pingPeer(final P2PPeerId peerId) async {
     try {

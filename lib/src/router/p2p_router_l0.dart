@@ -2,24 +2,25 @@ part of 'router.dart';
 
 /// This layer should be fast as possible and can be used as relay only node.
 /// It can recieve, send and forward datagrams
+
 class P2PRouterL0 extends P2PRouterBase {
-  P2PRouterL0({super.crypto, super.transports, super.logger});
+  P2PRouterL0({
+    super.crypto,
+    super.transports,
+    super.keepalivePeriod,
+    super.logger,
+  });
 
   @override
   Future<P2PCryptoKeys> init([final P2PCryptoKeys? keys]) async {
     final cryptoKeys = await super.init(keys);
     // remove stale records
     Timer.periodic(
-      peerAddressTTL,
+      keepalivePeriod,
       (_) {
-        if (isNotRun) return;
-        if (routes.isEmpty) return;
-        final staleAt = DateTime.now()
-            .subtract(peerAddressTTL)
-            .add(const Duration(milliseconds: 100))
-            .millisecondsSinceEpoch;
+        if (isNotRun || routes.isEmpty) return;
         routes.forEach((_, r) => r.removeStaleAddresses(
-              staleAt: staleAt,
+              staleAt: _now - peerAddressTTL.inMilliseconds,
               preserveLocal: preserveLocalAddress,
             ));
         final routesCount = routes.length;
@@ -37,11 +38,11 @@ class P2PRouterL0 extends P2PRouterBase {
     // check minimal datagram length
     if (packet.datagram.length < P2PMessage.minimalLength) return null;
 
-    // check if message is stale
     final now = _now;
+    // check if message is stale
     final delta = requestTimeout.inMilliseconds;
-    if (packet.header.issuedAt < _now - delta ||
-        packet.header.issuedAt > _now + delta) return null;
+    if (packet.header.issuedAt < now - delta ||
+        packet.header.issuedAt > now + delta) return null;
 
     packet.srcPeerId = P2PMessage.getSrcPeerId(packet.datagram);
     // drop echo message

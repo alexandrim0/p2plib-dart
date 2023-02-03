@@ -1,6 +1,8 @@
 part of 'router.dart';
 
 /// Interface class with base functions such as init(), start(), stop()
+/// Also it keeps Routes and can manipulate with them
+
 abstract class P2PRouterBase {
   static const defaultPort = 2022;
   static const defaultPeriod = Duration(seconds: 1);
@@ -9,6 +11,7 @@ abstract class P2PRouterBase {
 
   final Map<P2PPeerId, P2PRoute> routes = {};
   final Iterable<P2PTransportBase> transports;
+  final Duration keepalivePeriod;
   final P2PCrypto crypto;
 
   var transportTTL = defaultTimeout.inSeconds;
@@ -28,6 +31,7 @@ abstract class P2PRouterBase {
   P2PRouterBase({
     final P2PCrypto? crypto,
     final Iterable<P2PTransportBase>? transports,
+    this.keepalivePeriod = const Duration(seconds: 15),
     this.logger,
   })  : crypto = crypto ?? P2PCrypto(),
         transports = transports ??
@@ -48,7 +52,9 @@ abstract class P2PRouterBase {
 
   bool get isRun => _isRun;
   bool get isNotRun => !_isRun;
+
   P2PPeerId get selfId => _selfId;
+
   int get _now => DateTime.now().millisecondsSinceEpoch;
 
   Future<P2PCryptoKeys> init([final P2PCryptoKeys? keys]) async {
@@ -81,6 +87,9 @@ abstract class P2PRouterBase {
     }
   }
 
+  /// returns null if message is processed and children have to return
+  Future<P2PPacket?> onMessage(final P2PPacket packet);
+
   void sendDatagram({
     required final Iterable<P2PFullAddress> addresses,
     required final Uint8List datagram,
@@ -89,6 +98,14 @@ abstract class P2PRouterBase {
       t.send(addresses, datagram);
     }
   }
+
+  // TBD
+  void addRoute(final P2PRoute route) {}
+
+  P2PRoute? removeRoute(final P2PPeerId peerId) => routes.remove(peerId);
+
+  bool getPeerStatus(final P2PPeerId peerId) =>
+      (routes[peerId]?.lastSeen ?? 0) + requestTimeout.inMilliseconds > _now;
 
   /// Returns cached addresses or who can forward
   Iterable<P2PFullAddress> resolvePeerId(final P2PPeerId peerId) {
@@ -106,9 +123,6 @@ abstract class P2PRouterBase {
       );
     }
   }
-
-  /// returns null if message is processed and children have to return
-  Future<P2PPacket?> onMessage(final P2PPacket packet);
 
   void _log(Object message) => logger?.call(message.toString());
 }
