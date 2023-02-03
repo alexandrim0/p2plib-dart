@@ -80,10 +80,14 @@ main() async {
           subscription.onData((message) {
             completer.complete(token == P2PToken(value: message.payload));
           });
-          await aliceRouter.sendMessage(
-            isConfirmable: true,
-            dstPeerId: bobRouter.selfId,
-            payload: token.value,
+
+          await expectLater(
+            aliceRouter.sendMessage(
+              isConfirmable: true,
+              dstPeerId: bobRouter.selfId,
+              payload: token.value,
+            ),
+            completes,
           );
           expect(completer.isCompleted || await completer.future, true);
         },
@@ -179,7 +183,7 @@ main() async {
           aliceRouter.routes[proxyPeerId] = getProxyRoute();
           await aliceRouter.start();
           expect(
-            () async => await aliceRouter.sendMessage(
+            aliceRouter.sendMessage(
               isConfirmable: true,
               dstPeerId: randomPeerId,
             ),
@@ -224,17 +228,21 @@ main() async {
           await aliceRouter.sendMessage(dstPeerId: proxyPeerId);
           await Future.delayed(initTime);
           await bobRouter.sendMessage(dstPeerId: proxyPeerId);
+          await Future.delayed(initTime);
 
           final completer = Completer<bool>();
           subscription.onData((message) {
             completer.complete(token == P2PToken(value: message.payload));
           });
-          await aliceRouter.sendMessage(
-            isConfirmable: true,
-            dstPeerId: bobRouter.selfId,
-            payload: token.value,
-          );
 
+          await expectLater(
+            aliceRouter.sendMessage(
+              isConfirmable: true,
+              dstPeerId: bobRouter.selfId,
+              payload: token.value,
+            ),
+            completes,
+          );
           expect(completer.isCompleted || await completer.future, true);
         },
         timeout: Timeout(testTimeout),
