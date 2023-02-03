@@ -41,8 +41,7 @@ class P2PRouterL1 extends P2PRouterL0 {
   @override
   void stop() {
     for (final c in _ackCompleters.values) {
-      // c.complete();
-      c.completeError(TimeoutException('Router has been stopped'));
+      c.completeError(const P2PExceptionRouterIsNotRunning());
     }
     _ackCompleters.clear();
     super.stop();
@@ -57,8 +56,27 @@ class P2PRouterL1 extends P2PRouterL0 {
     // check and remove signature, decrypt if not empty
     packet.message = await crypto.unseal(packet.datagram);
 
-    // exit if message is ack for mine message
-    if (_processAck(packet.message!, packet.srcFullAddress)) return null;
+    // exit if message is confirmation of mine message
+    if (packet.header.messageType == P2PPacketType.confirmation) {
+      _ackCompleters.remove(packet.header.id)?.complete();
+      return null;
+    }
+
+    // send confirmation if required
+    if (packet.header.messageType == P2PPacketType.confirmable) {
+      crypto
+          .sign(P2PMessage(
+            header: packet.header.copyWith(
+              messageType: P2PPacketType.confirmation,
+            ),
+            srcPeerId: selfId,
+            dstPeerId: packet.srcPeerId!,
+          ).toBytes())
+          .then((d) => sendDatagram(
+                addresses: [packet.srcFullAddress],
+                datagram: d,
+              ));
+    }
 
     return packet;
   }
@@ -140,25 +158,5 @@ class P2PRouterL1 extends P2PRouterL0 {
         ),
       );
     }
-  }
-
-  // TBD: remove
-  bool _processAck(final P2PMessage message, final P2PFullAddress srcAddress) {
-    if (message.header.messageType == P2PPacketType.confirmation) {
-      _ackCompleters.remove(message.header.id)?.complete();
-      return true;
-    }
-    if (message.header.messageType == P2PPacketType.confirmable) {
-      crypto
-          .sign(P2PMessage(
-            header: message.header.copyWith(
-              messageType: P2PPacketType.confirmation,
-            ),
-            srcPeerId: selfId,
-            dstPeerId: message.srcPeerId,
-          ).toBytes())
-          .then((d) => sendDatagram(addresses: [srcAddress], datagram: d));
-    }
-    return false;
   }
 }
