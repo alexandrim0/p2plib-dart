@@ -6,29 +6,38 @@ class P2PRouterL2 extends P2PRouterL1 {
   final _lastSeenController =
       StreamController<MapEntry<P2PPeerId, bool>>.broadcast();
 
-  Stream<P2PMessage> get messageStream => _messageController.stream;
-
-  Stream<MapEntry<P2PPeerId, bool>> get lastSeenStream =>
-      _lastSeenController.stream;
-
-  P2PRouterL2({super.crypto, super.transports, super.logger}) {
+  P2PRouterL2({
+    super.crypto,
+    super.transports,
+    super.logger,
+    super.keepalivePeriod,
+  }) {
     // More convenient for endpoint client
     preserveLocalAddress = true;
     maxStoredHeaders = 10;
   }
+
+  Stream<P2PMessage> get messageStream => _messageController.stream;
+
+  Stream<MapEntry<P2PPeerId, bool>> get lastSeenStream =>
+      _lastSeenController.stream;
 
   /// returns null if message is processed and children have to return
   @override
   Future<P2PPacket?> onMessage(final P2PPacket packet) async {
     // exit if parent done all needed work
     if (await super.onMessage(packet) == null) return null;
+
     // update peer status
     _lastSeenController
         .add(MapEntry<P2PPeerId, bool>(packet.message!.srcPeerId, true));
+
     // drop empty messages (keepalive)
     if (packet.message!.isEmpty) return null;
+
     // message is for user, send it to subscriber
     if (_messageController.hasListener) _messageController.add(packet.message!);
+
     return packet;
   }
 

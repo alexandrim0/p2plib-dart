@@ -3,14 +3,6 @@ part of 'router.dart';
 /// This layer should be fast as possible and can be used as relay only node.
 /// It can recieve, send and forward datagrams
 class P2PRouterL0 extends P2PRouterBase {
-  var keepalivePeriod = P2PRouterBase.defaultAddressTTL ~/ 2;
-  var peerAddressTTL = P2PRouterBase.defaultAddressTTL;
-  var requestTimeout = P2PRouterBase.defaultTimeout;
-  var preserveLocalAddress = false; // More efficient for relay node
-  var useForwardersCount = 2;
-  var maxForwardsCount = 1;
-  var maxStoredHeaders = 0;
-
   P2PRouterL0({super.crypto, super.transports, super.logger});
 
   @override
@@ -45,10 +37,11 @@ class P2PRouterL0 extends P2PRouterBase {
     // check minimal datagram length
     if (packet.datagram.length < P2PMessage.minimalLength) return null;
 
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final staleAt = now - requestTimeout.inMilliseconds;
     // check if message is stale
-    if (packet.header.issuedAt < staleAt) return null;
+    final now = _now;
+    final delta = requestTimeout.inMilliseconds;
+    if (packet.header.issuedAt < _now - delta ||
+        packet.header.issuedAt > _now + delta) return null;
 
     packet.srcPeerId = P2PMessage.getSrcPeerId(packet.datagram);
     // drop echo message
@@ -118,22 +111,5 @@ class P2PRouterL0 extends P2PRouterBase {
       );
     }
     return null;
-  }
-
-  /// Returns cached addresses or who can forward
-  Iterable<P2PFullAddress> resolvePeerId(final P2PPeerId peerId) {
-    final route = routes[peerId];
-    if (route == null || route.isEmpty) {
-      final result = <P2PFullAddress>{};
-      for (final a in routes.values.where((e) => e.canForward)) {
-        result.addAll(a.addresses.keys);
-      }
-      return result.take(useForwardersCount);
-    } else {
-      return route.getActualAddresses(
-        staleAt: DateTime.now().subtract(peerAddressTTL).millisecondsSinceEpoch,
-        preserveLocal: preserveLocalAddress,
-      );
-    }
   }
 }

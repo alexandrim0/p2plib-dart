@@ -1,16 +1,23 @@
 part of 'router.dart';
 
-/// This layer do enhanced protocol features like ack, dedup and keepalive
+/// This layer do enhanced protocol features like confirmation and keepalive
 /// It can send and process messages, so can be used as advanced relay node
 class P2PRouterL1 extends P2PRouterL0 {
-  final _ackCompleters = <int, Completer<int>>{};
+  final Duration keepalivePeriod;
 
   var retryPeriod = P2PRouterBase.defaultPeriod;
 
+  final _ackCompleters = <int, Completer<int>>{};
+
+  P2PRouterL1({
+    super.crypto,
+    super.transports,
+    super.logger,
+    this.keepalivePeriod = const Duration(seconds: 15),
+  });
+
   Iterable<P2PFullAddress> get selfAddresses =>
       transports.map((t) => t.fullAddress);
-
-  P2PRouterL1({super.crypto, super.transports, super.logger});
 
   @override
   Future<P2PCryptoKeys> init([P2PCryptoKeys? keys]) async {
@@ -35,6 +42,7 @@ class P2PRouterL1 extends P2PRouterL0 {
   void stop() {
     for (final c in _ackCompleters.values) {
       c.complete(0);
+      // c.completeError(TimeoutException('Router has been stopped'));
     }
     _ackCompleters.clear();
     super.stop();
@@ -45,10 +53,13 @@ class P2PRouterL1 extends P2PRouterL0 {
   Future<P2PPacket?> onMessage(final P2PPacket packet) async {
     // exit if parent done all needed work
     if (await super.onMessage(packet) == null) return null;
+
     // check and remove signature, decrypt if not empty
     packet.message = await crypto.unseal(packet.datagram);
+
     // exit if message is ack for mine message
     if (_processAck(packet.message!, packet.srcFullAddress)) return null;
+
     return packet;
   }
 
@@ -108,13 +119,9 @@ class P2PRouterL1 extends P2PRouterL0 {
       messageId: messageId,
       addresses: addresses,
     );
-    return completer.future.timeout(
-      ackTimeout ?? requestTimeout,
-      onTimeout: () {
-        if (_ackCompleters.remove(messageId) == null) return messageId;
-        throw TimeoutException('Confirmation timeout');
-      },
-    );
+    return completer.future
+        .timeout(ackTimeout ?? requestTimeout)
+        .whenComplete(() => _ackCompleters.remove(messageId));
   }
 
   void _sendAndRetry({
