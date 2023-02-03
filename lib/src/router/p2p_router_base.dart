@@ -55,7 +55,7 @@ abstract class P2PRouterBase {
   Future<void> start() async {
     if (_isRun) return;
     if (transports.isEmpty) {
-      throw Exception('Need at least one P2PTransport!');
+      throw P2PExceptionTransport('Need at least one P2PTransport!');
     }
     for (final t in transports) {
       t.ttl = transportTTL;

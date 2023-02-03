@@ -24,14 +24,24 @@ main() async {
     'Without bootstrap server',
     () {
       test(
-        'Send packet to unknown host',
+        'Send on router stopped',
         () {
           expect(
-            () async => await bobRouter.sendMessage(
-              isConfirmable: true,
-              dstPeerId: randomPeerId,
-            ),
-            throwsA(isA<Exception>()),
+            bobRouter.sendMessage(dstPeerId: randomPeerId),
+            throwsA(isA<P2PExceptionRouterIsNotRunning>()),
+          );
+        },
+        timeout: Timeout(testTimeout),
+      );
+
+      test(
+        'Send packet to unknown host',
+        () async {
+          await bobRouter.start();
+
+          await expectLater(
+            () => bobRouter.sendMessage(dstPeerId: randomPeerId),
+            throwsA(isA<P2PExceptionRouterUnknownRoute>()),
           );
         },
         timeout: Timeout(testTimeout),

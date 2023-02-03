@@ -61,10 +61,12 @@ class P2PRouterL1 extends P2PRouterL0 {
     final Duration? ackTimeout,
     final Iterable<P2PFullAddress>? useAddresses,
   }) async {
-    if (isNotRun) throw Exception('P2PRouter is not running!');
+    if (isNotRun) throw const P2PExceptionRouterIsNotRunning();
 
     final addresses = useAddresses ?? resolvePeerId(dstPeerId);
-    if (addresses.isEmpty) throw Exception('Unknown route to $dstPeerId. ');
+    if (addresses.isEmpty) {
+      throw P2PExceptionRouterUnknownRoute(dstPeerId);
+    }
 
     final header = P2PPacketHeader(
       messageType:
@@ -110,7 +112,7 @@ class P2PRouterL1 extends P2PRouterL0 {
       ackTimeout ?? requestTimeout,
       onTimeout: () {
         if (_ackCompleters.remove(messageId) == null) return messageId;
-        throw TimeoutException('Ack timeout');
+        throw TimeoutException('Confirmation timeout');
       },
     );
   }

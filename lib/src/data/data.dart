@@ -12,6 +12,7 @@ part 'p2p_crypto.dart';
 part 'p2p_peer_id.dart';
 part 'p2p_message.dart';
 part 'p2p_packet.dart';
+part 'p2p_exception.dart';
 part 'p2p_full_address.dart';
 part 'p2p_message_header.dart';
 
