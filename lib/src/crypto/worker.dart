@@ -111,21 +111,6 @@ void cryptoWorker(final P2PCryptoTask initialTask) async {
             }
             break;
 
-          case P2PCryptoTaskType.encrypt:
-            task.payload = box.seal(
-              message: task.payload as Uint8List,
-              publicKey: task.extra as Uint8List,
-            );
-            break;
-
-          case P2PCryptoTaskType.decrypt:
-            task.payload = box.sealOpen(
-              cipherText: task.payload as Uint8List,
-              publicKey: encKeyPair.publicKey,
-              secretKey: encKeyPair.secretKey,
-            );
-            break;
-
           case P2PCryptoTaskType.sign:
             final message = task.payload as Uint8List;
             final signature = sign.detached(

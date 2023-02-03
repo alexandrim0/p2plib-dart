@@ -40,19 +40,6 @@ main() async {
       );
 
       test(
-        'P2PCrypto encrypt/decrypt',
-        () async {
-          final encryptedData = await crypto.encrypt(
-            encPublicKey,
-            randomPayload,
-          );
-          final decryptedData = await crypto.decrypt(encryptedData);
-          expect(
-              P2PToken(value: randomPayload), P2PToken(value: decryptedData));
-        },
-      );
-
-      test(
         'P2PCrypto sign/unsign',
         () async {
           final signedData = await crypto.sign(randomPayload);
@@ -75,19 +62,6 @@ main() async {
           final m = message.copyWith(payload: randomPayload);
           for (var i = 0; i < stressCount; i++) {
             await crypto.unseal(await crypto.seal(m));
-          }
-        },
-        timeout: Timeout(Duration(minutes: 1)),
-      );
-
-      test(
-        'P2PCrypto stress test: encrypt/decrypt',
-        () async {
-          for (var i = 0; i < stressCount; i++) {
-            await crypto.decrypt(await crypto.encrypt(
-              encPublicKey,
-              randomPayload,
-            ));
           }
         },
         timeout: Timeout(Duration(minutes: 1)),

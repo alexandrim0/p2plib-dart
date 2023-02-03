@@ -3,8 +3,6 @@ part of 'data.dart';
 enum P2PCryptoTaskType {
   seal,
   unseal,
-  encrypt,
-  decrypt,
   sign,
   openSigned,
 }
