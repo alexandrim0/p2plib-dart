@@ -3,7 +3,9 @@ part of 'data.dart';
 /// 16 bytes - message header
 /// 64 bytes - source PeerId
 /// 64 bytes - destination PeerId
-/// >=64 bytes - payload with signature
+/// 0 | >48 bytes - encrypted payload
+/// 64 bytes - signature
+
 class P2PMessage {
   static const protocolNumber = 0;
   static const sealLength = 48;
@@ -57,20 +59,12 @@ class P2PMessage {
     final Uint8List? payload,
   }) : payload = payload ?? emptyUint8List;
 
-  factory P2PMessage.fromBytes(
-    final Uint8List datagram, [
-    final P2PPacketHeader? header,
-  ]) {
-    if (datagram.length < headerLength) {
-      throw const FormatException('Header length is wrong!');
-    }
-    return P2PMessage(
-      header: header ?? P2PPacketHeader.fromBytes(datagram),
-      srcPeerId: getSrcPeerId(datagram),
-      dstPeerId: getDstPeerId(datagram),
-      payload: datagram.sublist(headerLength),
-    );
-  }
+  factory P2PMessage.fromBytes(final Uint8List datagram) => P2PMessage(
+        header: P2PPacketHeader.fromBytes(datagram),
+        srcPeerId: getSrcPeerId(datagram),
+        dstPeerId: getDstPeerId(datagram),
+        payload: datagram.sublist(headerLength),
+      );
 
   Uint8List toBytes() {
     final bytesBuilder = BytesBuilder(copy: false)

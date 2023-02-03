@@ -6,6 +6,7 @@ enum P2PPacketType { regular, confirmable, confirmation }
 /// 1 byte - packet type
 /// 6 bytes - issuedAt (unix timestamp with ms)
 /// 8 bytes - message id (int)
+
 class P2PPacketHeader {
   static const length = 16;
 

@@ -46,7 +46,7 @@ class P2PRouterL1 extends P2PRouterL0 {
     // exit if parent done all needed work
     if (await super.onMessage(packet) == null) return null;
     // check and remove signature, decrypt if not empty
-    packet.message = await crypto.unseal(packet.datagram, packet.header);
+    packet.message = await crypto.unseal(packet.datagram);
     // exit if message is ack for mine message
     if (_processAck(packet.message!, packet.srcFullAddress)) return null;
     return packet;

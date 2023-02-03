@@ -64,10 +64,7 @@ class P2PCrypto {
     }
   }
 
-  Future<P2PMessage> unseal(
-    final Uint8List datagram, [
-    final P2PPacketHeader? header,
-  ]) async {
+  Future<P2PMessage> unseal(final Uint8List datagram) async {
     final id = _idCounter++;
     final completer = Completer<P2PCryptoTask>();
     _completers[id] = completer;
@@ -75,7 +72,6 @@ class P2PCrypto {
       id: id,
       type: P2PCryptoTaskType.unseal,
       payload: datagram,
-      extra: header,
     ));
     try {
       final result = await completer.future.timeout(operationTimeout);

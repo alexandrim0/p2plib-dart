@@ -89,10 +89,7 @@ void cryptoWorker(final P2PCryptoTask initialTask) async {
               0,
               datagram.length - P2PMessage.signatureLength,
             );
-            final message = P2PMessage.fromBytes(
-              unsignedDatagram,
-              task.extra as P2PPacketHeader?,
-            );
+            final message = P2PMessage.fromBytes(unsignedDatagram);
             if (sign.verifyDetached(
               message: unsignedDatagram,
               signature: datagram.sublist(unsignedDatagram.length),
