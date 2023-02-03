@@ -29,29 +29,29 @@ class P2PCrypto {
 
   /// Will create key pair if seed is not empty else use key pair
   Future<P2PCryptoKeys> init([P2PCryptoKeys? keys]) async {
+    final id = _idCounter++;
     await Isolate.spawn<P2PCryptoTask>(
       cryptoWorker,
       P2PCryptoTask(
-        id: _idCounter,
+        id: id,
         type: P2PCryptoTaskType.sign, // does not matter for initial task
         payload: _recievePort.sendPort,
         extra: keys,
       ),
     );
-    final initResult =
-        await _completers[_idCounter]!.future.timeout(operationTimeout);
+    final initResult = await _completers[id]!.future.timeout(operationTimeout);
     _sendPort = initResult.payload as SendPort;
     cryptoKeys = initResult.extra as P2PCryptoKeys;
-    _completers.remove(_idCounter);
+    _completers.remove(id);
     return cryptoKeys;
   }
 
   Future<Uint8List> seal(final P2PMessage message) async {
-    _idCounter++;
+    final id = _idCounter++;
     final completer = Completer<P2PCryptoTask>();
-    _completers[_idCounter] = completer;
+    _completers[id] = completer;
     _sendPort.send(P2PCryptoTask(
-      id: _idCounter,
+      id: id,
       type: P2PCryptoTaskType.seal,
       payload: message,
     ));
@@ -60,7 +60,7 @@ class P2PCrypto {
       if (result.payload is Uint8List) return result.payload as Uint8List;
       throw result.payload;
     } finally {
-      _completers.remove(_idCounter);
+      _completers.remove(id);
     }
   }
 
@@ -68,11 +68,11 @@ class P2PCrypto {
     final Uint8List datagram, [
     final P2PPacketHeader? header,
   ]) async {
-    _idCounter++;
+    final id = _idCounter++;
     final completer = Completer<P2PCryptoTask>();
-    _completers[_idCounter] = completer;
+    _completers[id] = completer;
     _sendPort.send(P2PCryptoTask(
-      id: _idCounter,
+      id: id,
       type: P2PCryptoTaskType.unseal,
       payload: datagram,
       extra: header,
@@ -82,7 +82,7 @@ class P2PCrypto {
       if (result.payload is P2PMessage) return result.payload as P2PMessage;
       throw result.payload;
     } finally {
-      _completers.remove(_idCounter);
+      _completers.remove(id);
     }
   }
 
@@ -90,11 +90,11 @@ class P2PCrypto {
     final Uint8List pubKey,
     final Uint8List data,
   ) async {
-    _idCounter++;
+    final id = _idCounter++;
     final completer = Completer<P2PCryptoTask>();
-    _completers[_idCounter] = completer;
+    _completers[id] = completer;
     _sendPort.send(P2PCryptoTask(
-      id: _idCounter,
+      id: id,
       type: P2PCryptoTaskType.encrypt,
       payload: data,
       extra: pubKey,
@@ -104,16 +104,16 @@ class P2PCrypto {
       if (result.payload is Uint8List) return result.payload as Uint8List;
       throw result.payload;
     } finally {
-      _completers.remove(_idCounter);
+      _completers.remove(id);
     }
   }
 
   Future<Uint8List> decrypt(final Uint8List data) async {
-    _idCounter++;
+    final id = _idCounter++;
     final completer = Completer<P2PCryptoTask>();
-    _completers[_idCounter] = completer;
+    _completers[id] = completer;
     _sendPort.send(P2PCryptoTask(
-      id: _idCounter,
+      id: id,
       type: P2PCryptoTaskType.decrypt,
       payload: data,
     ));
@@ -122,16 +122,16 @@ class P2PCrypto {
       if (result.payload is Uint8List) return result.payload as Uint8List;
       throw result.payload;
     } finally {
-      _completers.remove(_idCounter);
+      _completers.remove(id);
     }
   }
 
   Future<Uint8List> sign(final Uint8List data) async {
-    _idCounter++;
+    final id = _idCounter++;
     final completer = Completer<P2PCryptoTask>();
-    _completers[_idCounter] = completer;
+    _completers[id] = completer;
     _sendPort.send(P2PCryptoTask(
-      id: _idCounter,
+      id: id,
       type: P2PCryptoTaskType.sign,
       payload: data,
     ));
@@ -140,7 +140,7 @@ class P2PCrypto {
       if (result.payload is Uint8List) return result.payload as Uint8List;
       throw result.payload;
     } finally {
-      _completers.remove(_idCounter);
+      _completers.remove(id);
     }
   }
 
@@ -148,11 +148,11 @@ class P2PCrypto {
     final Uint8List pubKey,
     final Uint8List data,
   ) async {
-    _idCounter++;
+    final id = _idCounter++;
     final completer = Completer<P2PCryptoTask>();
-    _completers[_idCounter] = completer;
+    _completers[id] = completer;
     _sendPort.send(P2PCryptoTask(
-      id: _idCounter,
+      id: id,
       type: P2PCryptoTaskType.openSigned,
       payload: data,
       extra: pubKey,
@@ -162,7 +162,7 @@ class P2PCrypto {
       if (result.payload is Uint8List) return result.payload as Uint8List;
       throw result.payload;
     } finally {
-      _completers.remove(_idCounter);
+      _completers.remove(id);
     }
   }
 }
