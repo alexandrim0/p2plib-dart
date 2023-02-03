@@ -55,12 +55,12 @@ class P2PCrypto {
       type: P2PCryptoTaskType.seal,
       payload: message,
     ));
-    final result = await completer.future.timeout(operationTimeout);
-    _completers.remove(_idCounter);
-    if (result.payload is Uint8List) {
-      return result.payload as Uint8List;
-    } else {
+    try {
+      final result = await completer.future.timeout(operationTimeout);
+      if (result.payload is Uint8List) return result.payload as Uint8List;
       throw result.payload;
+    } finally {
+      _completers.remove(_idCounter);
     }
   }
 
@@ -77,12 +77,12 @@ class P2PCrypto {
       payload: datagram,
       extra: header,
     ));
-    final result = await completer.future.timeout(operationTimeout);
-    _completers.remove(_idCounter);
-    if (result.payload is P2PMessage) {
-      return result.payload as P2PMessage;
-    } else {
+    try {
+      final result = await completer.future.timeout(operationTimeout);
+      if (result.payload is P2PMessage) return result.payload as P2PMessage;
       throw result.payload;
+    } finally {
+      _completers.remove(_idCounter);
     }
   }
 
@@ -99,12 +99,12 @@ class P2PCrypto {
       payload: data,
       extra: pubKey,
     ));
-    final result = await completer.future.timeout(operationTimeout);
-    _completers.remove(_idCounter);
-    if (result.payload is Uint8List) {
-      return result.payload as Uint8List;
-    } else {
+    try {
+      final result = await completer.future.timeout(operationTimeout);
+      if (result.payload is Uint8List) return result.payload as Uint8List;
       throw result.payload;
+    } finally {
+      _completers.remove(_idCounter);
     }
   }
 
@@ -117,12 +117,12 @@ class P2PCrypto {
       type: P2PCryptoTaskType.decrypt,
       payload: data,
     ));
-    final result = await completer.future.timeout(operationTimeout);
-    _completers.remove(_idCounter);
-    if (result.payload is Uint8List) {
-      return result.payload as Uint8List;
-    } else {
+    try {
+      final result = await completer.future.timeout(operationTimeout);
+      if (result.payload is Uint8List) return result.payload as Uint8List;
       throw result.payload;
+    } finally {
+      _completers.remove(_idCounter);
     }
   }
 
@@ -135,12 +135,12 @@ class P2PCrypto {
       type: P2PCryptoTaskType.sign,
       payload: data,
     ));
-    final result = await completer.future.timeout(operationTimeout);
-    _completers.remove(_idCounter);
-    if (result.payload is Uint8List) {
-      return result.payload as Uint8List;
-    } else {
+    try {
+      final result = await completer.future.timeout(operationTimeout);
+      if (result.payload is Uint8List) return result.payload as Uint8List;
       throw result.payload;
+    } finally {
+      _completers.remove(_idCounter);
     }
   }
 
@@ -157,12 +157,12 @@ class P2PCrypto {
       payload: data,
       extra: pubKey,
     ));
-    final result = await completer.future.timeout(operationTimeout);
-    _completers.remove(_idCounter);
-    if (result.payload is Uint8List) {
-      return result.payload as Uint8List;
-    } else {
+    try {
+      final result = await completer.future.timeout(operationTimeout);
+      if (result.payload is Uint8List) return result.payload as Uint8List;
       throw result.payload;
+    } finally {
+      _completers.remove(_idCounter);
     }
   }
 }
