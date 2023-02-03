@@ -56,7 +56,9 @@ void cryptoWorker(final P2PCryptoTask initialTask) async {
 
   receivePort.listen(
     (final task) {
-      task as P2PCryptoTask;
+      if (task is! P2PCryptoTask) {
+        throw const FormatException('Message is not P2PCryptoTask');
+      }
       try {
         switch (task.type) {
           case P2PCryptoTaskType.seal:
@@ -154,8 +156,9 @@ void cryptoWorker(final P2PCryptoTask initialTask) async {
         }
       } catch (e) {
         task.payload = e;
+      } finally {
+        mainIsolatePort.send(task);
       }
-      mainIsolatePort.send(task);
     },
     onDone: () {
       encKeyPair.secretKey.dispose();

@@ -183,7 +183,7 @@ main() async {
               isConfirmable: true,
               dstPeerId: randomPeerId,
             ),
-            throwsA(isA<Exception>()),
+            throwsA(isA<TimeoutException>()),
           );
         },
         timeout: Timeout(testTimeout),
@@ -365,7 +365,7 @@ main() async {
             datagram: datagram2,
             addresses: [proxyAddress],
           ),
-          throwsA(isA<Exception>()),
+          throwsA(isA<TimeoutException>()),
         );
       });
     },

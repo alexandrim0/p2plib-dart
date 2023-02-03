@@ -17,7 +17,13 @@ class P2PCrypto {
 
   P2PCrypto() {
     _recievePort.listen(
-      (message) => _completers.remove(message.id)?.complete(message),
+      (message) {
+        if (message is P2PCryptoTask) {
+          message.payload is Exception
+              ? _completers.remove(message.id)?.completeError(message.payload)
+              : _completers.remove(message.id)?.complete(message);
+        }
+      },
     );
   }
 
