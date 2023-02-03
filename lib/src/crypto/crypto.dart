@@ -13,6 +13,7 @@ class P2PCrypto {
     0: Completer<P2PCryptoTask>(),
   };
   var _idCounter = 0;
+  var operationTimeout = const Duration(seconds: 1);
 
   P2PCrypto() {
     _recievePort.listen(
@@ -31,7 +32,8 @@ class P2PCrypto {
         extra: keys,
       ),
     );
-    final initResult = await _completers[_idCounter]!.future;
+    final initResult =
+        await _completers[_idCounter]!.future.timeout(operationTimeout);
     _sendPort = initResult.payload as SendPort;
     cryptoKeys = initResult.extra as P2PCryptoKeys;
     _completers.remove(_idCounter);
@@ -47,7 +49,7 @@ class P2PCrypto {
       type: P2PCryptoTaskType.seal,
       payload: message,
     ));
-    final result = await completer.future;
+    final result = await completer.future.timeout(operationTimeout);
     _completers.remove(_idCounter);
     if (result.payload is Uint8List) {
       return result.payload as Uint8List;
@@ -69,7 +71,7 @@ class P2PCrypto {
       payload: datagram,
       extra: header,
     ));
-    final result = await completer.future;
+    final result = await completer.future.timeout(operationTimeout);
     _completers.remove(_idCounter);
     if (result.payload is P2PMessage) {
       return result.payload as P2PMessage;
@@ -91,7 +93,7 @@ class P2PCrypto {
       payload: data,
       extra: pubKey,
     ));
-    final result = await completer.future;
+    final result = await completer.future.timeout(operationTimeout);
     _completers.remove(_idCounter);
     if (result.payload is Uint8List) {
       return result.payload as Uint8List;
@@ -109,7 +111,7 @@ class P2PCrypto {
       type: P2PCryptoTaskType.decrypt,
       payload: data,
     ));
-    final result = await completer.future;
+    final result = await completer.future.timeout(operationTimeout);
     _completers.remove(_idCounter);
     if (result.payload is Uint8List) {
       return result.payload as Uint8List;
@@ -127,7 +129,7 @@ class P2PCrypto {
       type: P2PCryptoTaskType.sign,
       payload: data,
     ));
-    final result = await completer.future;
+    final result = await completer.future.timeout(operationTimeout);
     _completers.remove(_idCounter);
     if (result.payload is Uint8List) {
       return result.payload as Uint8List;
@@ -149,7 +151,7 @@ class P2PCrypto {
       payload: data,
       extra: pubKey,
     ));
-    final result = await completer.future;
+    final result = await completer.future.timeout(operationTimeout);
     _completers.remove(_idCounter);
     if (result.payload is Uint8List) {
       return result.payload as Uint8List;
