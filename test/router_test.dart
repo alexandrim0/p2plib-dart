@@ -17,6 +17,8 @@ main() async {
     debugLabel: 'Bob',
   );
   final subscription = bobRouter.messageStream.listen(null);
+  final testTimeout = aliceRouter.requestTimeout * 2;
+  final testTimeoutLong = testTimeout * 2;
 
   group(
     'Without bootstrap server',
@@ -32,6 +34,7 @@ main() async {
             throwsA(isA<Exception>()),
           );
         },
+        timeout: Timeout(testTimeout),
       );
 
       test(
@@ -51,8 +54,8 @@ main() async {
             payload: token.value,
           );
           expect(completer.isCompleted || await completer.future, true);
-          subscription.onData(null);
         },
+        timeout: Timeout(testTimeout),
       );
 
       test(
@@ -73,8 +76,8 @@ main() async {
             payload: token.value,
           );
           expect(completer.isCompleted || await completer.future, true);
-          subscription.onData(null);
         },
+        timeout: Timeout(testTimeout),
       );
 
       test(
@@ -91,6 +94,7 @@ main() async {
           expect(await aliceRouter.pingPeer(bobRouter.selfId), true);
           expect(aliceRouter.getPeerStatus(bobRouter.selfId), true);
         },
+        timeout: Timeout(testTimeout),
       );
 
       test(
@@ -124,6 +128,7 @@ main() async {
           expect(aliceRouter.getPeerStatus(bobRouter.selfId), false);
           await subscription.cancel();
         },
+        timeout: Timeout(testTimeoutLong),
       );
 
       test(
@@ -150,6 +155,7 @@ main() async {
           expect(aliceRouter.getPeerStatus(bobRouter.selfId), false);
           expect(bobRouter.getPeerStatus(aliceRouter.selfId), false);
         },
+        timeout: Timeout(testTimeoutLong),
       );
     },
   );
@@ -170,6 +176,7 @@ main() async {
             throwsA(isA<Exception>()),
           );
         },
+        timeout: Timeout(testTimeout),
       );
 
       test(
@@ -193,8 +200,8 @@ main() async {
           );
 
           expect(completer.isCompleted || await completer.future, true);
-          subscription.onData(null);
         },
+        timeout: Timeout(testTimeout),
       );
 
       test(
@@ -219,8 +226,8 @@ main() async {
           );
 
           expect(completer.isCompleted || await completer.future, true);
-          subscription.onData(null);
         },
+        timeout: Timeout(testTimeout),
       );
 
       test(
@@ -239,6 +246,7 @@ main() async {
           expect(await aliceRouter.pingPeer(bobRouter.selfId), true);
           expect(aliceRouter.getPeerStatus(bobRouter.selfId), true);
         },
+        timeout: Timeout(testTimeout),
       );
 
       test(
@@ -271,6 +279,7 @@ main() async {
           expect(aliceRouter.getPeerStatus(bobRouter.selfId), false);
           await subscription.cancel();
         },
+        timeout: Timeout(testTimeoutLong),
       );
 
       test(
@@ -296,6 +305,7 @@ main() async {
           expect(aliceRouter.getPeerStatus(bobRouter.selfId), false);
           expect(bobRouter.getPeerStatus(aliceRouter.selfId), false);
         },
+        timeout: Timeout(testTimeoutLong),
       );
 
       test('do not forward on limit', () async {
@@ -349,10 +359,12 @@ main() async {
         );
       });
     },
+    timeout: Timeout(testTimeoutLong),
   );
 
   tearDownAll(bootstrap.kill);
   tearDown(() {
+    subscription.onData(null);
     aliceRouter.stop();
     bobRouter.stop();
     aliceRouter.routes.clear();
