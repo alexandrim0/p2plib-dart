@@ -338,8 +338,9 @@ main() async {
         await Future.delayed(initTime);
 
         final header = P2PPacketHeader(
-          id: genRandomInt(),
           messageType: P2PPacketType.confirmable,
+          issuedAt: DateTime.now().millisecondsSinceEpoch,
+          id: genRandomInt(),
         );
         final datagram = await aliceRouter.crypto.sign(P2PMessage(
           header: header,
@@ -357,8 +358,9 @@ main() async {
         );
 
         final header2 = P2PPacketHeader(
-          id: genRandomInt(),
           messageType: P2PPacketType.confirmable,
+          issuedAt: DateTime.now().millisecondsSinceEpoch,
+          id: genRandomInt(),
         );
         final datagram2 = await aliceRouter.crypto.sign(P2PMessage(
           header: header2,

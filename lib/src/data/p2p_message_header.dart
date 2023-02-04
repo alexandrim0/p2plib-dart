@@ -18,12 +18,15 @@ class P2PPacketHeader {
   final P2PPacketType messageType;
   final int forwardsCount, issuedAt, id;
 
+  const P2PPacketHeader({
+    this.forwardsCount = 0,
+    this.messageType = P2PPacketType.regular,
+    required this.issuedAt,
+    required this.id,
+  });
+
   @override
-  int get hashCode => Object.hash(
-        runtimeType,
-        issuedAt,
-        id,
-      );
+  int get hashCode => Object.hash(runtimeType, issuedAt, id);
 
   @override
   bool operator ==(Object other) =>
@@ -31,13 +34,6 @@ class P2PPacketHeader {
       runtimeType == other.runtimeType &&
       issuedAt == other.issuedAt &&
       id == other.id;
-
-  P2PPacketHeader({
-    this.forwardsCount = 0,
-    this.messageType = P2PPacketType.regular,
-    final int? issuedAt,
-    required this.id,
-  }) : issuedAt = issuedAt ?? DateTime.now().millisecondsSinceEpoch;
 
   factory P2PPacketHeader.fromBytes(final Uint8List datagram) {
     final messageType = datagram[1];
@@ -66,7 +62,6 @@ class P2PPacketHeader {
     final int? issuedAt,
     final int? id,
     final P2PPacketType? messageType,
-    final P2PFullAddress? srcFullAddress,
   }) =>
       P2PPacketHeader(
         messageType: messageType ?? this.messageType,

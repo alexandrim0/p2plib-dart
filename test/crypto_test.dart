@@ -8,7 +8,10 @@ main() async {
   final encPublicKey = crypto.cryptoKeys.encPublicKey;
   final signPublicKey = crypto.cryptoKeys.signPublicKey;
   final message = P2PMessage(
-    header: P2PPacketHeader(id: genRandomInt()),
+    header: P2PPacketHeader(
+      issuedAt: DateTime.now().millisecondsSinceEpoch,
+      id: genRandomInt(),
+    ),
     srcPeerId: proxyPeerId,
     dstPeerId: proxyPeerId,
   );

@@ -101,6 +101,7 @@ class P2PRouterL1 extends P2PRouterL0 {
     final header = P2PPacketHeader(
       messageType:
           isConfirmable ? P2PPacketType.confirmable : P2PPacketType.regular,
+      issuedAt: _now,
       id: messageId ?? genRandomInt(),
     );
     final datagram = await crypto.seal(P2PMessage(

@@ -21,7 +21,10 @@ void main() async {
   test(
     'P2PMessageHeader equality and serialization',
     () {
-      final headerA = P2PPacketHeader(id: genRandomInt());
+      final headerA = P2PPacketHeader(
+        issuedAt: DateTime.now().millisecondsSinceEpoch,
+        id: genRandomInt(),
+      );
       final headerB = headerA.copyWith(
         messageType: P2PPacketType.confirmation,
       );
@@ -41,7 +44,10 @@ void main() async {
     () {
       final messageId = genRandomInt();
       final message = P2PMessage(
-        header: P2PPacketHeader(id: messageId),
+        header: P2PPacketHeader(
+          issuedAt: DateTime.now().millisecondsSinceEpoch,
+          id: messageId,
+        ),
         srcPeerId: randomPeerId,
         dstPeerId: randomPeerId,
       );
