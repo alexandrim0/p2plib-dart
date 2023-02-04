@@ -58,20 +58,20 @@ class P2PRouterL0 extends P2PRouterBase {
 
     // if peer unknown then check signature and keep address if success
     if (route?.addresses[packet.srcFullAddress] == null) {
-      try {
-        await crypto.openSigned(
-          packet.srcPeerId.signPiblicKey,
-          // reset for checking signature
-          P2PPacketHeader.setForwardsCount(0, packet.datagram),
-        );
+      final isVerified = await crypto.verifySigned(
+        packet.srcPeerId.signPiblicKey,
+        // reset for checking signature
+        P2PPacketHeader.setForwardsCount(0, packet.datagram),
+      );
+      if (isVerified) {
         routes[packet.srcPeerId] = P2PRoute(
           peerId: packet.srcPeerId,
           addresses: {packet.srcFullAddress: now},
         );
         _log('Keep ${packet.srcFullAddress} for ${packet.srcPeerId}');
-      } catch (e) {
-        _log(e.toString());
-        return null; // exit on wrong signature
+      } else {
+        // exit on wrong signature
+        return null;
       }
     } else {
       // update peer address timestamp

@@ -45,12 +45,13 @@ main() async {
       test(
         'P2PCrypto sign/unsign',
         () async {
-          final signedData = await crypto.sign(randomPayload);
-          final unsignedData = await crypto.openSigned(
-            signPublicKey,
-            signedData,
+          expect(
+            await crypto.verifySigned(
+              signPublicKey,
+              await crypto.sign(randomPayload),
+            ),
+            true,
           );
-          expect(P2PToken(value: randomPayload), P2PToken(value: unsignedData));
         },
       );
     },
@@ -74,7 +75,7 @@ main() async {
         'P2PCrypto stress test: sign/unsign',
         () async {
           for (var i = 0; i < stressCount; i++) {
-            await crypto.openSigned(
+            await crypto.verifySigned(
               signPublicKey,
               await crypto.sign(randomPayload),
             );

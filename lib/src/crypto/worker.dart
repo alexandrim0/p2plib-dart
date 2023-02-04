@@ -118,17 +118,14 @@ void cryptoWorker(final P2PCryptoTask initialTask) async {
             );
             break;
 
-          case P2PCryptoTaskType.openSigned:
+          case P2PCryptoTaskType.verifySigned:
             final data = task.payload as Uint8List;
             final messageLength = data.length - P2PMessage.signatureLength;
-            final message = data.sublist(0, messageLength);
             task.payload = sign.verifyDetached(
-              message: message,
+              message: data.sublist(0, messageLength),
               signature: data.sublist(messageLength),
               publicKey: task.extra as Uint8List,
-            )
-                ? message
-                : Exception('Crypto worker. Wrong signature!');
+            );
             break;
         }
       } catch (e) {

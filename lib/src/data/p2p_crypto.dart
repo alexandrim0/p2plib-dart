@@ -4,7 +4,7 @@ enum P2PCryptoTaskType {
   seal,
   unseal,
   sign,
-  openSigned,
+  verifySigned,
 }
 
 class P2PCryptoTask {

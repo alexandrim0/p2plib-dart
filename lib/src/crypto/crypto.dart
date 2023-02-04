@@ -107,7 +107,7 @@ class P2PCrypto {
     }
   }
 
-  Future<Uint8List> openSigned(
+  Future<bool> verifySigned(
     final Uint8List pubKey,
     final Uint8List data,
   ) async {
@@ -116,13 +116,13 @@ class P2PCrypto {
     _completers[id] = completer;
     _sendPort.send(P2PCryptoTask(
       id: id,
-      type: P2PCryptoTaskType.openSigned,
+      type: P2PCryptoTaskType.verifySigned,
       payload: data,
       extra: pubKey,
     ));
     try {
       final result = await completer.future.timeout(operationTimeout);
-      if (result.payload is Uint8List) return result.payload as Uint8List;
+      if (result.payload is bool) return result.payload as bool;
       throw result.payload;
     } finally {
       _completers.remove(id);
