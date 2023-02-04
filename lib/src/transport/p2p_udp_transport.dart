@@ -20,15 +20,19 @@ class P2PUdpTransport extends P2PTransportBase {
         if (datagram == null || datagram.data.length < P2PPacketHeader.length) {
           return;
         }
-        callback!(P2PPacket(
-          srcFullAddress: P2PFullAddress(
-            address: datagram.address,
-            isLocal: fullAddress.isLocal,
-            port: datagram.port,
-          ),
-          header: P2PPacketHeader.fromBytes(datagram.data),
-          datagram: datagram.data,
-        ));
+        try {
+          callback!(P2PPacket(
+            srcFullAddress: P2PFullAddress(
+              address: datagram.address,
+              isLocal: fullAddress.isLocal,
+              port: datagram.port,
+            ),
+            header: P2PPacketHeader.fromBytes(datagram.data),
+            datagram: datagram.data,
+          ));
+        } catch (e) {
+          logger?.call(e.toString());
+        }
       },
     );
   }

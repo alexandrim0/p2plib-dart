@@ -71,10 +71,12 @@ abstract class P2PRouterBase {
     if (transports.isEmpty) {
       throw P2PExceptionTransport('Need at least one P2PTransport!');
     }
-    for (final t in transports) {
-      t.ttl = transportTTL;
-      t.callback = onMessage;
-      await t.start();
+    for (final transport in transports) {
+      transport
+        ..logger = logger
+        ..ttl = transportTTL
+        ..callback = onMessage;
+      await transport.start();
     }
     _isRun = true;
     _log('Start listen $transports with key $_selfId');
