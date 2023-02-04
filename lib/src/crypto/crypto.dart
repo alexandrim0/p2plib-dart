@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:isolate';
+import 'dart:typed_data';
 
 import '/src/data/data.dart';
 
@@ -93,8 +94,14 @@ class P2PCrypto {
     ));
     try {
       final result = await completer.future.timeout(operationTimeout);
-      if (result.payload is Uint8List) return result.payload as Uint8List;
-      throw result.payload;
+      if (result.payload is! Uint8List) {
+        throw result.payload;
+      } else {
+        final signed = BytesBuilder(copy: false)
+          ..add(data)
+          ..add(result.payload as Uint8List);
+        return signed.toBytes();
+      }
     } finally {
       _completers.remove(id);
     }

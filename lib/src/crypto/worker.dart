@@ -112,15 +112,10 @@ void cryptoWorker(final P2PCryptoTask initialTask) async {
             break;
 
           case P2PCryptoTaskType.sign:
-            final message = task.payload as Uint8List;
-            final signature = sign.detached(
-              message: message,
+            task.payload = sign.detached(
+              message: task.payload as Uint8List,
               secretKey: signKeyPair.secretKey,
             );
-            final signed = BytesBuilder(copy: false)
-              ..add(message)
-              ..add(signature);
-            task.payload = signed.toBytes();
             break;
 
           case P2PCryptoTaskType.openSigned:
