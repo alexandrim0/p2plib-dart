@@ -54,7 +54,8 @@ class P2PRouterL1 extends P2PRouterL0 {
     if (await super.onMessage(packet) == null) return null;
 
     // check and remove signature, decrypt if not empty
-    packet.message = await crypto.unseal(packet.datagram);
+    final message = await crypto.unseal(packet.datagram);
+    packet.payload = message.payload.isEmpty ? emptyUint8List : message.payload;
 
     // exit if message is confirmation of mine message
     if (packet.header.messageType == P2PPacketType.confirmation) {
@@ -70,11 +71,11 @@ class P2PRouterL1 extends P2PRouterL0 {
               messageType: P2PPacketType.confirmation,
             ),
             srcPeerId: selfId,
-            dstPeerId: packet.srcPeerId!,
+            dstPeerId: packet.srcPeerId,
           ).toBytes())
-          .then((d) => sendDatagram(
+          .then((datagram) => sendDatagram(
                 addresses: [packet.srcFullAddress],
-                datagram: d,
+                datagram: datagram,
               ));
     }
 

@@ -30,13 +30,20 @@ class P2PRouterL2 extends P2PRouterL1 {
     if (await super.onMessage(packet) == null) return null;
 
     // update peer status
-    _lastSeenController.add(MapEntry<P2PPeerId, bool>(packet.srcPeerId!, true));
+    _lastSeenController.add(MapEntry<P2PPeerId, bool>(packet.srcPeerId, true));
 
     // drop empty messages (keepalive)
-    if (packet.message!.isEmpty) return null;
+    if (packet.payload.isEmpty) return null;
 
     // message is for user, send it to subscriber
-    if (_messageController.hasListener) _messageController.add(packet.message!);
+    if (_messageController.hasListener) {
+      _messageController.add(P2PMessage(
+        header: packet.header,
+        srcPeerId: packet.srcPeerId,
+        dstPeerId: packet.dstPeerId,
+        payload: packet.payload,
+      ));
+    }
 
     return packet;
   }

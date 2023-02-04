@@ -60,12 +60,12 @@ class P2PRouterL0 extends P2PRouterBase {
     if (route?.addresses[packet.srcFullAddress] == null) {
       try {
         await crypto.openSigned(
-          packet.srcPeerId!.signPiblicKey,
+          packet.srcPeerId.signPiblicKey,
           // reset for checking signature
           P2PPacketHeader.setForwardsCount(0, packet.datagram),
         );
-        routes[packet.srcPeerId!] = P2PRoute(
-          peerId: packet.srcPeerId!,
+        routes[packet.srcPeerId] = P2PRoute(
+          peerId: packet.srcPeerId,
           addresses: {packet.srcFullAddress: now},
         );
         _log('Keep ${packet.srcFullAddress} for ${packet.srcPeerId}');
@@ -77,7 +77,7 @@ class P2PRouterL0 extends P2PRouterBase {
       // update peer address timestamp
       routes[packet.srcPeerId]!.addresses[packet.srcFullAddress] = now;
       _log(
-        'Update lastseen of ${packet.srcFullAddress} for ${packet.srcPeerId!}',
+        'Update lastseen of ${packet.srcFullAddress} for ${packet.srcPeerId}',
       );
     }
 
@@ -89,7 +89,7 @@ class P2PRouterL0 extends P2PRouterBase {
     if (packet.header.forwardsCount >= maxForwardsCount) return null;
 
     // resolve peer address exclude source address to prevent echo
-    final addresses = resolvePeerId(packet.dstPeerId!)
+    final addresses = resolvePeerId(packet.dstPeerId)
         .where((e) => e != packet.srcFullAddress);
 
     if (addresses.isEmpty) {

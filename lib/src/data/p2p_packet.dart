@@ -13,8 +13,8 @@ class P2PPacket {
   final P2PFullAddress srcFullAddress;
   final P2PPacketHeader header;
   final Uint8List datagram;
-  P2PPeerId? srcPeerId, dstPeerId;
-  P2PMessage? message;
+  late final P2PPeerId srcPeerId, dstPeerId;
+  late final Uint8List payload;
 
   P2PPacket({
     required this.srcFullAddress,
