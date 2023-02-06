@@ -115,7 +115,7 @@ void cryptoWorker(final P2PCryptoTask initialTask) async {
 
           case P2PCryptoTaskType.verifySigned:
             final data = task.payload as Uint8List;
-            final messageLength = data.length - P2PMessage.signatureLength;
+            final messageLength = data.length - signatureLength;
             task.payload = sign.verifyDetached(
               message: data.sublist(0, messageLength),
               signature: data.sublist(messageLength),

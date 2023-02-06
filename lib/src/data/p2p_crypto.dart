@@ -1,5 +1,8 @@
 part of 'data.dart';
 
+const sealLength = 48;
+const signatureLength = 64;
+
 enum P2PCryptoTaskType {
   seal,
   unseal,

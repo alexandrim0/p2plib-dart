@@ -8,17 +8,15 @@ part of 'data.dart';
 
 class P2PMessage {
   static const protocolNumber = 0;
-  static const sealLength = 48;
-  static const signatureLength = 64;
   static const headerLength = P2PPacketHeader.length + P2PPeerId.length * 2;
-  static const emptyPayloadLength = headerLength + signatureLength;
-  static const minPayloadedLength = emptyPayloadLength + sealLength;
+  static const emptyMessageLength = headerLength + signatureLength;
+  static const zeroMessageLength = emptyMessageLength + sealLength;
 
   static const _listEq = ListEquality<int>();
 
   static bool hasCorrectLength(Uint8List datagram) =>
-      datagram.length == emptyPayloadLength ||
-      datagram.length > minPayloadedLength;
+      datagram.length == emptyMessageLength ||
+      datagram.length > zeroMessageLength;
 
   static P2PPeerId getSrcPeerId(Uint8List datagram) => P2PPeerId(
           value: datagram.sublist(
@@ -39,7 +37,7 @@ class P2PMessage {
       datagram.sublist(datagram.length - signatureLength);
 
   static bool hasEmptyPayload(Uint8List datagram) =>
-      datagram.length == emptyPayloadLength;
+      datagram.length == emptyMessageLength;
 
   static Uint8List getPayload(Uint8List datagram) =>
       datagram.sublist(headerLength, datagram.length - signatureLength);
