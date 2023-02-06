@@ -7,7 +7,7 @@ main() async {
   await crypto.init(P2PCryptoKeys.empty()..seed = proxySeed);
   final encPublicKey = crypto.cryptoKeys.encPublicKey;
   final signPublicKey = crypto.cryptoKeys.signPublicKey;
-  final message = P2PMessage(
+  final emptyMessage = P2PMessage(
     header: P2PPacketHeader(
       issuedAt: DateTime.now().millisecondsSinceEpoch,
       id: genRandomInt(),
@@ -15,6 +15,7 @@ main() async {
     srcPeerId: proxyPeerId,
     dstPeerId: proxyPeerId,
   );
+  final notEmptyMessage = emptyMessage.copyWith(payload: randomPayload);
   const stressCount = 100000;
 
   group(
@@ -34,11 +35,15 @@ main() async {
         'P2PCrypto seal/unseal',
         () async {
           // empty message
-          expect(await crypto.unseal(await crypto.seal(message)), message);
-
-          // message with payload
-          final m = message.copyWith(payload: randomPayload);
-          expect(await crypto.unseal(await crypto.seal(m)), m);
+          expect(
+            await crypto.unseal(await crypto.seal(emptyMessage)),
+            emptyUint8List,
+          );
+          // not empty message
+          expect(
+            await crypto.unseal(await crypto.seal(notEmptyMessage)),
+            randomPayload,
+          );
         },
       );
 
@@ -63,9 +68,8 @@ main() async {
       test(
         'P2PCrypto stress test: seal/unseal',
         () async {
-          final m = message.copyWith(payload: randomPayload);
           for (var i = 0; i < stressCount; i++) {
-            await crypto.unseal(await crypto.seal(m));
+            await crypto.unseal(await crypto.seal(notEmptyMessage));
           }
         },
         timeout: Timeout(Duration(minutes: 1)),

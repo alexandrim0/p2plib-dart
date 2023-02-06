@@ -65,7 +65,7 @@ class P2PCrypto {
     }
   }
 
-  Future<P2PMessage> unseal(final Uint8List datagram) async {
+  Future<Uint8List> unseal(final Uint8List datagram) async {
     final id = _idCounter++;
     final completer = Completer<P2PCryptoTask>();
     _completers[id] = completer;
@@ -76,7 +76,7 @@ class P2PCrypto {
     ));
     try {
       final result = await completer.future.timeout(operationTimeout);
-      if (result.payload is P2PMessage) return result.payload as P2PMessage;
+      if (result.payload is Uint8List) return result.payload as Uint8List;
       throw result.payload;
     } finally {
       _completers.remove(id);
@@ -94,14 +94,13 @@ class P2PCrypto {
     ));
     try {
       final result = await completer.future.timeout(operationTimeout);
-      if (result.payload is! Uint8List) {
-        throw result.payload;
-      } else {
+      if (result.payload is Uint8List) {
         final signed = BytesBuilder(copy: false)
           ..add(data)
           ..add(result.payload as Uint8List);
         return signed.toBytes();
       }
+      throw result.payload;
     } finally {
       _completers.remove(id);
     }

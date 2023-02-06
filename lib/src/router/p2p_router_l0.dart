@@ -36,7 +36,7 @@ class P2PRouterL0 extends P2PRouterBase {
   @override
   Future<P2PPacket?> onMessage(final P2PPacket packet) async {
     // check minimal datagram length
-    if (packet.datagram.length < P2PMessage.minimalLength) return null;
+    if (!P2PMessage.hasCorrectLength(packet.datagram)) return null;
 
     final now = _now;
     // check if message is stale

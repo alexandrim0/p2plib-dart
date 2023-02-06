@@ -47,7 +47,7 @@ void cryptoWorker(final P2PCryptoTask initialTask) async {
     );
   }
 
-  // send back index, SendPort and keys
+  // send back SendPort and keys
   final receivePort = ReceivePort();
   final mainIsolatePort = initialTask.payload as SendPort;
   initialTask.payload = receivePort.sendPort;
@@ -85,29 +85,24 @@ void cryptoWorker(final P2PCryptoTask initialTask) async {
 
           case P2PCryptoTaskType.unseal:
             final datagram = task.payload as Uint8List;
-            final unsignedDatagram = datagram.sublist(
-              0,
-              datagram.length - P2PMessage.signatureLength,
-            );
-            final message = P2PMessage.fromBytes(unsignedDatagram);
-            if (sign.verifyDetached(
-              message: unsignedDatagram,
-              signature: datagram.sublist(unsignedDatagram.length),
-              publicKey: message.srcPeerId.signPiblicKey,
+            // check signature
+            if (!sign.verifyDetached(
+              message: P2PMessage.getUnsignedDatagram(datagram),
+              signature: P2PMessage.getSignature(datagram),
+              publicKey: P2PMessage.getSrcPeerId(datagram).signPiblicKey,
             )) {
-              if (message.payload.isEmpty) {
-                task.payload = message;
-              } else if (message.payload.length > P2PMessage.sealLength) {
-                task.payload = message.copyWith(
-                  payload: box.sealOpen(
-                    cipherText: message.payload,
-                    publicKey: encKeyPair.publicKey,
-                    secretKey: encKeyPair.secretKey,
-                  ),
-                );
-              }
-            } else {
               task.payload = Exception('Crypto worker. Wrong signature!');
+              break;
+            }
+            // decrypt payload
+            if (P2PMessage.hasEmptyPayload(datagram)) {
+              task.payload = emptyUint8List;
+            } else {
+              task.payload = box.sealOpen(
+                cipherText: P2PMessage.getPayload(datagram),
+                publicKey: encKeyPair.publicKey,
+                secretKey: encKeyPair.secretKey,
+              );
             }
             break;
 

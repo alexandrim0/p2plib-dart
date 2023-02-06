@@ -11,9 +11,14 @@ class P2PMessage {
   static const sealLength = 48;
   static const signatureLength = 64;
   static const headerLength = P2PPacketHeader.length + P2PPeerId.length * 2;
-  static const minimalLength = headerLength + signatureLength;
+  static const emptyPayloadLength = headerLength + signatureLength;
+  static const minPayloadedLength = emptyPayloadLength + sealLength;
 
   static const _listEq = ListEquality<int>();
+
+  static bool hasCorrectLength(Uint8List datagram) =>
+      datagram.length == emptyPayloadLength ||
+      datagram.length > minPayloadedLength;
 
   static P2PPeerId getSrcPeerId(Uint8List datagram) => P2PPeerId(
           value: datagram.sublist(
@@ -26,6 +31,18 @@ class P2PMessage {
         P2PPacketHeader.length + P2PPeerId.length,
         headerLength,
       ));
+
+  static Uint8List getUnsignedDatagram(Uint8List datagram) =>
+      datagram.sublist(0, datagram.length - signatureLength);
+
+  static Uint8List getSignature(Uint8List datagram) =>
+      datagram.sublist(datagram.length - signatureLength);
+
+  static bool hasEmptyPayload(Uint8List datagram) =>
+      datagram.length == emptyPayloadLength;
+
+  static Uint8List getPayload(Uint8List datagram) =>
+      datagram.sublist(headerLength, datagram.length - signatureLength);
 
   final P2PPacketHeader header;
   final P2PPeerId srcPeerId, dstPeerId;
@@ -75,16 +92,10 @@ class P2PMessage {
     return bytesBuilder.toBytes();
   }
 
-  P2PMessage copyWith({
-    final P2PPacketHeader? header,
-    final P2PPeerId? srcPeerId,
-    final P2PPeerId? dstPeerId,
-    final Uint8List? payload,
-  }) =>
-      P2PMessage(
-        header: header ?? this.header,
-        srcPeerId: srcPeerId ?? this.srcPeerId,
-        dstPeerId: dstPeerId ?? this.dstPeerId,
+  P2PMessage copyWith({final Uint8List? payload}) => P2PMessage(
+        header: header,
+        srcPeerId: srcPeerId,
+        dstPeerId: dstPeerId,
         payload: payload ?? this.payload,
       );
 }

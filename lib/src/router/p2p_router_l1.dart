@@ -54,8 +54,7 @@ class P2PRouterL1 extends P2PRouterL0 {
     if (await super.onMessage(packet) == null) return null;
 
     // check and remove signature, decrypt if not empty
-    final message = await crypto.unseal(packet.datagram);
-    packet.payload = message.payload.isEmpty ? emptyUint8List : message.payload;
+    packet.payload = await crypto.unseal(packet.datagram);
 
     // exit if message is confirmation of mine message
     if (packet.header.messageType == P2PPacketType.confirmation) {
