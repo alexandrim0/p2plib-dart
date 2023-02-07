@@ -97,22 +97,24 @@ class P2PRouterL1 extends P2PRouterL0 {
       throw P2PExceptionRouterUnknownRoute(dstPeerId);
     }
 
-    final header = P2PPacketHeader(
-      messageType:
-          isConfirmable ? P2PPacketType.confirmable : P2PPacketType.regular,
-      issuedAt: _now,
-      id: messageId ?? genRandomInt(),
-    );
-    final datagram = await crypto.seal(P2PMessage(
-      header: header,
+    final message = P2PMessage(
+      header: P2PPacketHeader(
+        messageType:
+            isConfirmable ? P2PPacketType.confirmable : P2PPacketType.regular,
+        issuedAt: _now,
+        id: messageId ?? genRandomInt(),
+      ),
       srcPeerId: selfId,
       dstPeerId: dstPeerId,
       payload: payload,
-    ));
+    );
+    final datagram = message.isEmpty
+        ? await crypto.sign(message.toBytes())
+        : await crypto.seal(message);
 
     if (isConfirmable) {
       await sendDatagramConfirmable(
-        messageId: header.id,
+        messageId: message.header.id,
         datagram: datagram,
         addresses: addresses,
         ackTimeout: ackTimeout,
@@ -121,7 +123,7 @@ class P2PRouterL1 extends P2PRouterL0 {
       sendDatagram(addresses: addresses, datagram: datagram);
       _log('sent ${datagram.length} bytes to $addresses');
     }
-    return header;
+    return message.header;
   }
 
   Future<void> sendDatagramConfirmable({

@@ -47,6 +47,7 @@ class P2PCrypto {
     return cryptoKeys;
   }
 
+  /// Encrypt message`s payload and sign whole datagram
   Future<Uint8List> seal(final P2PMessage message) async {
     final id = _idCounter++;
     final completer = Completer<P2PCryptoTask>();
@@ -65,6 +66,7 @@ class P2PCrypto {
     }
   }
 
+  /// Returns unencrypted payload of message
   Future<Uint8List> unseal(final Uint8List datagram) async {
     final id = _idCounter++;
     final completer = Completer<P2PCryptoTask>();
@@ -83,20 +85,20 @@ class P2PCrypto {
     }
   }
 
-  Future<Uint8List> sign(final Uint8List data) async {
+  Future<Uint8List> sign(final Uint8List datagram) async {
     final id = _idCounter++;
     final completer = Completer<P2PCryptoTask>();
     _completers[id] = completer;
     _sendPort.send(P2PCryptoTask(
       id: id,
       type: P2PCryptoTaskType.sign,
-      payload: data,
+      payload: datagram,
     ));
     try {
       final result = await completer.future.timeout(operationTimeout);
       if (result.payload is Uint8List) {
         final signed = BytesBuilder(copy: false)
-          ..add(data)
+          ..add(datagram)
           ..add(result.payload as Uint8List);
         return signed.toBytes();
       }
@@ -108,7 +110,7 @@ class P2PCrypto {
 
   Future<bool> verifySigned(
     final Uint8List pubKey,
-    final Uint8List data,
+    final Uint8List datagram,
   ) async {
     final id = _idCounter++;
     final completer = Completer<P2PCryptoTask>();
@@ -116,7 +118,7 @@ class P2PCrypto {
     _sendPort.send(P2PCryptoTask(
       id: id,
       type: P2PCryptoTaskType.verifySigned,
-      payload: data,
+      payload: datagram,
       extra: pubKey,
     ));
     try {

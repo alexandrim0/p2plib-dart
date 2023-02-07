@@ -9,14 +9,11 @@ part of 'data.dart';
 class P2PMessage {
   static const protocolNumber = 0;
   static const headerLength = P2PPacketHeader.length + P2PPeerId.length * 2;
-  static const emptyMessageLength = headerLength + signatureLength;
-  static const zeroMessageLength = emptyMessageLength + sealLength;
-
-  static const _listEq = ListEquality<int>();
+  static const emptySignedMessageLength = headerLength + signatureLength;
 
   static bool hasCorrectLength(Uint8List datagram) =>
-      datagram.length == emptyMessageLength ||
-      datagram.length > zeroMessageLength;
+      datagram.length == emptySignedMessageLength ||
+      datagram.length > emptySignedMessageLength + sealLength;
 
   static P2PPeerId getSrcPeerId(Uint8List datagram) => P2PPeerId(
           value: datagram.sublist(
@@ -30,70 +27,38 @@ class P2PMessage {
         headerLength,
       ));
 
-  static Uint8List getUnsignedDatagram(Uint8List datagram) =>
-      datagram.sublist(0, datagram.length - signatureLength);
+  static Uint8List getUnsignedDatagram(Uint8List signedDatagram) =>
+      signedDatagram.sublist(0, signedDatagram.length - signatureLength);
 
-  static Uint8List getSignature(Uint8List datagram) =>
-      datagram.sublist(datagram.length - signatureLength);
+  static Uint8List getSignature(Uint8List signedDatagram) =>
+      signedDatagram.sublist(signedDatagram.length - signatureLength);
 
-  static bool hasEmptyPayload(Uint8List datagram) =>
-      datagram.length == emptyMessageLength;
+  static bool hasEmptyPayload(Uint8List signedDatagram) =>
+      signedDatagram.length == emptySignedMessageLength;
 
-  static Uint8List getPayload(Uint8List datagram) =>
-      datagram.sublist(headerLength, datagram.length - signatureLength);
+  static Uint8List getPayload(Uint8List signedDatagram) => signedDatagram
+      .sublist(headerLength, signedDatagram.length - signatureLength);
 
   final P2PPacketHeader header;
   final P2PPeerId srcPeerId, dstPeerId;
-  final Uint8List payload;
-
-  @override
-  int get hashCode => Object.hash(
-        runtimeType,
-        header,
-        srcPeerId,
-        dstPeerId,
-        _listEq.hash(payload),
-      );
-
-  @override
-  bool operator ==(Object other) =>
-      other is P2PMessage &&
-      runtimeType == other.runtimeType &&
-      header == other.header &&
-      srcPeerId == other.srcPeerId &&
-      dstPeerId == other.dstPeerId &&
-      _listEq.equals(payload, other.payload);
-
-  bool get isEmpty => payload.isEmpty;
-  bool get isNotEmpty => payload.isNotEmpty;
+  Uint8List? payload;
 
   P2PMessage({
     required this.header,
     required this.srcPeerId,
     required this.dstPeerId,
-    final Uint8List? payload,
-  }) : payload = payload ?? emptyUint8List;
+    this.payload,
+  });
 
-  factory P2PMessage.fromBytes(final Uint8List datagram) => P2PMessage(
-        header: P2PPacketHeader.fromBytes(datagram),
-        srcPeerId: getSrcPeerId(datagram),
-        dstPeerId: getDstPeerId(datagram),
-        payload: datagram.sublist(headerLength),
-      );
+  bool get isEmpty => payload == null || payload!.isEmpty;
+  bool get isNotEmpty => payload != null && payload!.isNotEmpty;
 
   Uint8List toBytes() {
     final bytesBuilder = BytesBuilder(copy: false)
       ..add(header.toBytes())
       ..add(srcPeerId.value)
-      ..add(dstPeerId.value)
-      ..add(payload);
+      ..add(dstPeerId.value);
+    if (payload != null) bytesBuilder.add(payload!);
     return bytesBuilder.toBytes();
   }
-
-  P2PMessage copyWith({final Uint8List? payload}) => P2PMessage(
-        header: header,
-        srcPeerId: srcPeerId,
-        dstPeerId: dstPeerId,
-        payload: payload ?? this.payload,
-      );
 }

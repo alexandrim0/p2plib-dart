@@ -57,7 +57,7 @@ main() async {
           );
           final completer = Completer<bool>();
           subscription.onData((message) {
-            completer.complete(token == P2PToken(value: message.payload));
+            completer.complete(token == P2PToken(value: message.payload!));
           });
           await aliceRouter.sendMessage(
             dstPeerId: bobRouter.selfId,
@@ -78,7 +78,7 @@ main() async {
           );
           final completer = Completer<bool>();
           subscription.onData((message) {
-            completer.complete(token == P2PToken(value: message.payload));
+            completer.complete(token == P2PToken(value: message.payload!));
           });
 
           await expectLater(
@@ -206,7 +206,7 @@ main() async {
 
           final completer = Completer<bool>();
           subscription.onData((message) {
-            completer.complete(token == P2PToken(value: message.payload));
+            completer.complete(token == P2PToken(value: message.payload!));
           });
           await aliceRouter.sendMessage(
             dstPeerId: bobRouter.selfId,
@@ -232,7 +232,7 @@ main() async {
 
           final completer = Completer<bool>();
           subscription.onData((message) {
-            completer.complete(token == P2PToken(value: message.payload));
+            completer.complete(token == P2PToken(value: message.payload!));
           });
 
           await expectLater(

@@ -15,7 +15,12 @@ main() async {
     srcPeerId: proxyPeerId,
     dstPeerId: proxyPeerId,
   );
-  final notEmptyMessage = emptyMessage.copyWith(payload: randomPayload);
+  final notEmptyMessage = P2PMessage(
+    header: emptyMessage.header,
+    srcPeerId: proxyPeerId,
+    dstPeerId: proxyPeerId,
+    payload: randomPayload,
+  );
   const stressCount = 100000;
 
   group(

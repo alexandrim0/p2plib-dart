@@ -56,30 +56,24 @@ void cryptoWorker(final P2PCryptoTask initialTask) async {
 
   receivePort.listen(
     (final task) {
-      if (task is! P2PCryptoTask) {
-        throw const FormatException('Message is not P2PCryptoTask');
-      }
+      if (task is! P2PCryptoTask) return;
       try {
         switch (task.type) {
           case P2PCryptoTaskType.seal:
             final message = task.payload as P2PMessage;
-            final datagram = message.payload.isEmpty
-                ? message.toBytes()
-                : message
-                    .copyWith(
-                      payload: box.seal(
-                        publicKey: message.dstPeerId.encPublicKey,
-                        message: message.payload,
-                      ),
-                    )
-                    .toBytes();
-            final signature = sign.detached(
-              message: datagram,
-              secretKey: signKeyPair.secretKey,
-            );
+            if (message.isNotEmpty) {
+              message.payload = box.seal(
+                publicKey: message.dstPeerId.encPublicKey,
+                message: message.payload!,
+              );
+            }
+            final datagram = message.toBytes();
             final signedDatagram = BytesBuilder(copy: false)
               ..add(datagram)
-              ..add(signature);
+              ..add(sign.detached(
+                message: datagram,
+                secretKey: signKeyPair.secretKey,
+              ));
             task.payload = signedDatagram.toBytes();
             break;
 
