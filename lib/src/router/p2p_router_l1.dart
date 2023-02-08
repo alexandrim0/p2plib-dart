@@ -108,9 +108,7 @@ class P2PRouterL1 extends P2PRouterL0 {
       dstPeerId: dstPeerId,
       payload: payload,
     );
-    final datagram = message.isEmpty
-        ? await crypto.sign(message.toBytes())
-        : await crypto.seal(message);
+    final datagram = await crypto.seal(message);
 
     if (isConfirmable) {
       await sendDatagramConfirmable(
