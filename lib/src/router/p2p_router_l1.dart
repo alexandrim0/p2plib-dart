@@ -8,6 +8,7 @@ class P2PRouterL1 extends P2PRouterL0 {
   var retryPeriod = P2PRouterBase.defaultPeriod;
 
   final _ackCompleters = <int, Completer<void>>{};
+  final _messageController = StreamController<P2PMessage>();
 
   P2PRouterL1({
     super.crypto,
@@ -18,6 +19,8 @@ class P2PRouterL1 extends P2PRouterL0 {
 
   Iterable<P2PFullAddress> get selfAddresses =>
       transports.map((t) => t.fullAddress);
+
+  Stream<P2PMessage> get messageStream => _messageController.stream;
 
   @override
   Future<P2PCryptoKeys> init([P2PCryptoKeys? keys]) async {
@@ -76,6 +79,16 @@ class P2PRouterL1 extends P2PRouterL0 {
                 addresses: [packet.srcFullAddress],
                 datagram: datagram,
               ));
+    }
+
+    // message is for user, send it to subscriber
+    if (packet.payload.isNotEmpty && _messageController.hasListener) {
+      _messageController.add(P2PMessage(
+        header: packet.header,
+        srcPeerId: packet.srcPeerId,
+        dstPeerId: packet.dstPeerId,
+        payload: packet.payload,
+      ));
     }
 
     return packet;

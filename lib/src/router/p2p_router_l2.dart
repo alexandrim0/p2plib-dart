@@ -3,7 +3,6 @@ part of 'router.dart';
 /// Enhanced router with more high level API for building rich client
 
 class P2PRouterL2 extends P2PRouterL1 {
-  final _messageController = StreamController<P2PMessage>();
   final _lastSeenController =
       StreamController<MapEntry<P2PPeerId, bool>>.broadcast();
 
@@ -18,8 +17,6 @@ class P2PRouterL2 extends P2PRouterL1 {
     maxStoredHeaders = 10;
   }
 
-  Stream<P2PMessage> get messageStream => _messageController.stream;
-
   Stream<MapEntry<P2PPeerId, bool>> get lastSeenStream =>
       _lastSeenController.stream;
 
@@ -31,19 +28,6 @@ class P2PRouterL2 extends P2PRouterL1 {
 
     // update peer status
     _lastSeenController.add(MapEntry<P2PPeerId, bool>(packet.srcPeerId, true));
-
-    // drop empty messages (keepalive)
-    if (packet.payload.isEmpty) return null;
-
-    // message is for user, send it to subscriber
-    if (_messageController.hasListener) {
-      _messageController.add(P2PMessage(
-        header: packet.header,
-        srcPeerId: packet.srcPeerId,
-        dstPeerId: packet.dstPeerId,
-        payload: packet.payload,
-      ));
-    }
 
     return packet;
   }
