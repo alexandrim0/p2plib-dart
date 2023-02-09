@@ -49,17 +49,15 @@ class P2PRouterL1 extends P2PRouterL0 {
   @override
   void stop() {
     for (final c in _ackCompleters.values) {
-      c.completeError(const P2PExceptionRouterIsNotRunning());
+      c.completeError(const P2PExceptionIsNotRunning());
     }
     _ackCompleters.clear();
     super.stop();
   }
 
-  /// returns null if message is processed and children have to return
   @override
-  Future<P2PPacket?> onMessage(final P2PPacket packet) async {
-    // exit if parent done all needed work
-    if (await super.onMessage(packet) == null) return null;
+  Future<P2PPacket> onMessage(final P2PPacket packet) async {
+    await super.onMessage(packet);
 
     // check and remove signature, decrypt if not empty
     packet.payload = await crypto.unseal(packet.datagram);
@@ -67,7 +65,7 @@ class P2PRouterL1 extends P2PRouterL0 {
     // exit if message is confirmation of mine message
     if (packet.header.messageType == P2PPacketType.confirmation) {
       _ackCompleters.remove(packet.header.id)?.complete();
-      return null;
+      throw const StopProcessing();
     }
 
     // send confirmation if required
@@ -108,12 +106,10 @@ class P2PRouterL1 extends P2PRouterL0 {
     final Duration? ackTimeout,
     final Iterable<P2PFullAddress>? useAddresses,
   }) async {
-    if (isNotRun) throw const P2PExceptionRouterIsNotRunning();
+    if (isNotRun) throw const P2PExceptionIsNotRunning();
 
     final addresses = useAddresses ?? resolvePeerId(dstPeerId);
-    if (addresses.isEmpty) {
-      throw P2PExceptionRouterUnknownRoute(dstPeerId);
-    }
+    if (addresses.isEmpty) throw P2PExceptionUnknownRoute(dstPeerId);
 
     final message = P2PMessage(
       header: P2PPacketHeader(

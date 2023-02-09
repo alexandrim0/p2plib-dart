@@ -76,7 +76,7 @@ abstract class P2PRouterBase {
       transport
         ..logger = logger
         ..ttl = transportTTL
-        ..callback = onMessage;
+        ..onMessage = onMessage;
       await transport.start();
     }
     _isRun = true;
@@ -90,8 +90,8 @@ abstract class P2PRouterBase {
     }
   }
 
-  /// returns null if message is processed and children have to return
-  Future<P2PPacket?> onMessage(final P2PPacket packet);
+  /// throws StopProcessing if message is processed and children have to return
+  Future<P2PPacket> onMessage(final P2PPacket packet);
 
   void sendDatagram({
     required final Iterable<P2PFullAddress> addresses,

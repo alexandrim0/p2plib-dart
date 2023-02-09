@@ -16,11 +16,9 @@ class P2PRouterL2 extends P2PRouterL1 {
   Stream<MapEntry<P2PPeerId, bool>> get lastSeenStream =>
       _lastSeenController.stream;
 
-  /// returns null if message is processed and children have to return
   @override
-  Future<P2PPacket?> onMessage(final P2PPacket packet) async {
-    // exit if parent done all needed work
-    if (await super.onMessage(packet) == null) return null;
+  Future<P2PPacket> onMessage(final P2PPacket packet) async {
+    await super.onMessage(packet);
 
     // update peer status
     _lastSeenController.add(MapEntry<P2PPeerId, bool>(packet.srcPeerId, true));

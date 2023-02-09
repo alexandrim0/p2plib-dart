@@ -28,7 +28,7 @@ main() async {
         () {
           expect(
             bobRouter.sendMessage(dstPeerId: randomPeerId),
-            throwsA(isA<P2PExceptionRouterIsNotRunning>()),
+            throwsA(isA<P2PExceptionIsNotRunning>()),
           );
         },
         timeout: Timeout(testTimeout),
@@ -41,7 +41,7 @@ main() async {
 
           await expectLater(
             () => bobRouter.sendMessage(dstPeerId: randomPeerId),
-            throwsA(isA<P2PExceptionRouterUnknownRoute>()),
+            throwsA(isA<P2PExceptionUnknownRoute>()),
           );
         },
         timeout: Timeout(testTimeout),

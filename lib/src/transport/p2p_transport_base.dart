@@ -3,12 +3,12 @@ part of 'transport.dart';
 abstract class P2PTransportBase {
   int ttl;
   final P2PFullAddress fullAddress;
-  void Function(P2PPacket)? callback;
+  Future<void> Function(P2PPacket packet)? onMessage;
   void Function(String)? logger;
 
   P2PTransportBase({
     required this.fullAddress,
-    this.callback,
+    this.onMessage,
     this.ttl = 5,
     this.logger,
   });

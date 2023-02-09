@@ -3,7 +3,7 @@ part of 'transport.dart';
 class P2PUdpTransport extends P2PTransportBase {
   RawDatagramSocket? _socket;
 
-  P2PUdpTransport({required super.fullAddress, super.callback, super.ttl});
+  P2PUdpTransport({required super.fullAddress, super.onMessage, super.ttl});
 
   @override
   Future<void> start() async {
@@ -14,14 +14,14 @@ class P2PUdpTransport extends P2PTransportBase {
       ttl: ttl,
     );
     _socket!.listen(
-      (event) {
+      (event) async {
         if (event != RawSocketEvent.read) return;
         final datagram = _socket?.receive();
         if (datagram == null || datagram.data.length < P2PPacketHeader.length) {
           return;
         }
         try {
-          callback!(P2PPacket(
+          await onMessage!(P2PPacket(
             srcFullAddress: P2PFullAddress(
               address: datagram.address,
               isLocal: fullAddress.isLocal,
@@ -30,6 +30,7 @@ class P2PUdpTransport extends P2PTransportBase {
             header: P2PPacketHeader.fromBytes(datagram.data),
             datagram: datagram.data,
           ));
+        } on StopProcessing catch (_) {
         } catch (e) {
           logger?.call(e.toString());
         }

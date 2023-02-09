@@ -32,28 +32,29 @@ class P2PRouterL0 extends P2PRouterBase {
     return cryptoKeys;
   }
 
-  /// returns null if message is processed and children have to return
   @override
-  Future<P2PPacket?> onMessage(final P2PPacket packet) async {
+  Future<P2PPacket> onMessage(final P2PPacket packet) async {
     // check minimal datagram length
-    if (!P2PMessage.hasCorrectLength(packet.datagram)) return null;
+    if (!P2PMessage.hasCorrectLength(packet.datagram)) {
+      throw const StopProcessing();
+    }
 
     final now = _now;
     // check if message is stale
     final delta = requestTimeout.inMilliseconds;
     if (packet.header.issuedAt < now - delta ||
-        packet.header.issuedAt > now + delta) return null;
+        packet.header.issuedAt > now + delta) throw const StopProcessing();
 
     packet.srcPeerId = P2PMessage.getSrcPeerId(packet.datagram);
     // drop echo message
-    if (packet.srcPeerId == _selfId) return null;
+    if (packet.srcPeerId == _selfId) throw const StopProcessing();
 
     final route = routes[packet.srcPeerId];
 
     // drop duplicate
     if (route != null &&
         P2PRoute.maxStoredHeaders > 0 &&
-        route.lastHeaders.contains(packet.header)) return null;
+        route.lastHeaders.contains(packet.header)) throw const StopProcessing();
 
     // reset for checking signature
     P2PPacketHeader.setForwardsCount(0, packet.datagram);
@@ -72,7 +73,7 @@ class P2PRouterL0 extends P2PRouterBase {
         _log('Keep ${packet.srcFullAddress} for ${packet.srcPeerId}');
       } else {
         // exit on wrong signature
-        return null;
+        throw const StopProcessing();
       }
     } else {
       routes[packet.srcPeerId]!
@@ -90,7 +91,9 @@ class P2PRouterL0 extends P2PRouterBase {
     if (packet.dstPeerId == _selfId) return packet;
 
     // check if forwards count exeeds
-    if (packet.header.forwardsCount >= maxForwardsCount) return null;
+    if (packet.header.forwardsCount >= maxForwardsCount) {
+      throw const StopProcessing();
+    }
 
     // resolve peer address exclude source address to prevent echo
     final addresses = resolvePeerId(packet.dstPeerId)
@@ -115,6 +118,6 @@ class P2PRouterL0 extends P2PRouterBase {
         'to $addresses ${packet.datagram.length} bytes',
       );
     }
-    return null;
+    throw const StopProcessing();
   }
 }
