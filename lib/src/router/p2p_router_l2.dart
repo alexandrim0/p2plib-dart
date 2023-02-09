@@ -11,11 +11,7 @@ class P2PRouterL2 extends P2PRouterL1 {
     super.transports,
     super.keepalivePeriod,
     super.logger,
-  }) {
-    // More convenient for endpoint client
-    preserveLocalAddress = true;
-    maxStoredHeaders = 10;
-  }
+  });
 
   Stream<MapEntry<P2PPeerId, bool>> get lastSeenStream =>
       _lastSeenController.stream;
@@ -51,7 +47,7 @@ class P2PRouterL2 extends P2PRouterL1 {
       routes[peerId] = P2PRoute(
         peerId: peerId,
         canForward: canForward ?? false,
-        addresses: {address: timestamp},
+        address: MapEntry(address, timestamp),
       );
     }
   }

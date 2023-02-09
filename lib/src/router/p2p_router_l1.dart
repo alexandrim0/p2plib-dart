@@ -15,7 +15,11 @@ class P2PRouterL1 extends P2PRouterL0 {
     super.transports,
     super.keepalivePeriod,
     super.logger,
-  });
+  }) {
+    // More convenient for endpoint client
+    preserveLocalAddress = true;
+    maxStoredHeaders = 5;
+  }
 
   Iterable<P2PFullAddress> get selfAddresses =>
       transports.map((t) => t.fullAddress);
@@ -25,6 +29,7 @@ class P2PRouterL1 extends P2PRouterL0 {
   @override
   Future<P2PCryptoKeys> init([P2PCryptoKeys? keys]) async {
     final cryptoKeys = await super.init(keys);
+
     // send keepalive messages
     Timer.periodic(
       keepalivePeriod,

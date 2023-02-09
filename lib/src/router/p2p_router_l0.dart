@@ -49,24 +49,25 @@ class P2PRouterL0 extends P2PRouterBase {
     if (packet.srcPeerId == _selfId) return null;
 
     final route = routes[packet.srcPeerId];
-    if (maxStoredHeaders > 0) {
-      // drop duplicate
-      if (route?.lastPacketHeader == packet.header) return null;
-      // remember header to prevent duplicates processing
-      routes[packet.srcPeerId]?.lastPacketHeader = packet.header;
-    }
+
+    // drop duplicate
+    if (route != null &&
+        P2PRoute.maxStoredHeaders > 0 &&
+        route.lastHeaders.contains(packet.header)) return null;
+
+    // reset for checking signature
+    P2PPacketHeader.setForwardsCount(0, packet.datagram);
 
     // if peer unknown then check signature and keep address if success
     if (route?.addresses[packet.srcFullAddress] == null) {
-      final isVerified = await crypto.verifySigned(
+      if (await crypto.verifySigned(
         packet.srcPeerId.signPiblicKey,
-        // reset for checking signature
-        P2PPacketHeader.setForwardsCount(0, packet.datagram),
-      );
-      if (isVerified) {
+        packet.datagram,
+      )) {
         routes[packet.srcPeerId] = P2PRoute(
+          header: packet.header,
           peerId: packet.srcPeerId,
-          addresses: {packet.srcFullAddress: now},
+          address: MapEntry(packet.srcFullAddress, now),
         );
         _log('Keep ${packet.srcFullAddress} for ${packet.srcPeerId}');
       } else {
@@ -74,8 +75,11 @@ class P2PRouterL0 extends P2PRouterBase {
         return null;
       }
     } else {
-      // update peer address timestamp
-      routes[packet.srcPeerId]!.addresses[packet.srcFullAddress] = now;
+      routes[packet.srcPeerId]!
+        // update peer address timestamp
+        ..addresses[packet.srcFullAddress] = now
+        // remember header to prevent duplicates processing
+        ..addHeader(packet.header);
       _log(
         'Update lastseen of ${packet.srcFullAddress} for ${packet.srcPeerId}',
       );

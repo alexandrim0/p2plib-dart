@@ -34,7 +34,7 @@ final bobAddress = P2PFullAddress(
 P2PRoute getProxyRoute() => P2PRoute(
       peerId: proxyPeerId,
       canForward: true,
-      addresses: {proxyAddress: DateTime.now().millisecondsSinceEpoch},
+      address: MapEntry(proxyAddress, DateTime.now().millisecondsSinceEpoch),
     );
 
 void log(debugLabel, message) => print('[$debugLabel] $message');

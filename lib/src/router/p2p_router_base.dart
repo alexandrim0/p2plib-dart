@@ -19,7 +19,6 @@ abstract class P2PRouterBase {
   var requestTimeout = defaultTimeout;
   var useForwardersCount = 2;
   var maxForwardsCount = 1;
-  var maxStoredHeaders = 0;
   var preserveLocalAddress = false; // More efficient for relay node
 
   void Function(String)? logger;
@@ -56,6 +55,8 @@ abstract class P2PRouterBase {
   P2PPeerId get selfId => _selfId;
 
   int get _now => DateTime.now().millisecondsSinceEpoch;
+
+  set maxStoredHeaders(int value) => P2PRoute.maxStoredHeaders = value;
 
   Future<P2PCryptoKeys> init([final P2PCryptoKeys? keys]) async {
     final cryptoKeys = await crypto.init(keys);
@@ -100,11 +101,6 @@ abstract class P2PRouterBase {
       t.send(addresses, datagram);
     }
   }
-
-  // TBD
-  void addRoute(final P2PRoute route) {}
-
-  P2PRoute? removeRoute(final P2PPeerId peerId) => routes.remove(peerId);
 
   bool getPeerStatus(final P2PPeerId peerId) =>
       (routes[peerId]?.lastSeen ?? 0) + requestTimeout.inMilliseconds > _now;
