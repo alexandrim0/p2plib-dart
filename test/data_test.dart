@@ -40,7 +40,7 @@ void main() async {
   );
 
   test(
-    'P2PMessage equality and serialization',
+    'P2PMessage serialization',
     () {
       final messageId = genRandomInt();
       final message = P2PMessage(
@@ -53,13 +53,8 @@ void main() async {
       );
       final datagram = message.toBytes();
 
-      expect(messageId == datagram.buffer.asInt64List(8, 1).first, true);
-      final dstPeerId = P2PPeerId(
-          value: datagram.sublist(
-        P2PPacketHeader.length + P2PPeerId.length,
-        P2PMessage.headerLength,
-      ));
-      expect(randomPeerId == dstPeerId, true);
+      expect(P2PPacketHeader.fromBytes(datagram).id, messageId);
+      expect(P2PMessage.getDstPeerId(datagram), randomPeerId);
     },
   );
 
@@ -113,7 +108,28 @@ void main() async {
   );
 
   test(
-    'getActualAddresses, removeStaleAddresses',
+    'P2PRoute.addHeader',
+    () {
+      P2PRoute.maxStoredHeaders = 5;
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final firstHeader = P2PPacketHeader(issuedAt: now, id: genRandomInt());
+      final route = P2PRoute(
+        peerId: proxyPeerId,
+        header: firstHeader,
+      );
+
+      for (var i = 0; i < 4; i++) {
+        route.addHeader(P2PPacketHeader(issuedAt: now, id: genRandomInt()));
+      }
+      expect(route.lastHeaders.contains(firstHeader), true);
+
+      route.addHeader(P2PPacketHeader(issuedAt: now, id: genRandomInt()));
+      expect(route.lastHeaders.contains(firstHeader), false);
+    },
+  );
+
+  test(
+    'P2PRoute.getActualAddresses, removeStaleAddresses',
     () {
       final now = DateTime.now().millisecondsSinceEpoch;
       final staleAt = now - 3000;
