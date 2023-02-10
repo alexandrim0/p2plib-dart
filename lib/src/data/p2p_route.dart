@@ -56,21 +56,11 @@ class P2PRoute {
     }
   }
 
-  Iterable<P2PFullAddress> getActualAddresses({
-    required int staleAt,
-    bool preserveLocal = false,
-  }) =>
-      addresses.entries.where((e) {
-        if (preserveLocal && e.key.isLocal) return true;
-        return e.value > staleAt;
-      }).map((e) => e.key);
+  Iterable<P2PFullAddress> getActualAddresses({required final int staleAt}) =>
+      addresses.entries
+          .where((e) => e.key.isStatic || e.value > staleAt)
+          .map((e) => e.key);
 
-  void removeStaleAddresses({
-    required int staleAt,
-    bool preserveLocal = false,
-  }) =>
-      addresses.removeWhere((a, t) {
-        if (preserveLocal && a.isLocal) return false;
-        return t < staleAt;
-      });
+  void removeStaleAddresses({required final int staleAt}) =>
+      addresses.removeWhere((a, t) => a.isNotStatic && t < staleAt);
 }

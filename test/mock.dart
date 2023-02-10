@@ -17,6 +17,7 @@ final proxyPeerId = P2PPeerId(
 );
 final proxyAddress = P2PFullAddress(
   address: localAddress,
+  isStatic: true,
   isLocal: true,
   port: 2022,
 );
@@ -45,9 +46,11 @@ Future<P2PRouterL2> createRouter({
   final String? debugLabel,
 }) async {
   final router = P2PRouterL2(
-    transports: [P2PUdpTransport(fullAddress: address)],
+    transports: [P2PUdpTransport(bindAddress: address)],
     logger: (message) => print('[$debugLabel] $message'),
-  )..requestTimeout = const Duration(seconds: 2);
+  )
+    ..requestTimeout = const Duration(seconds: 2)
+    ..peerOnlineTimeout = const Duration(seconds: 2);
   final cryptoKeys = P2PCryptoKeys.empty();
   if (seed != null) cryptoKeys.seed = seed;
   await router.init(cryptoKeys);
@@ -61,9 +64,11 @@ Future<Isolate> createProxy({
   final isolate = await Isolate.spawn(
     (_) async {
       final router = P2PRouterL0(
-        transports: [P2PUdpTransport(fullAddress: address ?? proxyAddress)],
+        transports: [P2PUdpTransport(bindAddress: address ?? proxyAddress)],
         logger: (message) => print('[$debugLabel] $message'),
-      )..requestTimeout = const Duration(seconds: 2);
+      )
+        ..requestTimeout = const Duration(seconds: 2)
+        ..peerOnlineTimeout = const Duration(seconds: 2);
       await router.init(P2PCryptoKeys.empty()..seed = proxySeed);
       await router.start();
     },

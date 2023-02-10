@@ -4,7 +4,6 @@ part of 'router.dart';
 /// Also it keeps Routes and can manipulate with them
 
 abstract class P2PRouterBase {
-  static const defaultPort = 2022;
   static const defaultPeriod = Duration(seconds: 1);
   static const defaultTimeout = Duration(seconds: 3);
   static const defaultAddressTTL = Duration(seconds: 30);
@@ -14,12 +13,11 @@ abstract class P2PRouterBase {
   final Duration keepalivePeriod;
   final P2PCrypto crypto;
 
-  var transportTTL = defaultTimeout.inSeconds;
   var peerAddressTTL = defaultAddressTTL;
+  var peerOnlineTimeout = defaultTimeout;
   var requestTimeout = defaultTimeout;
   var useForwardersCount = 2;
   var maxForwardsCount = 1;
-  var preserveLocalAddress = false; // More efficient for relay node
 
   void Function(String)? logger;
 
@@ -36,17 +34,19 @@ abstract class P2PRouterBase {
         transports = transports ??
             [
               P2PUdpTransport(
-                  fullAddress: P2PFullAddress(
-                address: InternetAddress.anyIPv4,
-                isLocal: false,
-                port: defaultPort,
-              )),
+                bindAddress: P2PFullAddress(
+                  address: InternetAddress.anyIPv4,
+                  port: P2PUdpTransport.defaultPort,
+                ),
+                ttl: defaultTimeout.inSeconds,
+              ),
               P2PUdpTransport(
-                  fullAddress: P2PFullAddress(
-                address: InternetAddress.anyIPv6,
-                isLocal: false,
-                port: defaultPort,
-              )),
+                bindAddress: P2PFullAddress(
+                  address: InternetAddress.anyIPv6,
+                  port: P2PUdpTransport.defaultPort,
+                ),
+                ttl: defaultTimeout.inSeconds,
+              ),
             ];
 
   bool get isRun => _isRun;
@@ -75,7 +75,6 @@ abstract class P2PRouterBase {
     for (final transport in transports) {
       transport
         ..logger = logger
-        ..ttl = transportTTL
         ..onMessage = onMessage;
       await transport.start();
     }
@@ -103,7 +102,7 @@ abstract class P2PRouterBase {
   }
 
   bool getPeerStatus(final P2PPeerId peerId) =>
-      (routes[peerId]?.lastSeen ?? 0) + requestTimeout.inMilliseconds > _now;
+      (routes[peerId]?.lastSeen ?? 0) + peerOnlineTimeout.inMilliseconds > _now;
 
   /// Returns cached addresses or who can forward
   Iterable<P2PFullAddress> resolvePeerId(final P2PPeerId peerId) {
@@ -117,7 +116,6 @@ abstract class P2PRouterBase {
     } else {
       return route.getActualAddresses(
         staleAt: _now - peerAddressTTL.inMilliseconds,
-        preserveLocal: preserveLocalAddress,
       );
     }
   }

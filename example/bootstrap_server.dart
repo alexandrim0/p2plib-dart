@@ -4,17 +4,17 @@ import 'package:p2plib/p2plib.dart';
 
 void main(List<String> args) async {
   if (args.contains('help')) _printHelpScreen();
-  final port = _getPort(args) ?? P2PRouterBase.defaultPort;
+  final port = _getPort(args) ?? P2PUdpTransport.defaultPort;
   final router = P2PRouterL0(
     transports: [
       P2PUdpTransport(
-          fullAddress: P2PFullAddress(
+          bindAddress: P2PFullAddress(
         address: InternetAddress.anyIPv4,
         isLocal: false,
         port: port,
       )),
       P2PUdpTransport(
-          fullAddress: P2PFullAddress(
+          bindAddress: P2PFullAddress(
         address: InternetAddress.anyIPv6,
         isLocal: false,
         port: port,

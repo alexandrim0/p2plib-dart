@@ -21,7 +21,6 @@ class P2PRouterL0 extends P2PRouterBase {
         if (isNotRun || routes.isEmpty) return;
         routes.forEach((_, r) => r.removeStaleAddresses(
               staleAt: _now - peerAddressTTL.inMilliseconds,
-              preserveLocal: preserveLocalAddress,
             ));
         final routesCount = routes.length;
         routes.removeWhere((_, r) => r.isEmpty);

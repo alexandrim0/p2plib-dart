@@ -136,12 +136,20 @@ void main() async {
       final actualAddress = P2PFullAddress(
         address: localAddress,
         isLocal: true,
+        isStatic: false,
         port: 1234,
       );
       final staleAddress = P2PFullAddress(
         address: localAddress,
         isLocal: true,
+        isStatic: false,
         port: 4321,
+      );
+      final staticAddress = P2PFullAddress(
+        address: localAddress,
+        isLocal: true,
+        isStatic: true,
+        port: 2345,
       );
       final route = P2PRoute(
         peerId: proxyPeerId,
@@ -150,28 +158,43 @@ void main() async {
           bobAddress: now,
           actualAddress: now,
           staleAddress: staleAt - 1,
+          staticAddress: staleAt - 1,
         },
       );
 
-      final actualAddresses = route.getActualAddresses(
-        staleAt: staleAt,
-        preserveLocal: false,
-      );
+      final actualAddresses = route.getActualAddresses(staleAt: staleAt);
       expect(actualAddresses.contains(actualAddress), true);
+      expect(actualAddresses.contains(staticAddress), true);
       expect(actualAddresses.contains(staleAddress), false);
 
-      final actualAddressesLocalsPreserved = route.getActualAddresses(
-        staleAt: staleAt,
-        preserveLocal: true,
-      );
-      expect(actualAddressesLocalsPreserved.contains(actualAddress), true);
-      expect(actualAddressesLocalsPreserved.contains(staleAddress), true);
-
-      route.removeStaleAddresses(staleAt: staleAt, preserveLocal: true);
-      expect(route.addresses.containsKey(staleAddress), true);
-
-      route.removeStaleAddresses(staleAt: staleAt, preserveLocal: false);
+      route.removeStaleAddresses(staleAt: staleAt);
       expect(route.addresses.containsKey(staleAddress), false);
+      expect(route.addresses.containsKey(staticAddress), true);
+    },
+  );
+
+  test(
+    'FullAddress',
+    () {
+      final addr1 = P2PFullAddress(
+        address: proxyAddress.address,
+        port: proxyAddress.port,
+        isLocal: true,
+        isStatic: false,
+      );
+      final addr2 = P2PFullAddress(
+        address: proxyAddress.address,
+        port: proxyAddress.port,
+        isLocal: false,
+        isStatic: true,
+      );
+      final set = {addr1, addr2};
+
+      expect(addr1, addr2);
+      expect(addr1, addr2);
+      expect(addr1.isLocal == addr2.isLocal, false);
+      expect(addr1.isStatic == addr2.isStatic, false);
+      expect(set.length, 1);
     },
   );
 }
