@@ -23,3 +23,7 @@ class ExceptionIsNotRunning extends ExceptionBase {
 class ExceptionUnknownRoute extends ExceptionBase {
   const ExceptionUnknownRoute([super.message]);
 }
+
+class ExceptionInvalidSignature extends ExceptionBase {
+  const ExceptionInvalidSignature([super.message]);
+}

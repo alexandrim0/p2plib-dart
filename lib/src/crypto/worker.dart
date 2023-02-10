@@ -17,8 +17,7 @@ void cryptoWorker(final CryptoTask initialTask) async {
   if (cryptoKeys.seed.isEmpty) {
     cryptoKeys.seed = sodium.randombytes.buf(sodium.randombytes.seedBytes);
   }
-  late final KeyPair encKeyPair;
-  late final KeyPair signKeyPair;
+  late final KeyPair encKeyPair, signKeyPair;
 
   // use given encryption key pair or create it from given or generated seed
   if (cryptoKeys.encPrivateKey.isEmpty || cryptoKeys.encPublicKey.isEmpty) {
@@ -79,16 +78,14 @@ void cryptoWorker(final CryptoTask initialTask) async {
 
           case CryptoTaskType.unseal:
             final datagram = task.payload as Uint8List;
-            // check signature
             if (!sign.verifyDetached(
               message: Message.getUnsignedDatagram(datagram),
               signature: Message.getSignature(datagram),
               publicKey: Message.getSrcPeerId(datagram).signPiblicKey,
             )) {
-              task.payload = Exception('Crypto worker. Wrong signature!');
+              task.payload = const ExceptionInvalidSignature();
               break;
             }
-            // decrypt payload
             if (Message.hasEmptyPayload(datagram)) {
               task.payload = emptyUint8List;
             } else {
