@@ -10,8 +10,8 @@ void main() async {
     () {
       final bytesA = getRandomBytes(64);
       final bytesB = bytesA.buffer.asUint8List();
-      final peerIdA = P2PPeerId(value: bytesA);
-      final peerIdB = P2PPeerId(value: bytesB);
+      final peerIdA = PeerId(value: bytesA);
+      final peerIdB = PeerId(value: bytesB);
 
       expect(proxyPeerId == randomPeerId, false);
       expect(peerIdA == peerIdB, true);
@@ -19,19 +19,19 @@ void main() async {
   );
 
   test(
-    'P2PMessageHeader equality and serialization',
+    'MessageHeader equality and serialization',
     () {
-      final headerA = P2PPacketHeader(
+      final headerA = PacketHeader(
         issuedAt: DateTime.now().millisecondsSinceEpoch,
         id: genRandomInt(),
       );
       final headerB = headerA.copyWith(
-        messageType: P2PPacketType.confirmation,
+        messageType: PacketType.confirmation,
       );
       final headerC = headerA.copyWith(
         id: genRandomInt(),
       );
-      final headerD = P2PPacketHeader.fromBytes(headerA.toBytes());
+      final headerD = PacketHeader.fromBytes(headerA.toBytes());
 
       expect(headerA == headerB, true);
       expect(headerA == headerC, false);
@@ -40,11 +40,11 @@ void main() async {
   );
 
   test(
-    'P2PMessage serialization',
+    'Message serialization',
     () {
       final messageId = genRandomInt();
-      final message = P2PMessage(
-        header: P2PPacketHeader(
+      final message = Message(
+        header: PacketHeader(
           issuedAt: DateTime.now().millisecondsSinceEpoch,
           id: messageId,
         ),
@@ -53,8 +53,8 @@ void main() async {
       );
       final datagram = message.toBytes();
 
-      expect(P2PPacketHeader.fromBytes(datagram).id, messageId);
-      expect(P2PMessage.getDstPeerId(datagram), randomPeerId);
+      expect(PacketHeader.fromBytes(datagram).id, messageId);
+      expect(Message.getDstPeerId(datagram), randomPeerId);
     },
   );
 
@@ -68,27 +68,27 @@ void main() async {
       expect(addressA == addressB, true);
       expect(addressA == addressC, false);
 
-      final fullAddressA = P2PFullAddress(
+      final fullAddressA = FullAddress(
         address: addressA,
         isLocal: true,
         port: 5000,
       );
-      final fullAddressB = P2PFullAddress(
+      final fullAddressB = FullAddress(
         address: addressB,
         isLocal: true,
         port: 5000,
       );
-      final fullAddressC = P2PFullAddress(
+      final fullAddressC = FullAddress(
         address: addressC,
         isLocal: true,
         port: 5000,
       );
-      final fullAddressD = P2PFullAddress(
+      final fullAddressD = FullAddress(
         address: addressA,
         isLocal: true,
         port: 5001,
       );
-      final fullAddressE = P2PFullAddress(
+      final fullAddressE = FullAddress(
         address: addressC,
         isLocal: true,
         port: 5001,
@@ -108,50 +108,50 @@ void main() async {
   );
 
   test(
-    'P2PRoute.addHeader',
+    'Route.addHeader',
     () {
-      P2PRoute.maxStoredHeaders = 5;
+      Route.maxStoredHeaders = 5;
       final now = DateTime.now().millisecondsSinceEpoch;
-      final firstHeader = P2PPacketHeader(issuedAt: now, id: genRandomInt());
-      final route = P2PRoute(
+      final firstHeader = PacketHeader(issuedAt: now, id: genRandomInt());
+      final route = Route(
         peerId: proxyPeerId,
         header: firstHeader,
       );
 
       for (var i = 0; i < 4; i++) {
-        route.addHeader(P2PPacketHeader(issuedAt: now, id: genRandomInt()));
+        route.addHeader(PacketHeader(issuedAt: now, id: genRandomInt()));
       }
       expect(route.lastHeaders.contains(firstHeader), true);
 
-      route.addHeader(P2PPacketHeader(issuedAt: now, id: genRandomInt()));
+      route.addHeader(PacketHeader(issuedAt: now, id: genRandomInt()));
       expect(route.lastHeaders.contains(firstHeader), false);
     },
   );
 
   test(
-    'P2PRoute.getActualAddresses, removeStaleAddresses',
+    'Route.getActualAddresses, removeStaleAddresses',
     () {
       final now = DateTime.now().millisecondsSinceEpoch;
       final staleAt = now - 3000;
-      final actualAddress = P2PFullAddress(
+      final actualAddress = FullAddress(
         address: localAddress,
         isLocal: true,
         isStatic: false,
         port: 1234,
       );
-      final staleAddress = P2PFullAddress(
+      final staleAddress = FullAddress(
         address: localAddress,
         isLocal: true,
         isStatic: false,
         port: 4321,
       );
-      final staticAddress = P2PFullAddress(
+      final staticAddress = FullAddress(
         address: localAddress,
         isLocal: true,
         isStatic: true,
         port: 2345,
       );
-      final route = P2PRoute(
+      final route = Route(
         peerId: proxyPeerId,
         addresses: {
           aliceAddress: now,
@@ -176,13 +176,13 @@ void main() async {
   test(
     'FullAddress',
     () {
-      final addr1 = P2PFullAddress(
+      final addr1 = FullAddress(
         address: proxyAddress.address,
         port: proxyAddress.port,
         isLocal: true,
         isStatic: false,
       );
-      final addr2 = P2PFullAddress(
+      final addr2 = FullAddress(
         address: proxyAddress.address,
         port: proxyAddress.port,
         isLocal: false,

@@ -1,13 +1,13 @@
 part of 'data.dart';
 
-enum P2PPacketType { regular, confirmable, confirmation }
+enum PacketType { regular, confirmable, confirmation }
 
 /// 1 byte - forwards count
 /// 1 byte - packet type
 /// 6 bytes - issuedAt (unix timestamp with ms)
 /// 8 bytes - message id (int)
 
-class P2PPacketHeader {
+class PacketHeader {
   static const length = 16;
 
   static Uint8List setForwardsCount(int count, Uint8List datagram) {
@@ -15,12 +15,12 @@ class P2PPacketHeader {
     return datagram;
   }
 
-  final P2PPacketType messageType;
+  final PacketType messageType;
   final int forwardsCount, issuedAt, id;
 
-  const P2PPacketHeader({
+  const PacketHeader({
     this.forwardsCount = 0,
-    this.messageType = P2PPacketType.regular,
+    this.messageType = PacketType.regular,
     required this.issuedAt,
     required this.id,
   });
@@ -30,20 +30,20 @@ class P2PPacketHeader {
 
   @override
   bool operator ==(Object other) =>
-      other is P2PPacketHeader &&
+      other is PacketHeader &&
       runtimeType == other.runtimeType &&
       issuedAt == other.issuedAt &&
       id == other.id;
 
-  factory P2PPacketHeader.fromBytes(final Uint8List datagram) {
+  factory PacketHeader.fromBytes(final Uint8List datagram) {
     final messageType = datagram[1];
-    if (messageType > P2PPacketType.values.length) {
+    if (messageType > PacketType.values.length) {
       throw const FormatException('Packet type is wrong!');
     }
     final buffer = datagram.buffer.asInt64List(0, 2);
-    return P2PPacketHeader(
+    return PacketHeader(
       forwardsCount: datagram[0],
-      messageType: P2PPacketType.values[messageType],
+      messageType: PacketType.values[messageType],
       issuedAt: buffer[0] >> 16,
       id: buffer[1],
     );
@@ -58,12 +58,12 @@ class P2PPacketHeader {
     return head;
   }
 
-  P2PPacketHeader copyWith({
+  PacketHeader copyWith({
     final int? issuedAt,
     final int? id,
-    final P2PPacketType? messageType,
+    final PacketType? messageType,
   }) =>
-      P2PPacketHeader(
+      PacketHeader(
         messageType: messageType ?? this.messageType,
         issuedAt: issuedAt ?? this.issuedAt,
         id: id ?? this.id,

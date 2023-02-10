@@ -1,12 +1,12 @@
 part of 'transport.dart';
 
-abstract class P2PTransportBase {
+abstract class TransportBase {
   int ttl;
-  final P2PFullAddress bindAddress;
-  Future<void> Function(P2PPacket packet)? onMessage;
+  final FullAddress bindAddress;
+  Future<void> Function(Packet packet)? onMessage;
   void Function(String)? logger;
 
-  P2PTransportBase({
+  TransportBase({
     required this.bindAddress,
     this.onMessage,
     this.ttl = 5,
@@ -18,7 +18,7 @@ abstract class P2PTransportBase {
   void stop();
 
   void send(
-    final Iterable<P2PFullAddress> fullAddresses,
+    final Iterable<FullAddress> fullAddresses,
     final Uint8List datagram,
   );
 

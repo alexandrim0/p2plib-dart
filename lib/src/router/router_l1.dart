@@ -4,26 +4,26 @@ part of 'router.dart';
 /// It can send and process messages, so can be used as advanced relay node.
 /// Also it can be an base class for poor client.
 
-class P2PRouterL1 extends P2PRouterL0 {
-  var retryPeriod = P2PRouterBase.defaultPeriod;
+class RouterL1 extends RouterL0 {
+  var retryPeriod = RouterBase.defaultPeriod;
 
   final _ackCompleters = <int, Completer<void>>{};
-  final _messageController = StreamController<P2PMessage>();
+  final _messageController = StreamController<Message>();
 
-  P2PRouterL1({
+  RouterL1({
     super.crypto,
     super.transports,
     super.keepalivePeriod,
     super.logger,
   });
 
-  Iterable<P2PFullAddress> get selfAddresses =>
+  Iterable<FullAddress> get selfAddresses =>
       transports.map((t) => t.bindAddress);
 
-  Stream<P2PMessage> get messageStream => _messageController.stream;
+  Stream<Message> get messageStream => _messageController.stream;
 
   @override
-  Future<P2PCryptoKeys> init([P2PCryptoKeys? keys]) async {
+  Future<CryptoKeys> init([CryptoKeys? keys]) async {
     final cryptoKeys = await super.init(keys);
 
     // send keepalive messages
@@ -45,31 +45,31 @@ class P2PRouterL1 extends P2PRouterL0 {
   @override
   void stop() {
     for (final c in _ackCompleters.values) {
-      c.completeError(const P2PExceptionIsNotRunning());
+      c.completeError(const ExceptionIsNotRunning());
     }
     _ackCompleters.clear();
     super.stop();
   }
 
   @override
-  Future<P2PPacket> onMessage(final P2PPacket packet) async {
+  Future<Packet> onMessage(final Packet packet) async {
     await super.onMessage(packet);
 
     // check and remove signature, decrypt if not empty
     packet.payload = await crypto.unseal(packet.datagram);
 
     // exit if message is confirmation of mine message
-    if (packet.header.messageType == P2PPacketType.confirmation) {
+    if (packet.header.messageType == PacketType.confirmation) {
       _ackCompleters.remove(packet.header.id)?.complete();
       throw const StopProcessing();
     }
 
     // send confirmation if required
-    if (packet.header.messageType == P2PPacketType.confirmable) {
+    if (packet.header.messageType == PacketType.confirmable) {
       crypto
-          .sign(P2PMessage(
+          .sign(Message(
             header: packet.header.copyWith(
-              messageType: P2PPacketType.confirmation,
+              messageType: PacketType.confirmation,
             ),
             srcPeerId: selfId,
             dstPeerId: packet.srcPeerId,
@@ -82,7 +82,7 @@ class P2PRouterL1 extends P2PRouterL0 {
 
     // message is for user, send it to subscriber
     if (packet.payload.isNotEmpty && _messageController.hasListener) {
-      _messageController.add(P2PMessage(
+      _messageController.add(Message(
         header: packet.header,
         srcPeerId: packet.srcPeerId,
         dstPeerId: packet.dstPeerId,
@@ -94,23 +94,23 @@ class P2PRouterL1 extends P2PRouterL0 {
   }
 
   /// Send message. If useAddress is not null then use this else resolve peerId
-  Future<P2PPacketHeader> sendMessage({
+  Future<PacketHeader> sendMessage({
     final bool isConfirmable = false,
-    required final P2PPeerId dstPeerId,
+    required final PeerId dstPeerId,
     final int? messageId,
     final Uint8List? payload,
     final Duration? ackTimeout,
-    final Iterable<P2PFullAddress>? useAddresses,
+    final Iterable<FullAddress>? useAddresses,
   }) async {
-    if (isNotRun) throw const P2PExceptionIsNotRunning();
+    if (isNotRun) throw const ExceptionIsNotRunning();
 
     final addresses = useAddresses ?? resolvePeerId(dstPeerId);
-    if (addresses.isEmpty) throw P2PExceptionUnknownRoute(dstPeerId);
+    if (addresses.isEmpty) throw ExceptionUnknownRoute(dstPeerId);
 
-    final message = P2PMessage(
-      header: P2PPacketHeader(
+    final message = Message(
+      header: PacketHeader(
         messageType:
-            isConfirmable ? P2PPacketType.confirmable : P2PPacketType.regular,
+            isConfirmable ? PacketType.confirmable : PacketType.regular,
         issuedAt: _now,
         id: messageId ?? genRandomInt(),
       ),
@@ -137,7 +137,7 @@ class P2PRouterL1 extends P2PRouterL0 {
   Future<void> sendDatagramConfirmable({
     required final int messageId,
     required final Uint8List datagram,
-    required final Iterable<P2PFullAddress> addresses,
+    required final Iterable<FullAddress> addresses,
     final Duration? ackTimeout,
   }) {
     final completer = Completer<void>();
@@ -155,7 +155,7 @@ class P2PRouterL1 extends P2PRouterL0 {
   void _sendAndRetry({
     required final int messageId,
     required final Uint8List datagram,
-    required final Iterable<P2PFullAddress> addresses,
+    required final Iterable<FullAddress> addresses,
   }) {
     if (isRun && _ackCompleters.containsKey(messageId)) {
       sendDatagram(addresses: addresses, datagram: datagram);

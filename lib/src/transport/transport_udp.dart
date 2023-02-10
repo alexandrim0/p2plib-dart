@@ -1,11 +1,11 @@
 part of 'transport.dart';
 
-class P2PUdpTransport extends P2PTransportBase {
+class TransportUdp extends TransportBase {
   static const defaultPort = 2022;
 
   RawDatagramSocket? _socket;
 
-  P2PUdpTransport({required super.bindAddress, super.onMessage, super.ttl});
+  TransportUdp({required super.bindAddress, super.onMessage, super.ttl});
 
   @override
   Future<void> start() async {
@@ -19,17 +19,17 @@ class P2PUdpTransport extends P2PTransportBase {
       (event) async {
         if (event != RawSocketEvent.read) return;
         final datagram = _socket?.receive();
-        if (datagram == null || datagram.data.length < P2PPacketHeader.length) {
+        if (datagram == null || datagram.data.length < PacketHeader.length) {
           return;
         }
         try {
-          await onMessage!(P2PPacket(
-            srcFullAddress: P2PFullAddress(
+          await onMessage!(Packet(
+            srcFullAddress: FullAddress(
               address: datagram.address,
               isLocal: bindAddress.isLocal,
               port: datagram.port,
             ),
-            header: P2PPacketHeader.fromBytes(datagram.data),
+            header: PacketHeader.fromBytes(datagram.data),
             datagram: datagram.data,
           ));
         } on StopProcessing catch (_) {
@@ -48,7 +48,7 @@ class P2PUdpTransport extends P2PTransportBase {
 
   @override
   void send(
-    final Iterable<P2PFullAddress> fullAddresses,
+    final Iterable<FullAddress> fullAddresses,
     final Uint8List datagram,
   ) {
     if (_socket == null) return;

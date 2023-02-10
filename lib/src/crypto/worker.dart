@@ -6,13 +6,13 @@ import 'package:sodium/sodium.dart';
 
 import '/src/data/data.dart';
 
-void cryptoWorker(final P2PCryptoTask initialTask) async {
+void cryptoWorker(final CryptoTask initialTask) async {
   final sodium = await SodiumInit.init(_loadSodium());
   final box = sodium.crypto.box;
   final sign = sodium.crypto.sign;
   final cryptoKeys = initialTask.extra == null
-      ? P2PCryptoKeys.empty()
-      : initialTask.extra as P2PCryptoKeys;
+      ? CryptoKeys.empty()
+      : initialTask.extra as CryptoKeys;
 
   if (cryptoKeys.seed.isEmpty) {
     cryptoKeys.seed = sodium.randombytes.buf(sodium.randombytes.seedBytes);
@@ -56,11 +56,11 @@ void cryptoWorker(final P2PCryptoTask initialTask) async {
 
   receivePort.listen(
     (final task) {
-      if (task is! P2PCryptoTask) return;
+      if (task is! CryptoTask) return;
       try {
         switch (task.type) {
-          case P2PCryptoTaskType.seal:
-            final message = task.payload as P2PMessage;
+          case CryptoTaskType.seal:
+            final message = task.payload as Message;
             if (message.isNotEmpty) {
               message.payload = box.seal(
                 publicKey: message.dstPeerId.encPublicKey,
@@ -77,37 +77,37 @@ void cryptoWorker(final P2PCryptoTask initialTask) async {
             task.payload = signedDatagram.toBytes();
             break;
 
-          case P2PCryptoTaskType.unseal:
+          case CryptoTaskType.unseal:
             final datagram = task.payload as Uint8List;
             // check signature
             if (!sign.verifyDetached(
-              message: P2PMessage.getUnsignedDatagram(datagram),
-              signature: P2PMessage.getSignature(datagram),
-              publicKey: P2PMessage.getSrcPeerId(datagram).signPiblicKey,
+              message: Message.getUnsignedDatagram(datagram),
+              signature: Message.getSignature(datagram),
+              publicKey: Message.getSrcPeerId(datagram).signPiblicKey,
             )) {
               task.payload = Exception('Crypto worker. Wrong signature!');
               break;
             }
             // decrypt payload
-            if (P2PMessage.hasEmptyPayload(datagram)) {
+            if (Message.hasEmptyPayload(datagram)) {
               task.payload = emptyUint8List;
             } else {
               task.payload = box.sealOpen(
-                cipherText: P2PMessage.getPayload(datagram),
+                cipherText: Message.getPayload(datagram),
                 publicKey: encKeyPair.publicKey,
                 secretKey: encKeyPair.secretKey,
               );
             }
             break;
 
-          case P2PCryptoTaskType.sign:
+          case CryptoTaskType.sign:
             task.payload = sign.detached(
               message: task.payload as Uint8List,
               secretKey: signKeyPair.secretKey,
             );
             break;
 
-          case P2PCryptoTaskType.verifySigned:
+          case CryptoTaskType.verifySigned:
             final data = task.payload as Uint8List;
             final messageLength = data.length - signatureLength;
             task.payload = sign.verifyDetached(
@@ -140,5 +140,5 @@ DynamicLibrary _loadSodium() {
   if (Platform.isWindows) {
     return DynamicLibrary.open('C:\\Windows\\System32\\libsodium.dll');
   }
-  throw OSError('[P2PCrypto] Platform not supported');
+  throw OSError('[Crypto] Platform not supported');
 }

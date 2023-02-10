@@ -6,15 +6,15 @@ import 'package:collection/collection.dart';
 
 export 'dart:typed_data' show Uint8List;
 
-part 'p2p_route.dart';
-part 'p2p_token.dart';
-part 'p2p_crypto.dart';
-part 'p2p_peer_id.dart';
-part 'p2p_message.dart';
-part 'p2p_packet.dart';
-part 'p2p_exception.dart';
-part 'p2p_full_address.dart';
-part 'p2p_message_header.dart';
+part 'route.dart';
+part 'token.dart';
+part 'crypto.dart';
+part 'peer_id.dart';
+part 'message.dart';
+part 'packet.dart';
+part 'exception.dart';
+part 'full_address.dart';
+part 'message_header.dart';
 
 const _maxRandomNumber = 1 << 32;
 final _random = Random.secure();

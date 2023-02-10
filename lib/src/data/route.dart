@@ -1,21 +1,21 @@
 part of 'data.dart';
 
-class P2PRoute {
+class Route {
   static var maxStoredHeaders = 0;
 
-  final P2PPeerId peerId;
+  final PeerId peerId;
 
   bool canForward;
 
-  final _addresses = <P2PFullAddress, int>{};
-  final _lastHeaders = QueueList<P2PPacketHeader>(maxStoredHeaders);
+  final _addresses = <FullAddress, int>{};
+  final _lastHeaders = QueueList<PacketHeader>(maxStoredHeaders);
 
-  P2PRoute({
+  Route({
     required this.peerId,
     this.canForward = false,
-    final P2PPacketHeader? header,
-    final Map<P2PFullAddress, int>? addresses,
-    final MapEntry<P2PFullAddress, int>? address,
+    final PacketHeader? header,
+    final Map<FullAddress, int>? addresses,
+    final MapEntry<FullAddress, int>? address,
   }) {
     if (header != null) _lastHeaders.add(header);
     if (addresses != null) _addresses.addAll(addresses);
@@ -25,19 +25,19 @@ class P2PRoute {
   bool get isEmpty => addresses.isEmpty;
   bool get isNotEmpty => addresses.isNotEmpty;
 
-  Map<P2PFullAddress, int> get addresses => _addresses;
+  Map<FullAddress, int> get addresses => _addresses;
 
-  QueueList<P2PPacketHeader> get lastHeaders => _lastHeaders;
+  QueueList<PacketHeader> get lastHeaders => _lastHeaders;
 
   int get lastSeen => addresses.isEmpty ? 0 : addresses.values.reduce(max);
 
-  void addHeader(P2PPacketHeader header) {
+  void addHeader(PacketHeader header) {
     _lastHeaders.addLast(header);
     if (_lastHeaders.length > maxStoredHeaders) _lastHeaders.removeFirst();
   }
 
   void addAddress({
-    required final P2PFullAddress address,
+    required final FullAddress address,
     required final int timestamp,
     bool? canForward,
   }) {
@@ -46,7 +46,7 @@ class P2PRoute {
   }
 
   void addAddresses({
-    required final Iterable<P2PFullAddress> addresses,
+    required final Iterable<FullAddress> addresses,
     required final int timestamp,
     bool? canForward,
   }) {
@@ -56,7 +56,7 @@ class P2PRoute {
     }
   }
 
-  Iterable<P2PFullAddress> getActualAddresses({required final int staleAt}) =>
+  Iterable<FullAddress> getActualAddresses({required final int staleAt}) =>
       addresses.entries
           .where((e) => e.key.isStatic || e.value > staleAt)
           .map((e) => e.key);

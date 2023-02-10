@@ -9,14 +9,14 @@ part of 'data.dart';
 /// 0 | >48 bytes - encrypted payload
 /// 64 bytes - signature
 
-class P2PPacket {
-  final P2PFullAddress srcFullAddress;
-  final P2PPacketHeader header;
+class Packet {
+  final FullAddress srcFullAddress;
+  final PacketHeader header;
   final Uint8List datagram;
-  late final P2PPeerId srcPeerId, dstPeerId;
+  late final PeerId srcPeerId, dstPeerId;
   late final Uint8List payload;
 
-  P2PPacket({
+  Packet({
     required this.srcFullAddress,
     required this.datagram,
     required this.header,

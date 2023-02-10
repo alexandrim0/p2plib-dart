@@ -3,15 +3,15 @@ part of 'router.dart';
 /// Interface class with base functions such as init(), start(), stop()
 /// Also it keeps Routes and can manipulate with them
 
-abstract class P2PRouterBase {
+abstract class RouterBase {
   static const defaultPeriod = Duration(seconds: 1);
   static const defaultTimeout = Duration(seconds: 3);
   static const defaultAddressTTL = Duration(seconds: 30);
 
-  final Map<P2PPeerId, P2PRoute> routes = {};
-  final Iterable<P2PTransportBase> transports;
+  final Map<PeerId, Route> routes = {};
+  final Iterable<TransportBase> transports;
   final Duration keepalivePeriod;
-  final P2PCrypto crypto;
+  final Crypto crypto;
 
   var peerAddressTTL = defaultAddressTTL;
   var peerOnlineTimeout = defaultTimeout;
@@ -21,29 +21,29 @@ abstract class P2PRouterBase {
 
   void Function(String)? logger;
 
-  late final P2PPeerId _selfId;
+  late final PeerId _selfId;
 
   var _isRun = false;
 
-  P2PRouterBase({
-    final P2PCrypto? crypto,
-    final Iterable<P2PTransportBase>? transports,
+  RouterBase({
+    final Crypto? crypto,
+    final Iterable<TransportBase>? transports,
     this.keepalivePeriod = const Duration(seconds: 15),
     this.logger,
-  })  : crypto = crypto ?? P2PCrypto(),
+  })  : crypto = crypto ?? Crypto(),
         transports = transports ??
             [
-              P2PUdpTransport(
-                bindAddress: P2PFullAddress(
+              TransportUdp(
+                bindAddress: FullAddress(
                   address: InternetAddress.anyIPv4,
-                  port: P2PUdpTransport.defaultPort,
+                  port: TransportUdp.defaultPort,
                 ),
                 ttl: defaultTimeout.inSeconds,
               ),
-              P2PUdpTransport(
-                bindAddress: P2PFullAddress(
+              TransportUdp(
+                bindAddress: FullAddress(
                   address: InternetAddress.anyIPv6,
-                  port: P2PUdpTransport.defaultPort,
+                  port: TransportUdp.defaultPort,
                 ),
                 ttl: defaultTimeout.inSeconds,
               ),
@@ -52,15 +52,15 @@ abstract class P2PRouterBase {
   bool get isRun => _isRun;
   bool get isNotRun => !_isRun;
 
-  P2PPeerId get selfId => _selfId;
+  PeerId get selfId => _selfId;
 
   int get _now => DateTime.now().millisecondsSinceEpoch;
 
-  set maxStoredHeaders(int value) => P2PRoute.maxStoredHeaders = value;
+  set maxStoredHeaders(int value) => Route.maxStoredHeaders = value;
 
-  Future<P2PCryptoKeys> init([final P2PCryptoKeys? keys]) async {
+  Future<CryptoKeys> init([final CryptoKeys? keys]) async {
     final cryptoKeys = await crypto.init(keys);
-    _selfId = P2PPeerId.fromKeys(
+    _selfId = PeerId.fromKeys(
       encryptionKey: cryptoKeys.encPublicKey,
       signKey: cryptoKeys.signPublicKey,
     );
@@ -70,7 +70,7 @@ abstract class P2PRouterBase {
   Future<void> start() async {
     if (_isRun) return;
     if (transports.isEmpty) {
-      throw P2PExceptionTransport('Need at least one P2PTransport!');
+      throw ExceptionTransport('Need at least one Transport!');
     }
     for (final transport in transports) {
       transport
@@ -90,10 +90,10 @@ abstract class P2PRouterBase {
   }
 
   /// throws StopProcessing if message is processed and children have to return
-  Future<P2PPacket> onMessage(final P2PPacket packet);
+  Future<Packet> onMessage(final Packet packet);
 
   void sendDatagram({
-    required final Iterable<P2PFullAddress> addresses,
+    required final Iterable<FullAddress> addresses,
     required final Uint8List datagram,
   }) {
     for (final t in transports) {
@@ -101,14 +101,14 @@ abstract class P2PRouterBase {
     }
   }
 
-  bool getPeerStatus(final P2PPeerId peerId) =>
+  bool getPeerStatus(final PeerId peerId) =>
       (routes[peerId]?.lastSeen ?? 0) + peerOnlineTimeout.inMilliseconds > _now;
 
   /// Returns cached addresses or who can forward
-  Iterable<P2PFullAddress> resolvePeerId(final P2PPeerId peerId) {
+  Iterable<FullAddress> resolvePeerId(final PeerId peerId) {
     final route = routes[peerId];
     if (route == null || route.isEmpty) {
-      final result = <P2PFullAddress>{};
+      final result = <FullAddress>{};
       for (final a in routes.values.where((e) => e.canForward)) {
         result.addAll(a.addresses.keys);
       }

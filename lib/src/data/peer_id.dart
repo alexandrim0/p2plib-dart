@@ -1,14 +1,14 @@
 part of 'data.dart';
 
-class P2PPeerId extends P2PToken {
+class PeerId extends Token {
   static const _keyLength = 32;
   static const length = _keyLength * 2;
 
-  P2PPeerId({required super.value}) {
+  PeerId({required super.value}) {
     if (value.length != length) const FormatException('PeerId length');
   }
 
-  factory P2PPeerId.fromKeys({
+  factory PeerId.fromKeys({
     required final Uint8List encryptionKey,
     required final Uint8List signKey,
   }) {
@@ -21,7 +21,7 @@ class P2PPeerId extends P2PToken {
     final builder = BytesBuilder(copy: false)
       ..add(encryptionKey)
       ..add(signKey);
-    return P2PPeerId(value: builder.toBytes());
+    return PeerId(value: builder.toBytes());
   }
 
   Uint8List get encPublicKey => value.sublist(0, _keyLength);

@@ -4,17 +4,17 @@ import 'package:p2plib/p2plib.dart';
 
 void main(List<String> args) async {
   if (args.contains('help')) _printHelpScreen();
-  final port = _getPort(args) ?? P2PUdpTransport.defaultPort;
-  final router = P2PRouterL0(
+  final port = _getPort(args) ?? TransportUdp.defaultPort;
+  final router = RouterL0(
     transports: [
-      P2PUdpTransport(
-          bindAddress: P2PFullAddress(
+      TransportUdp(
+          bindAddress: FullAddress(
         address: InternetAddress.anyIPv4,
         isLocal: false,
         port: port,
       )),
-      P2PUdpTransport(
-          bindAddress: P2PFullAddress(
+      TransportUdp(
+          bindAddress: FullAddress(
         address: InternetAddress.anyIPv6,
         isLocal: false,
         port: port,
@@ -24,12 +24,12 @@ void main(List<String> args) async {
   if (args.contains('log')) router.logger = stdout.writeln;
   final seed = Platform.environment['P2P_SEED'];
   final keys = await router.init(
-    seed == null ? null : (P2PCryptoKeys.empty()..seed = base64Decode(seed)),
+    seed == null ? null : (CryptoKeys.empty()..seed = base64Decode(seed)),
   );
   if (args.contains('show_seed')) {
     stdout.writeln('seed: ${base64UrlEncode(keys.seed)}');
   }
-  stdout.writeln(base64UrlEncode(P2PPeerId.fromKeys(
+  stdout.writeln(base64UrlEncode(PeerId.fromKeys(
     encryptionKey: keys.encPublicKey,
     signKey: keys.signPublicKey,
   ).value));

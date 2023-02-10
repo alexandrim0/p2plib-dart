@@ -3,8 +3,8 @@ part of 'router.dart';
 /// This layer should be fast as possible and can be used as relay only node.
 /// It can recieve, send and forward datagrams
 
-class P2PRouterL0 extends P2PRouterBase {
-  P2PRouterL0({
+class RouterL0 extends RouterBase {
+  RouterL0({
     super.crypto,
     super.transports,
     super.keepalivePeriod,
@@ -12,7 +12,7 @@ class P2PRouterL0 extends P2PRouterBase {
   });
 
   @override
-  Future<P2PCryptoKeys> init([final P2PCryptoKeys? keys]) async {
+  Future<CryptoKeys> init([final CryptoKeys? keys]) async {
     final cryptoKeys = await super.init(keys);
     // remove stale records
     Timer.periodic(
@@ -32,9 +32,9 @@ class P2PRouterL0 extends P2PRouterBase {
   }
 
   @override
-  Future<P2PPacket> onMessage(final P2PPacket packet) async {
+  Future<Packet> onMessage(final Packet packet) async {
     // check minimal datagram length
-    if (!P2PMessage.hasCorrectLength(packet.datagram)) {
+    if (!Message.hasCorrectLength(packet.datagram)) {
       throw const StopProcessing();
     }
 
@@ -44,7 +44,7 @@ class P2PRouterL0 extends P2PRouterBase {
     if (packet.header.issuedAt < now - delta ||
         packet.header.issuedAt > now + delta) throw const StopProcessing();
 
-    packet.srcPeerId = P2PMessage.getSrcPeerId(packet.datagram);
+    packet.srcPeerId = Message.getSrcPeerId(packet.datagram);
     // drop echo message
     if (packet.srcPeerId == _selfId) throw const StopProcessing();
 
@@ -52,11 +52,11 @@ class P2PRouterL0 extends P2PRouterBase {
 
     // drop duplicate
     if (route != null &&
-        P2PRoute.maxStoredHeaders > 0 &&
+        Route.maxStoredHeaders > 0 &&
         route.lastHeaders.contains(packet.header)) throw const StopProcessing();
 
     // reset for checking signature
-    P2PPacketHeader.setForwardsCount(0, packet.datagram);
+    PacketHeader.setForwardsCount(0, packet.datagram);
 
     // if peer unknown then check signature and keep address if success
     if (route?.addresses[packet.srcFullAddress] == null) {
@@ -64,7 +64,7 @@ class P2PRouterL0 extends P2PRouterBase {
         packet.srcPeerId.signPiblicKey,
         packet.datagram,
       )) {
-        routes[packet.srcPeerId] = P2PRoute(
+        routes[packet.srcPeerId] = Route(
           header: packet.header,
           peerId: packet.srcPeerId,
           address: MapEntry(packet.srcFullAddress, now),
@@ -86,7 +86,7 @@ class P2PRouterL0 extends P2PRouterBase {
     }
 
     // is message for me or to forward?
-    packet.dstPeerId = P2PMessage.getDstPeerId(packet.datagram);
+    packet.dstPeerId = Message.getDstPeerId(packet.datagram);
     if (packet.dstPeerId == _selfId) return packet;
 
     // check if forwards count exeeds
@@ -107,7 +107,7 @@ class P2PRouterL0 extends P2PRouterBase {
       // increment forwards count and forward message
       sendDatagram(
         addresses: addresses,
-        datagram: P2PPacketHeader.setForwardsCount(
+        datagram: PacketHeader.setForwardsCount(
           packet.header.forwardsCount + 1,
           packet.datagram,
         ),

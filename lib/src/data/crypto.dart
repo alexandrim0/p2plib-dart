@@ -3,20 +3,20 @@ part of 'data.dart';
 const sealLength = 48;
 const signatureLength = 64;
 
-enum P2PCryptoTaskType {
+enum CryptoTaskType {
   seal,
   unseal,
   sign,
   verifySigned,
 }
 
-class P2PCryptoTask {
+class CryptoTask {
   final int id;
-  final P2PCryptoTaskType type;
+  final CryptoTaskType type;
   Object payload;
   Object? extra;
 
-  P2PCryptoTask({
+  CryptoTask({
     required this.id,
     required this.type,
     required this.payload,
@@ -26,10 +26,10 @@ class P2PCryptoTask {
 
 /// seed, public keys and encPrivateKey is Uint8List(32)
 /// signPrivateKey is Uint8List(64)
-class P2PCryptoKeys {
+class CryptoKeys {
   Uint8List seed, encPublicKey, encPrivateKey, signPublicKey, signPrivateKey;
 
-  P2PCryptoKeys({
+  CryptoKeys({
     required this.seed,
     required this.encPublicKey,
     required this.encPrivateKey,
@@ -37,7 +37,7 @@ class P2PCryptoKeys {
     required this.signPrivateKey,
   });
 
-  factory P2PCryptoKeys.empty() => P2PCryptoKeys(
+  factory CryptoKeys.empty() => CryptoKeys(
         seed: emptyUint8List,
         encPublicKey: emptyUint8List,
         encPrivateKey: emptyUint8List,

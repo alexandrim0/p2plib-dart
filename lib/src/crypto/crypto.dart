@@ -6,20 +6,20 @@ import '/src/data/data.dart';
 
 import 'worker.dart';
 
-class P2PCrypto {
-  late final P2PCryptoKeys cryptoKeys;
+class Crypto {
+  late final CryptoKeys cryptoKeys;
   late final SendPort _sendPort;
   final _recievePort = ReceivePort();
-  final Map<int, Completer<P2PCryptoTask>> _completers = {
-    0: Completer<P2PCryptoTask>(),
+  final Map<int, Completer<CryptoTask>> _completers = {
+    0: Completer<CryptoTask>(),
   };
   var _idCounter = 0;
   var operationTimeout = const Duration(seconds: 1);
 
-  P2PCrypto() {
+  Crypto() {
     _recievePort.listen(
       (message) {
-        if (message is P2PCryptoTask) {
+        if (message is CryptoTask) {
           message.payload is Exception
               ? _completers.remove(message.id)?.completeError(message.payload)
               : _completers.remove(message.id)?.complete(message);
@@ -29,32 +29,32 @@ class P2PCrypto {
   }
 
   /// Will create key pair if seed is not empty else use key pair
-  Future<P2PCryptoKeys> init([P2PCryptoKeys? keys]) async {
+  Future<CryptoKeys> init([CryptoKeys? keys]) async {
     final id = _idCounter++;
-    await Isolate.spawn<P2PCryptoTask>(
+    await Isolate.spawn<CryptoTask>(
       cryptoWorker,
-      P2PCryptoTask(
+      CryptoTask(
         id: id,
-        type: P2PCryptoTaskType.sign, // does not matter for initial task
+        type: CryptoTaskType.sign, // does not matter for initial task
         payload: _recievePort.sendPort,
         extra: keys,
       ),
     );
     final initResult = await _completers[id]!.future.timeout(operationTimeout);
     _sendPort = initResult.payload as SendPort;
-    cryptoKeys = initResult.extra as P2PCryptoKeys;
+    cryptoKeys = initResult.extra as CryptoKeys;
     _completers.remove(id);
     return cryptoKeys;
   }
 
   /// Encrypt message`s payload and sign whole datagram
-  Future<Uint8List> seal(final P2PMessage message) async {
+  Future<Uint8List> seal(final Message message) async {
     final id = _idCounter++;
-    final completer = Completer<P2PCryptoTask>();
+    final completer = Completer<CryptoTask>();
     _completers[id] = completer;
-    _sendPort.send(P2PCryptoTask(
+    _sendPort.send(CryptoTask(
       id: id,
-      type: P2PCryptoTaskType.seal,
+      type: CryptoTaskType.seal,
       payload: message,
     ));
     try {
@@ -69,11 +69,11 @@ class P2PCrypto {
   /// Returns unencrypted payload of message
   Future<Uint8List> unseal(final Uint8List datagram) async {
     final id = _idCounter++;
-    final completer = Completer<P2PCryptoTask>();
+    final completer = Completer<CryptoTask>();
     _completers[id] = completer;
-    _sendPort.send(P2PCryptoTask(
+    _sendPort.send(CryptoTask(
       id: id,
-      type: P2PCryptoTaskType.unseal,
+      type: CryptoTaskType.unseal,
       payload: datagram,
     ));
     try {
@@ -87,11 +87,11 @@ class P2PCrypto {
 
   Future<Uint8List> sign(final Uint8List datagram) async {
     final id = _idCounter++;
-    final completer = Completer<P2PCryptoTask>();
+    final completer = Completer<CryptoTask>();
     _completers[id] = completer;
-    _sendPort.send(P2PCryptoTask(
+    _sendPort.send(CryptoTask(
       id: id,
-      type: P2PCryptoTaskType.sign,
+      type: CryptoTaskType.sign,
       payload: datagram,
     ));
     try {
@@ -113,11 +113,11 @@ class P2PCrypto {
     final Uint8List datagram,
   ) async {
     final id = _idCounter++;
-    final completer = Completer<P2PCryptoTask>();
+    final completer = Completer<CryptoTask>();
     _completers[id] = completer;
-    _sendPort.send(P2PCryptoTask(
+    _sendPort.send(CryptoTask(
       id: id,
-      type: P2PCryptoTaskType.verifySigned,
+      type: CryptoTaskType.verifySigned,
       payload: datagram,
       extra: pubKey,
     ));

@@ -28,7 +28,7 @@ main() async {
         () {
           expect(
             bobRouter.sendMessage(dstPeerId: randomPeerId),
-            throwsA(isA<P2PExceptionIsNotRunning>()),
+            throwsA(isA<ExceptionIsNotRunning>()),
           );
         },
         timeout: Timeout(testTimeout),
@@ -41,7 +41,7 @@ main() async {
 
           await expectLater(
             () => bobRouter.sendMessage(dstPeerId: randomPeerId),
-            throwsA(isA<P2PExceptionUnknownRoute>()),
+            throwsA(isA<ExceptionUnknownRoute>()),
           );
         },
         timeout: Timeout(testTimeout),
@@ -57,7 +57,7 @@ main() async {
           );
           final completer = Completer<bool>();
           subscription.onData((message) {
-            completer.complete(token == P2PToken(value: message.payload!));
+            completer.complete(token == Token(value: message.payload!));
           });
           await aliceRouter.sendMessage(
             dstPeerId: bobRouter.selfId,
@@ -78,7 +78,7 @@ main() async {
           );
           final completer = Completer<bool>();
           subscription.onData((message) {
-            completer.complete(token == P2PToken(value: message.payload!));
+            completer.complete(token == Token(value: message.payload!));
           });
 
           await expectLater(
@@ -206,7 +206,7 @@ main() async {
 
           final completer = Completer<bool>();
           subscription.onData((message) {
-            completer.complete(token == P2PToken(value: message.payload!));
+            completer.complete(token == Token(value: message.payload!));
           });
           await aliceRouter.sendMessage(
             dstPeerId: bobRouter.selfId,
@@ -232,7 +232,7 @@ main() async {
 
           final completer = Completer<bool>();
           subscription.onData((message) {
-            completer.complete(token == P2PToken(value: message.payload!));
+            completer.complete(token == Token(value: message.payload!));
           });
 
           await expectLater(
@@ -337,12 +337,12 @@ main() async {
         await bobRouter.sendMessage(dstPeerId: proxyPeerId);
         await Future.delayed(initTime);
 
-        final header = P2PPacketHeader(
-          messageType: P2PPacketType.confirmable,
+        final header = PacketHeader(
+          messageType: PacketType.confirmable,
           issuedAt: DateTime.now().millisecondsSinceEpoch,
           id: genRandomInt(),
         );
-        final datagram = await aliceRouter.crypto.sign(P2PMessage(
+        final datagram = await aliceRouter.crypto.sign(Message(
           header: header,
           srcPeerId: aliceRouter.selfId,
           dstPeerId: bobRouter.selfId,
@@ -357,12 +357,12 @@ main() async {
           completes,
         );
 
-        final header2 = P2PPacketHeader(
-          messageType: P2PPacketType.confirmable,
+        final header2 = PacketHeader(
+          messageType: PacketType.confirmable,
           issuedAt: DateTime.now().millisecondsSinceEpoch,
           id: genRandomInt(),
         );
-        final datagram2 = await aliceRouter.crypto.sign(P2PMessage(
+        final datagram2 = await aliceRouter.crypto.sign(Message(
           header: header2,
           srcPeerId: aliceRouter.selfId,
           dstPeerId: bobRouter.selfId,

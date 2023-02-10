@@ -1,7 +1,7 @@
 part of 'data.dart';
 
 /// Only address and port defines hash and equality
-class P2PFullAddress {
+class FullAddress {
   final InternetAddress address;
   final int port;
 
@@ -11,7 +11,7 @@ class P2PFullAddress {
   /// Defines if it needs keepalive
   final bool isLocal;
 
-  const P2PFullAddress({
+  const FullAddress({
     required this.address,
     required this.port,
     this.isLocal = false,
@@ -20,7 +20,7 @@ class P2PFullAddress {
 
   @override
   bool operator ==(Object other) =>
-      other is P2PFullAddress &&
+      other is FullAddress &&
       runtimeType == other.runtimeType &&
       port == other.port &&
       address == other.address;

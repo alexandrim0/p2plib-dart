@@ -6,24 +6,24 @@ part of 'data.dart';
 /// 0 | >48 bytes - encrypted payload
 /// 64 bytes - signature
 
-class P2PMessage {
+class Message {
   static const protocolNumber = 0;
-  static const headerLength = P2PPacketHeader.length + P2PPeerId.length * 2;
+  static const headerLength = PacketHeader.length + PeerId.length * 2;
   static const emptySignedMessageLength = headerLength + signatureLength;
 
   static bool hasCorrectLength(Uint8List datagram) =>
       datagram.length == emptySignedMessageLength ||
       datagram.length > emptySignedMessageLength + sealLength;
 
-  static P2PPeerId getSrcPeerId(Uint8List datagram) => P2PPeerId(
+  static PeerId getSrcPeerId(Uint8List datagram) => PeerId(
           value: datagram.sublist(
-        P2PPacketHeader.length,
-        P2PPacketHeader.length + P2PPeerId.length,
+        PacketHeader.length,
+        PacketHeader.length + PeerId.length,
       ));
 
-  static P2PPeerId getDstPeerId(Uint8List datagram) => P2PPeerId(
+  static PeerId getDstPeerId(Uint8List datagram) => PeerId(
           value: datagram.sublist(
-        P2PPacketHeader.length + P2PPeerId.length,
+        PacketHeader.length + PeerId.length,
         headerLength,
       ));
 
@@ -39,11 +39,11 @@ class P2PMessage {
   static Uint8List getPayload(Uint8List signedDatagram) => signedDatagram
       .sublist(headerLength, signedDatagram.length - signatureLength);
 
-  final P2PPacketHeader header;
-  final P2PPeerId srcPeerId, dstPeerId;
+  final PacketHeader header;
+  final PeerId srcPeerId, dstPeerId;
   Uint8List? payload;
 
-  P2PMessage({
+  Message({
     required this.header,
     required this.srcPeerId,
     required this.dstPeerId,

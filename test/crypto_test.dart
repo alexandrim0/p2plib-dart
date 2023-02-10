@@ -3,19 +3,19 @@ import 'package:test/test.dart';
 import 'mock.dart';
 
 main() async {
-  final crypto = P2PCrypto();
-  await crypto.init(P2PCryptoKeys.empty()..seed = proxySeed);
+  final crypto = Crypto();
+  await crypto.init(CryptoKeys.empty()..seed = proxySeed);
   final encPublicKey = crypto.cryptoKeys.encPublicKey;
   final signPublicKey = crypto.cryptoKeys.signPublicKey;
-  final emptyMessage = P2PMessage(
-    header: P2PPacketHeader(
+  final emptyMessage = Message(
+    header: PacketHeader(
       issuedAt: DateTime.now().millisecondsSinceEpoch,
       id: genRandomInt(),
     ),
     srcPeerId: proxyPeerId,
     dstPeerId: proxyPeerId,
   );
-  final notEmptyMessage = P2PMessage(
+  final notEmptyMessage = Message(
     header: emptyMessage.header,
     srcPeerId: proxyPeerId,
     dstPeerId: proxyPeerId,
@@ -27,9 +27,9 @@ main() async {
     'Base',
     () {
       test(
-        'P2PCrypto seed',
+        'Crypto seed',
         () => expect(
-          P2PPeerId.fromKeys(
+          PeerId.fromKeys(
             encryptionKey: encPublicKey,
             signKey: signPublicKey,
           ).toString(),
@@ -37,7 +37,7 @@ main() async {
         ),
       );
       test(
-        'P2PCrypto seal/unseal',
+        'Crypto seal/unseal',
         () async {
           // empty message
           expect(
@@ -53,7 +53,7 @@ main() async {
       );
 
       test(
-        'P2PCrypto sign/unsign',
+        'Crypto sign/unsign',
         () async {
           expect(
             await crypto.verifySigned(
@@ -71,7 +71,7 @@ main() async {
     'Stress test.',
     () {
       test(
-        'P2PCrypto stress test: seal/unseal',
+        'Crypto stress test: seal/unseal',
         () async {
           for (var i = 0; i < stressCount; i++) {
             await crypto.unseal(await crypto.seal(notEmptyMessage));
@@ -81,7 +81,7 @@ main() async {
       );
 
       test(
-        'P2PCrypto stress test: sign/unsign',
+        'Crypto stress test: sign/unsign',
         () async {
           for (var i = 0; i < stressCount; i++) {
             await crypto.verifySigned(

@@ -2,34 +2,34 @@ part of 'router.dart';
 
 /// Enhanced router with more high level API for building rich client
 
-class P2PRouterL2 extends P2PRouterL1 {
+class RouterL2 extends RouterL1 {
   final _lastSeenController =
-      StreamController<MapEntry<P2PPeerId, bool>>.broadcast();
+      StreamController<MapEntry<PeerId, bool>>.broadcast();
 
-  P2PRouterL2({
+  RouterL2({
     super.crypto,
     super.transports,
     super.keepalivePeriod,
     super.logger,
   });
 
-  Stream<MapEntry<P2PPeerId, bool>> get lastSeenStream =>
+  Stream<MapEntry<PeerId, bool>> get lastSeenStream =>
       _lastSeenController.stream;
 
   @override
-  Future<P2PPacket> onMessage(final P2PPacket packet) async {
+  Future<Packet> onMessage(final Packet packet) async {
     await super.onMessage(packet);
 
     // update peer status
-    _lastSeenController.add(MapEntry<P2PPeerId, bool>(packet.srcPeerId, true));
+    _lastSeenController.add(MapEntry<PeerId, bool>(packet.srcPeerId, true));
 
     return packet;
   }
 
   /// Add Address with port and timestamp for PeerId into cache
   void addPeerAddress({
-    required final P2PPeerId peerId,
-    required final P2PFullAddress address,
+    required final PeerId peerId,
+    required final FullAddress address,
     final bool? canForward,
     int? timestamp,
   }) {
@@ -42,7 +42,7 @@ class P2PRouterL2 extends P2PRouterL1 {
         canForward: canForward,
       );
     } else {
-      routes[peerId] = P2PRoute(
+      routes[peerId] = Route(
         peerId: peerId,
         canForward: canForward ?? false,
         address: MapEntry(address, timestamp),
@@ -52,8 +52,8 @@ class P2PRouterL2 extends P2PRouterL1 {
 
   /// Add Addresses with port and timestamp for PeerId into cache
   void addPeerAddresses({
-    required final P2PPeerId peerId,
-    required final Iterable<P2PFullAddress> addresses,
+    required final PeerId peerId,
+    required final Iterable<FullAddress> addresses,
     final bool? canForward,
     int? timestamp,
   }) {
@@ -66,7 +66,7 @@ class P2PRouterL2 extends P2PRouterL1 {
         canForward: canForward,
       );
     } else {
-      routes[peerId] = P2PRoute(
+      routes[peerId] = Route(
         peerId: peerId,
         canForward: canForward ?? false,
         addresses: {for (final a in addresses) a: timestamp},
@@ -74,13 +74,13 @@ class P2PRouterL2 extends P2PRouterL1 {
     }
   }
 
-  Future<bool> pingPeer(final P2PPeerId peerId) async {
+  Future<bool> pingPeer(final PeerId peerId) async {
     try {
       await sendMessage(isConfirmable: true, dstPeerId: peerId);
-      _lastSeenController.add(MapEntry<P2PPeerId, bool>(peerId, true));
+      _lastSeenController.add(MapEntry<PeerId, bool>(peerId, true));
       return true;
     } catch (_) {}
-    _lastSeenController.add(MapEntry<P2PPeerId, bool>(
+    _lastSeenController.add(MapEntry<PeerId, bool>(
       peerId,
       getPeerStatus(peerId),
     ));
