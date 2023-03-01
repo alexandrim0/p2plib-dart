@@ -4,6 +4,12 @@ part of 'router.dart';
 /// It can recieve, send and forward datagrams
 
 class RouterL0 extends RouterBase {
+  /// Defines required clock sync accuracy between nodes
+  var deltaT = const Duration(seconds: 10).inMilliseconds;
+
+  /// Defines how much times message can be forwarded
+  var maxForwardsLimit = 1;
+
   RouterL0({
     super.crypto,
     super.transports,
@@ -38,13 +44,14 @@ class RouterL0 extends RouterBase {
       throw const StopProcessing();
     }
 
-    final now = _now;
-    // check if message is stale
-    final delta = requestTimeout.inMilliseconds;
-    if (packet.header.issuedAt < now - delta ||
-        packet.header.issuedAt > now + delta) throw const StopProcessing();
+    // check if message is in deltaT
+    if (packet.header.issuedAt < _now - deltaT ||
+        packet.header.issuedAt > _now + deltaT) {
+      throw const ExceptionInvalidTimestamp();
+    }
 
     packet.srcPeerId = Message.getSrcPeerId(packet.datagram);
+
     // drop echo message
     if (packet.srcPeerId == _selfId) throw const StopProcessing();
 
@@ -67,7 +74,7 @@ class RouterL0 extends RouterBase {
         routes[packet.srcPeerId] = Route(
           header: packet.header,
           peerId: packet.srcPeerId,
-          address: MapEntry(packet.srcFullAddress, now),
+          address: MapEntry(packet.srcFullAddress, AddressProperties()),
         );
         _log('Keep ${packet.srcFullAddress} for ${packet.srcPeerId}');
       } else {
@@ -77,7 +84,7 @@ class RouterL0 extends RouterBase {
     } else {
       routes[packet.srcPeerId]!
         // update peer address timestamp
-        ..addresses[packet.srcFullAddress] = now
+        ..addresses[packet.srcFullAddress]?.updateLastSeen()
         // remember header to prevent duplicates processing
         ..addHeader(packet.header);
       _log(
@@ -85,12 +92,13 @@ class RouterL0 extends RouterBase {
       );
     }
 
-    // is message for me or to forward?
     packet.dstPeerId = Message.getDstPeerId(packet.datagram);
+
+    // is message for me or to forward?
     if (packet.dstPeerId == _selfId) return packet;
 
     // check if forwards count exeeds
-    if (packet.header.forwardsCount >= maxForwardsCount) {
+    if (packet.header.forwardsCount >= maxForwardsLimit) {
       throw const StopProcessing();
     }
 

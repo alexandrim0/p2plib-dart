@@ -10,13 +10,11 @@ void main(List<String> args) async {
       TransportUdp(
           bindAddress: FullAddress(
         address: InternetAddress.anyIPv4,
-        isLocal: false,
         port: port,
       )),
       TransportUdp(
           bindAddress: FullAddress(
         address: InternetAddress.anyIPv6,
-        isLocal: false,
         port: port,
       )),
     ],

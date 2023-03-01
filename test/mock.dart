@@ -15,28 +15,21 @@ final proxyPeerId = PeerId(
   value: base64Decode(
       'xD_eApw8bN2EDDirUzCoEsOpSbGXfFD0WYr7q7hWjVUARgW4EQ7CTjMT_SqAfItrfS4BGl6sU-rnSWCwuOtv3Q=='),
 );
-final proxyAddress = FullAddress(
-  address: localAddress,
-  isStatic: true,
-  isLocal: true,
-  port: 2022,
+final proxyAddressWithProperties = MapEntry(
+  FullAddress(address: localAddress, port: 2022),
+  AddressProperties(isStatic: true, isLocal: true),
 );
-final aliceAddress = FullAddress(
-  address: localAddress,
-  isLocal: true,
-  port: 3022,
+final aliceAddressWithProperties = MapEntry(
+  FullAddress(address: localAddress, port: 3022),
+  AddressProperties(isLocal: true),
 );
-final bobAddress = FullAddress(
-  address: localAddress,
-  isLocal: true,
-  port: 4022,
+final bobAddressWithProperties = MapEntry(
+  FullAddress(address: localAddress, port: 4022),
+  AddressProperties(isLocal: true),
 );
 
 Route getProxyRoute() => Route(
-      peerId: proxyPeerId,
-      canForward: true,
-      address: MapEntry(proxyAddress, DateTime.now().millisecondsSinceEpoch),
-    );
+    peerId: proxyPeerId, canForward: true, address: proxyAddressWithProperties);
 
 void log(debugLabel, message) => print('[$debugLabel] $message');
 
@@ -49,7 +42,7 @@ Future<RouterL2> createRouter({
     transports: [TransportUdp(bindAddress: address)],
     logger: (message) => print('[$debugLabel] $message'),
   )
-    ..requestTimeout = const Duration(seconds: 2)
+    ..messageTTL = const Duration(seconds: 2)
     ..peerOnlineTimeout = const Duration(seconds: 2);
   final cryptoKeys = CryptoKeys.empty();
   if (seed != null) cryptoKeys.seed = seed;
@@ -64,11 +57,11 @@ Future<Isolate> createProxy({
   final isolate = await Isolate.spawn(
     (_) async {
       final router = RouterL0(
-        transports: [TransportUdp(bindAddress: address ?? proxyAddress)],
+        transports: [
+          TransportUdp(bindAddress: address ?? proxyAddressWithProperties.key)
+        ],
         logger: (message) => print('[$debugLabel] $message'),
-      )
-        ..requestTimeout = const Duration(seconds: 2)
-        ..peerOnlineTimeout = const Duration(seconds: 2);
+      )..messageTTL = const Duration(seconds: 2);
       await router.init(CryptoKeys.empty()..seed = proxySeed);
       await router.start();
     },

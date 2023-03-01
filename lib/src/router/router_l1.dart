@@ -5,7 +5,7 @@ part of 'router.dart';
 /// Also it can be an base class for poor client.
 
 class RouterL1 extends RouterL0 {
-  var retryPeriod = RouterBase.defaultPeriod;
+  var retryPeriod = const Duration(seconds: 1);
 
   final _ackCompleters = <int, Completer<void>>{};
   final _messageController = StreamController<Message>();
@@ -32,7 +32,9 @@ class RouterL1 extends RouterL0 {
       (_) {
         if (isNotRun || routes.isEmpty) return;
         for (final route in routes.values) {
-          final addresses = route.addresses.keys.where((a) => a.isNotLocal);
+          final addresses = route.addresses.entries
+              .where((e) => e.value.isNotLocal)
+              .map((e) => e.key);
           if (addresses.isNotEmpty) {
             sendMessage(dstPeerId: route.peerId, useAddresses: addresses);
           }
@@ -148,7 +150,7 @@ class RouterL1 extends RouterL0 {
       addresses: addresses,
     );
     return completer.future
-        .timeout(ackTimeout ?? requestTimeout)
+        .timeout(ackTimeout ?? messageTTL)
         .whenComplete(() => _ackCompleters.remove(messageId));
   }
 

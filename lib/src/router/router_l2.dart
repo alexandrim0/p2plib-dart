@@ -6,6 +6,8 @@ class RouterL2 extends RouterL1 {
   final _lastSeenController =
       StreamController<MapEntry<PeerId, bool>>.broadcast();
 
+  late var peerOnlineTimeout = retryPeriod * 2;
+
   RouterL2({
     super.crypto,
     super.transports,
@@ -26,51 +28,35 @@ class RouterL2 extends RouterL1 {
     return packet;
   }
 
+  bool getPeerStatus(final PeerId peerId) =>
+      (routes[peerId]?.lastSeen ?? 0) + peerOnlineTimeout.inMilliseconds > _now;
+
   /// Add Address with port and timestamp for PeerId into cache
   void addPeerAddress({
     required final PeerId peerId,
     required final FullAddress address,
+    required final AddressProperties properties,
     final bool? canForward,
-    int? timestamp,
   }) {
     if (peerId == selfId) return;
-    timestamp ??= _now;
     if (routes.containsKey(peerId)) {
       routes[peerId]!.addAddress(
         address: address,
-        timestamp: timestamp,
+        properties: properties,
         canForward: canForward,
       );
     } else {
       routes[peerId] = Route(
         peerId: peerId,
         canForward: canForward ?? false,
-        address: MapEntry(address, timestamp),
+        address: MapEntry(address, properties),
       );
     }
   }
 
-  /// Add Addresses with port and timestamp for PeerId into cache
-  void addPeerAddresses({
-    required final PeerId peerId,
-    required final Iterable<FullAddress> addresses,
-    final bool? canForward,
-    int? timestamp,
-  }) {
-    if (addresses.isEmpty || peerId == selfId) return;
-    timestamp ??= _now;
-    if (routes.containsKey(peerId)) {
-      routes[peerId]!.addAddresses(
-        addresses: addresses,
-        timestamp: timestamp,
-        canForward: canForward,
-      );
-    } else {
-      routes[peerId] = Route(
-        peerId: peerId,
-        canForward: canForward ?? false,
-        addresses: {for (final a in addresses) a: timestamp},
-      );
+  void removePeerAddress(PeerId peerId) {
+    if (routes.remove(peerId) != null) {
+      _lastSeenController.add(MapEntry<PeerId, bool>(peerId, false));
     }
   }
 

@@ -26,7 +26,6 @@ class TransportUdp extends TransportBase {
           await onMessage!(Packet(
             srcFullAddress: FullAddress(
               address: datagram.address,
-              isLocal: bindAddress.isLocal,
               port: datagram.port,
             ),
             header: PacketHeader.fromBytes(datagram.data),

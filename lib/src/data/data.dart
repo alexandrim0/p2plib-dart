@@ -15,6 +15,7 @@ part 'packet.dart';
 part 'exception.dart';
 part 'full_address.dart';
 part 'message_header.dart';
+part 'address_properties.dart';
 
 const _maxRandomNumber = 1 << 32;
 final _random = Random.secure();

@@ -7,15 +7,15 @@ class Route {
 
   bool canForward;
 
-  final _addresses = <FullAddress, int>{};
+  final _addresses = <FullAddress, AddressProperties>{};
   final _lastHeaders = QueueList<PacketHeader>(maxStoredHeaders);
 
   Route({
     required this.peerId,
     this.canForward = false,
     final PacketHeader? header,
-    final Map<FullAddress, int>? addresses,
-    final MapEntry<FullAddress, int>? address,
+    final Map<FullAddress, AddressProperties>? addresses,
+    final MapEntry<FullAddress, AddressProperties>? address,
   }) {
     if (header != null) _lastHeaders.add(header);
     if (addresses != null) _addresses.addAll(addresses);
@@ -25,11 +25,13 @@ class Route {
   bool get isEmpty => addresses.isEmpty;
   bool get isNotEmpty => addresses.isNotEmpty;
 
-  Map<FullAddress, int> get addresses => _addresses;
+  Map<FullAddress, AddressProperties> get addresses => _addresses;
 
   QueueList<PacketHeader> get lastHeaders => _lastHeaders;
 
-  int get lastSeen => addresses.isEmpty ? 0 : addresses.values.reduce(max);
+  int get lastSeen => addresses.isEmpty
+      ? 0
+      : addresses.values.map((e) => e.lastSeen).reduce(max);
 
   void addHeader(PacketHeader header) {
     _lastHeaders.addLast(header);
@@ -38,29 +40,27 @@ class Route {
 
   void addAddress({
     required final FullAddress address,
-    required final int timestamp,
-    bool? canForward,
+    required final AddressProperties properties,
+    final bool? canForward,
   }) {
     if (canForward != null) this.canForward = canForward;
-    addresses[address] = timestamp;
-  }
-
-  void addAddresses({
-    required final Iterable<FullAddress> addresses,
-    required final int timestamp,
-    bool? canForward,
-  }) {
-    if (canForward != null) this.canForward = canForward;
-    for (final a in addresses) {
-      this.addresses[a] = timestamp;
+    if (addresses.containsKey(address)) {
+      addresses[address]!.combine(properties);
+    } else {
+      addresses[address] = properties;
     }
   }
 
   Iterable<FullAddress> getActualAddresses({required final int staleAt}) =>
       addresses.entries
-          .where((e) => e.key.isStatic || e.value > staleAt)
+          .where((e) => e.value.isStatic || e.value.lastSeen > staleAt)
           .map((e) => e.key);
 
   void removeStaleAddresses({required final int staleAt}) =>
-      addresses.removeWhere((a, t) => a.isNotStatic && t < staleAt);
+      addresses.removeWhere((k, v) => v.isNotStatic && v.lastSeen < staleAt);
+
+  @override
+  String toString() =>
+      '$peerId, canForward: $canForward, headersCount: ${_lastHeaders.length}\n'
+      '$_addresses';
 }

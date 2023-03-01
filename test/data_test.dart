@@ -68,31 +68,11 @@ void main() async {
       expect(addressA == addressB, true);
       expect(addressA == addressC, false);
 
-      final fullAddressA = FullAddress(
-        address: addressA,
-        isLocal: true,
-        port: 5000,
-      );
-      final fullAddressB = FullAddress(
-        address: addressB,
-        isLocal: true,
-        port: 5000,
-      );
-      final fullAddressC = FullAddress(
-        address: addressC,
-        isLocal: true,
-        port: 5000,
-      );
-      final fullAddressD = FullAddress(
-        address: addressA,
-        isLocal: true,
-        port: 5001,
-      );
-      final fullAddressE = FullAddress(
-        address: addressC,
-        isLocal: true,
-        port: 5001,
-      );
+      final fullAddressA = FullAddress(address: addressA, port: 5000);
+      final fullAddressB = FullAddress(address: addressB, port: 5000);
+      final fullAddressC = FullAddress(address: addressC, port: 5000);
+      final fullAddressD = FullAddress(address: addressA, port: 5001);
+      final fullAddressE = FullAddress(address: addressC, port: 5001);
 
       expect(fullAddressA.hashCode == fullAddressB.hashCode, true);
       expect(fullAddressA.hashCode == fullAddressC.hashCode, false);
@@ -133,32 +113,29 @@ void main() async {
     () {
       final now = DateTime.now().millisecondsSinceEpoch;
       final staleAt = now - 3000;
-      final actualAddress = FullAddress(
-        address: localAddress,
-        isLocal: true,
-        isStatic: false,
-        port: 1234,
-      );
-      final staleAddress = FullAddress(
-        address: localAddress,
-        isLocal: true,
-        isStatic: false,
-        port: 4321,
-      );
-      final staticAddress = FullAddress(
-        address: localAddress,
-        isLocal: true,
-        isStatic: true,
-        port: 2345,
-      );
+      final actualAddress = FullAddress(address: localAddress, port: 1234);
+      final staleAddress = FullAddress(address: localAddress, port: 4321);
+      final staticAddress = FullAddress(address: localAddress, port: 2345);
       final route = Route(
         peerId: proxyPeerId,
         addresses: {
-          aliceAddress: now,
-          bobAddress: now,
-          actualAddress: now,
-          staleAddress: staleAt - 1,
-          staticAddress: staleAt - 1,
+          aliceAddressWithProperties.key: aliceAddressWithProperties.value,
+          bobAddressWithProperties.key: bobAddressWithProperties.value,
+          actualAddress: AddressProperties(
+            isLocal: true,
+            isStatic: false,
+            lastSeen: now,
+          ),
+          staleAddress: AddressProperties(
+            isLocal: true,
+            isStatic: false,
+            lastSeen: staleAt - 1,
+          ),
+          staticAddress: AddressProperties(
+            isLocal: true,
+            isStatic: true,
+            lastSeen: staleAt - 1,
+          ),
         },
       );
 
@@ -170,31 +147,6 @@ void main() async {
       route.removeStaleAddresses(staleAt: staleAt);
       expect(route.addresses.containsKey(staleAddress), false);
       expect(route.addresses.containsKey(staticAddress), true);
-    },
-  );
-
-  test(
-    'FullAddress',
-    () {
-      final addr1 = FullAddress(
-        address: proxyAddress.address,
-        port: proxyAddress.port,
-        isLocal: true,
-        isStatic: false,
-      );
-      final addr2 = FullAddress(
-        address: proxyAddress.address,
-        port: proxyAddress.port,
-        isLocal: false,
-        isStatic: true,
-      );
-      final set = {addr1, addr2};
-
-      expect(addr1, addr2);
-      expect(addr1, addr2);
-      expect(addr1.isLocal == addr2.isLocal, false);
-      expect(addr1.isStatic == addr2.isStatic, false);
-      expect(set.length, 1);
     },
   );
 }

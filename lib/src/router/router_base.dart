@@ -4,20 +4,16 @@ part of 'router.dart';
 /// Also it keeps Routes and can manipulate with them
 
 abstract class RouterBase {
-  static const defaultPeriod = Duration(seconds: 1);
-  static const defaultTimeout = Duration(seconds: 3);
-  static const defaultAddressTTL = Duration(seconds: 30);
-
   final Map<PeerId, Route> routes = {};
   final Iterable<TransportBase> transports;
   final Duration keepalivePeriod;
   final Crypto crypto;
 
-  var peerAddressTTL = defaultAddressTTL;
-  var peerOnlineTimeout = defaultTimeout;
-  var requestTimeout = defaultTimeout;
-  var useForwardersCount = 2;
-  var maxForwardsCount = 1;
+  late Duration messageTTL;
+  late Duration peerAddressTTL = keepalivePeriod * 2;
+
+  /// Defines how much nodes will be used for delivery
+  var useForwardersLimit = 2;
 
   void Function(String)? logger;
 
@@ -28,6 +24,7 @@ abstract class RouterBase {
   RouterBase({
     final Crypto? crypto,
     final Iterable<TransportBase>? transports,
+    this.messageTTL = const Duration(seconds: 3),
     this.keepalivePeriod = const Duration(seconds: 15),
     this.logger,
   })  : crypto = crypto ?? Crypto(),
@@ -38,14 +35,14 @@ abstract class RouterBase {
                   address: InternetAddress.anyIPv4,
                   port: TransportUdp.defaultPort,
                 ),
-                ttl: defaultTimeout.inSeconds,
+                ttl: messageTTL.inSeconds,
               ),
               TransportUdp(
                 bindAddress: FullAddress(
                   address: InternetAddress.anyIPv6,
                   port: TransportUdp.defaultPort,
                 ),
-                ttl: defaultTimeout.inSeconds,
+                ttl: messageTTL.inSeconds,
               ),
             ];
 
@@ -75,7 +72,8 @@ abstract class RouterBase {
     for (final transport in transports) {
       transport
         ..logger = logger
-        ..onMessage = onMessage;
+        ..onMessage = onMessage
+        ..ttl = messageTTL.inSeconds;
       await transport.start();
     }
     _isRun = true;
@@ -101,9 +99,6 @@ abstract class RouterBase {
     }
   }
 
-  bool getPeerStatus(final PeerId peerId) =>
-      (routes[peerId]?.lastSeen ?? 0) + peerOnlineTimeout.inMilliseconds > _now;
-
   /// Returns cached addresses or who can forward
   Iterable<FullAddress> resolvePeerId(final PeerId peerId) {
     final route = routes[peerId];
@@ -112,7 +107,7 @@ abstract class RouterBase {
       for (final a in routes.values.where((e) => e.canForward)) {
         result.addAll(a.addresses.keys);
       }
-      return result.take(useForwardersCount);
+      return result.take(useForwardersLimit);
     } else {
       return route.getActualAddresses(
         staleAt: _now - peerAddressTTL.inMilliseconds,

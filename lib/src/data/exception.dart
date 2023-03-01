@@ -17,7 +17,7 @@ class ExceptionTransport extends ExceptionBase {
 }
 
 class ExceptionIsNotRunning extends ExceptionBase {
-  const ExceptionIsNotRunning();
+  const ExceptionIsNotRunning([super.message]);
 }
 
 class ExceptionUnknownRoute extends ExceptionBase {
@@ -26,4 +26,8 @@ class ExceptionUnknownRoute extends ExceptionBase {
 
 class ExceptionInvalidSignature extends ExceptionBase {
   const ExceptionInvalidSignature([super.message]);
+}
+
+class ExceptionInvalidTimestamp extends ExceptionBase {
+  const ExceptionInvalidTimestamp([super.message]);
 }
