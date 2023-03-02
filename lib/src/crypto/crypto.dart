@@ -40,7 +40,7 @@ class Crypto {
         extra: keys,
       ),
     );
-    final initResult = await _completers[id]!.future.timeout(operationTimeout);
+    final initResult = await _completers[id]!.future;
     _sendPort = initResult.payload as SendPort;
     cryptoKeys = initResult.extra as CryptoKeys;
     _completers.remove(id);
