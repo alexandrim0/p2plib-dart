@@ -5,7 +5,7 @@ part of 'router.dart';
 
 abstract class RouterBase {
   final Map<PeerId, Route> routes = {};
-  final Iterable<TransportBase> transports;
+  final List<TransportBase> transports = [];
   final Duration keepalivePeriod;
   final Crypto crypto;
 
@@ -23,28 +23,29 @@ abstract class RouterBase {
 
   RouterBase({
     final Crypto? crypto,
-    final Iterable<TransportBase>? transports,
+    final List<TransportBase>? transports,
     this.messageTTL = const Duration(seconds: 3),
     this.keepalivePeriod = const Duration(seconds: 15),
     this.logger,
-  })  : crypto = crypto ?? Crypto(),
-        transports = transports ??
-            [
-              TransportUdp(
-                bindAddress: FullAddress(
-                  address: InternetAddress.anyIPv4,
-                  port: TransportUdp.defaultPort,
-                ),
-                ttl: messageTTL.inSeconds,
-              ),
-              TransportUdp(
-                bindAddress: FullAddress(
-                  address: InternetAddress.anyIPv6,
-                  port: TransportUdp.defaultPort,
-                ),
-                ttl: messageTTL.inSeconds,
-              ),
-            ];
+  }) : crypto = crypto ?? Crypto() {
+    this.transports.addAll(transports ??
+        [
+          TransportUdp(
+            bindAddress: FullAddress(
+              address: InternetAddress.anyIPv4,
+              port: TransportUdp.defaultPort,
+            ),
+            ttl: messageTTL.inSeconds,
+          ),
+          TransportUdp(
+            bindAddress: FullAddress(
+              address: InternetAddress.anyIPv6,
+              port: TransportUdp.defaultPort,
+            ),
+            ttl: messageTTL.inSeconds,
+          ),
+        ]);
+  }
 
   bool get isRun => _isRun;
   bool get isNotRun => !_isRun;
