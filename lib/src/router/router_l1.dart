@@ -14,6 +14,7 @@ class RouterL1 extends RouterL0 {
     super.crypto,
     super.transports,
     super.keepalivePeriod,
+    super.messageTTL,
     super.logger,
   });
 
