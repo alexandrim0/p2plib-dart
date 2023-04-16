@@ -1,3 +1,7 @@
+## 1.1.5
+
+- Add messageTTL to Router`s children constructor
+
 ## 1.1.4
 
 - Update readme
