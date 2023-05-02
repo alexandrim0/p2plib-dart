@@ -62,6 +62,7 @@ class RouterL2 extends RouterL1 {
   }
 
   Future<bool> pingPeer(final PeerId peerId) async {
+    if (peerId == selfId) return true;
     try {
       await sendMessage(isConfirmable: true, dstPeerId: peerId);
       _lastSeenController.add(MapEntry<PeerId, bool>(peerId, true));
