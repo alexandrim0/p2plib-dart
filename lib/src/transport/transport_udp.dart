@@ -5,7 +5,11 @@ class TransportUdp extends TransportBase {
 
   RawDatagramSocket? _socket;
 
-  TransportUdp({required super.bindAddress, super.onMessage, super.ttl});
+  TransportUdp({
+    required super.bindAddress,
+    super.onMessage,
+    super.ttl,
+  });
 
   @override
   Future<void> start() async {
@@ -52,9 +56,9 @@ class TransportUdp extends TransportBase {
   ) {
     if (_socket == null) return;
     for (final peerFullAddress in fullAddresses) {
-      if (peerFullAddress.type == bindAddress.type) {
-        _socket!.send(datagram, peerFullAddress.address, peerFullAddress.port);
-      }
+      if (peerFullAddress.isEmpty) continue;
+      if (peerFullAddress.type != bindAddress.type) continue;
+      _socket!.send(datagram, peerFullAddress.address, peerFullAddress.port);
     }
   }
 }

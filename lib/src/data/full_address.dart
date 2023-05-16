@@ -2,10 +2,13 @@ part of 'data.dart';
 
 /// Only address and port defines hash and equality
 class FullAddress {
+  const FullAddress({
+    required this.address,
+    required this.port,
+  });
+
   final InternetAddress address;
   final int port;
-
-  const FullAddress({required this.address, required this.port});
 
   @override
   bool operator ==(Object other) =>
@@ -16,6 +19,8 @@ class FullAddress {
 
   @override
   int get hashCode => Object.hash(runtimeType, address, port);
+
+  bool get isEmpty => address.rawAddress.isEmpty;
 
   InternetAddressType get type => address.type;
 

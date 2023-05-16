@@ -1,17 +1,20 @@
 part of 'transport.dart';
 
 abstract class TransportBase {
-  int ttl;
-  final FullAddress bindAddress;
-  Future<void> Function(Packet packet)? onMessage;
-  void Function(String)? logger;
-
   TransportBase({
     required this.bindAddress,
     this.onMessage,
     this.ttl = 5,
     this.logger,
   });
+
+  final FullAddress bindAddress;
+
+  int ttl;
+
+  void Function(String)? logger;
+
+  Future<void> Function(Packet packet)? onMessage;
 
   Future<void> start();
 
