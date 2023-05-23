@@ -3,8 +3,7 @@ part of 'router.dart';
 /// Enhanced router with more high level API for building rich client
 
 class RouterL2 extends RouterL1 {
-  final _lastSeenController =
-      StreamController<MapEntry<PeerId, bool>>.broadcast();
+  final _lastSeenController = StreamController<PeerStatus>.broadcast();
 
   late var peerOnlineTimeout = retryPeriod * 2;
 
@@ -16,15 +15,14 @@ class RouterL2 extends RouterL1 {
     super.logger,
   });
 
-  Stream<MapEntry<PeerId, bool>> get lastSeenStream =>
-      _lastSeenController.stream;
+  Stream<PeerStatus> get lastSeenStream => _lastSeenController.stream;
 
   @override
   Future<Packet> onMessage(final Packet packet) async {
     await super.onMessage(packet);
 
     // update peer status
-    _lastSeenController.add(MapEntry<PeerId, bool>(packet.srcPeerId, true));
+    _lastSeenController.add((peerId: packet.srcPeerId, isOnline: true));
 
     return packet;
   }
@@ -50,14 +48,14 @@ class RouterL2 extends RouterL1 {
       routes[peerId] = Route(
         peerId: peerId,
         canForward: canForward ?? false,
-        address: MapEntry(address, properties),
+        address: (ip: address, properties: properties),
       );
     }
   }
 
   void removePeerAddress(PeerId peerId) {
     if (routes.remove(peerId) != null) {
-      _lastSeenController.add(MapEntry<PeerId, bool>(peerId, false));
+      _lastSeenController.add((peerId: peerId, isOnline: false));
     }
   }
 
@@ -65,13 +63,10 @@ class RouterL2 extends RouterL1 {
     if (peerId == selfId) return true;
     try {
       await sendMessage(isConfirmable: true, dstPeerId: peerId);
-      _lastSeenController.add(MapEntry<PeerId, bool>(peerId, true));
+      _lastSeenController.add((peerId: peerId, isOnline: true));
       return true;
     } catch (_) {}
-    _lastSeenController.add(MapEntry<PeerId, bool>(
-      peerId,
-      getPeerStatus(peerId),
-    ));
+    _lastSeenController.add((peerId: peerId, isOnline: getPeerStatus(peerId)));
     return false;
   }
 }

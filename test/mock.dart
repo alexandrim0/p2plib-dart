@@ -15,17 +15,17 @@ final proxyPeerId = PeerId(
   value: base64Decode(
       'xD_eApw8bN2EDDirUzCoEsOpSbGXfFD0WYr7q7hWjVUARgW4EQ7CTjMT_SqAfItrfS4BGl6sU-rnSWCwuOtv3Q=='),
 );
-final proxyAddressWithProperties = MapEntry(
-  FullAddress(address: localAddress, port: 2022),
-  AddressProperties(isStatic: true, isLocal: true),
+final proxyAddressWithProperties = (
+  ip: FullAddress(address: localAddress, port: 2022),
+  properties: AddressProperties(isStatic: true, isLocal: true),
 );
-final aliceAddressWithProperties = MapEntry(
-  FullAddress(address: localAddress, port: 3022),
-  AddressProperties(isLocal: true),
+final aliceAddressWithProperties = (
+  ip: FullAddress(address: localAddress, port: 3022),
+  properties: AddressProperties(isLocal: true),
 );
-final bobAddressWithProperties = MapEntry(
-  FullAddress(address: localAddress, port: 4022),
-  AddressProperties(isLocal: true),
+final bobAddressWithProperties = (
+  ip: FullAddress(address: localAddress, port: 4022),
+  properties: AddressProperties(isLocal: true),
 );
 
 Route getProxyRoute() => Route(
@@ -56,7 +56,7 @@ Future<Isolate> createProxy({
     (_) async {
       final router = RouterL0(
         transports: [
-          TransportUdp(bindAddress: address ?? proxyAddressWithProperties.key)
+          TransportUdp(bindAddress: address ?? proxyAddressWithProperties.ip)
         ],
         logger: (message) => print('[$debugLabel] $message'),
       )..messageTTL = const Duration(seconds: 2);

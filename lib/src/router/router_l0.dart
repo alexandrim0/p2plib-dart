@@ -78,7 +78,7 @@ class RouterL0 extends RouterBase {
       routes[packet.srcPeerId] = Route(
         header: packet.header,
         peerId: packet.srcPeerId,
-        address: MapEntry(packet.srcFullAddress, AddressProperties()),
+        address: (ip: packet.srcFullAddress, properties: AddressProperties()),
       );
       _log('Keep ${packet.srcFullAddress} for ${packet.srcPeerId}');
     } else {

@@ -119,8 +119,8 @@ void main() async {
       final route = Route(
         peerId: proxyPeerId,
         addresses: {
-          aliceAddressWithProperties.key: aliceAddressWithProperties.value,
-          bobAddressWithProperties.key: bobAddressWithProperties.value,
+          aliceAddressWithProperties.ip: aliceAddressWithProperties.properties,
+          bobAddressWithProperties.ip: bobAddressWithProperties.properties,
           actualAddress: AddressProperties(
             isLocal: true,
             isStatic: false,

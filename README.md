@@ -12,7 +12,7 @@ P2Plib is a minimalistic library for peer-to-peer communication over UDP. Key fe
  - no legacy, the project is simple and self-sufficient.
 
 ## Usage
-You can see an example of using this library in practice in our project: 
+You can see an example at: 
 https://github.com/alexandrim0/p2plib-dart/example
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

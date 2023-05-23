@@ -18,8 +18,8 @@ part 'full_address.dart';
 part 'message_header.dart';
 part 'address_properties.dart';
 
-const _maxRandomNumber = 1 << 32;
-final _random = Random.secure();
+typedef PeerStatus = ({PeerId peerId, bool isOnline});
+
 final emptyUint8List = Uint8List(0);
 
 int genRandomInt() =>
@@ -33,3 +33,7 @@ Uint8List getRandomBytes(final int length) {
   }
   return r;
 }
+
+const _maxRandomNumber = 1 << 32;
+
+final _random = Random.secure();

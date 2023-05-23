@@ -15,11 +15,11 @@ class Route {
     this.canForward = false,
     final PacketHeader? header,
     final Map<FullAddress, AddressProperties>? addresses,
-    final MapEntry<FullAddress, AddressProperties>? address,
+    final ({FullAddress ip, AddressProperties properties})? address,
   }) {
     if (header != null) _lastHeaders.add(header);
     if (addresses != null) _addresses.addAll(addresses);
-    if (address != null) _addresses[address.key] = address.value;
+    if (address != null) _addresses[address.ip] = address.properties;
   }
 
   bool get isEmpty => addresses.isEmpty;
