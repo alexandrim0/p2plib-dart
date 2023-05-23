@@ -8,7 +8,7 @@ export 'package:p2plib/p2plib.dart';
 const initTime = Duration(milliseconds: 250);
 final localAddress = InternetAddress.loopbackIPv4;
 final randomPeerId = PeerId(value: getRandomBytes(PeerId.length));
-final randomPayload = getRandomBytes(64);
+final randomPayload = getRandomBytes(1024);
 final token = Token(value: randomPayload);
 final proxySeed = base64Decode('tuTfQVH3qgHZ751JtEja_ZbkY-EF0cbRzVDDO_HNrmY=');
 final proxyPeerId = PeerId(
@@ -44,9 +44,7 @@ Future<RouterL2> createRouter({
   )
     ..messageTTL = const Duration(seconds: 2)
     ..peerOnlineTimeout = const Duration(seconds: 2);
-  final cryptoKeys = CryptoKeys.empty();
-  if (seed != null) cryptoKeys.seed = seed;
-  await router.init(cryptoKeys);
+  await router.init(seed);
   return router;
 }
 
@@ -62,7 +60,7 @@ Future<Isolate> createProxy({
         ],
         logger: (message) => print('[$debugLabel] $message'),
       )..messageTTL = const Duration(seconds: 2);
-      await router.init(CryptoKeys.empty()..seed = proxySeed);
+      await router.init(proxySeed);
       await router.start();
     },
     null,

@@ -20,17 +20,12 @@ void main(List<String> args) async {
     ],
   );
   if (args.contains('log')) router.logger = stdout.writeln;
-  final seed = Platform.environment['P2P_SEED'];
-  final keys = await router.init(
-    seed == null ? null : (CryptoKeys.empty()..seed = base64Decode(seed)),
-  );
+  final seedS = Platform.environment['P2P_SEED'];
+  final seed = await router.init(seedS == null ? null : base64Decode(seedS));
   if (args.contains('show_seed')) {
-    stdout.writeln('seed: ${base64UrlEncode(keys.seed)}');
+    stdout.writeln('seed: ${base64UrlEncode(seed)}');
   }
-  stdout.writeln(base64UrlEncode(PeerId.fromKeys(
-    encryptionKey: keys.encPublicKey,
-    signKey: keys.signPublicKey,
-  ).value));
+  stdout.writeln(base64UrlEncode(router.selfId.value));
   await router.start();
 }
 

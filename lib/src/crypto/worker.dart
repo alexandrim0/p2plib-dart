@@ -1,129 +1,96 @@
 import 'dart:io';
 import 'dart:ffi';
 import 'dart:isolate';
-import 'dart:typed_data';
 import 'package:sodium/sodium.dart';
 
 import '/src/data/data.dart';
 
-void cryptoWorker(final CryptoTask initialTask) async {
-  final sodium = await SodiumInit.init(_loadSodium());
+void cryptoWorker(initialTask) async {
+  initialTask as InitRequest;
+  final receivePort = ReceivePort();
+  final mainIsolatePort = initialTask.sendPort;
+
+  final sodium = await SodiumInit.init2(_loadSodium);
   final box = sodium.crypto.box;
   final sign = sodium.crypto.sign;
-  final cryptoKeys = initialTask.extra == null
-      ? CryptoKeys.empty()
-      : initialTask.extra as CryptoKeys;
 
-  if (cryptoKeys.seed.isEmpty) {
-    cryptoKeys.seed = sodium.randombytes.buf(sodium.randombytes.seedBytes);
-  }
-  late final KeyPair encKeyPair, signKeyPair;
-
-  // use given encryption key pair or create it from given or generated seed
-  if (cryptoKeys.encPrivateKey.isEmpty || cryptoKeys.encPublicKey.isEmpty) {
-    encKeyPair = box.seedKeyPair(
-      SecureKey.fromList(sodium, cryptoKeys.seed),
-    );
-    cryptoKeys.encPublicKey = encKeyPair.publicKey;
-    cryptoKeys.encPrivateKey = encKeyPair.secretKey.extractBytes();
-  } else {
-    encKeyPair = KeyPair(
-      secretKey: SecureKey.fromList(sodium, cryptoKeys.encPrivateKey),
-      publicKey: cryptoKeys.encPublicKey,
-    );
-  }
-  // use given sign key pair or create it from given or generated seed
-  if (cryptoKeys.signPrivateKey.isEmpty || cryptoKeys.signPublicKey.isEmpty) {
-    signKeyPair = sign.seedKeyPair(
-      SecureKey.fromList(sodium, cryptoKeys.seed),
-    );
-    cryptoKeys.signPublicKey = signKeyPair.publicKey;
-    cryptoKeys.signPrivateKey = signKeyPair.secretKey.extractBytes();
-  } else {
-    signKeyPair = KeyPair(
-      secretKey: SecureKey.fromList(sodium, cryptoKeys.signPrivateKey),
-      publicKey: cryptoKeys.signPublicKey,
-    );
-  }
+  final seed =
+      initialTask.seed ?? sodium.randombytes.buf(sodium.randombytes.seedBytes);
+  final encKeyPair = box.seedKeyPair(SecureKey.fromList(sodium, seed));
+  final signKeyPair = sign.seedKeyPair(SecureKey.fromList(sodium, seed));
 
   // send back SendPort and keys
-  final receivePort = ReceivePort();
-  final mainIsolatePort = initialTask.payload as SendPort;
-  initialTask.payload = receivePort.sendPort;
-  initialTask.extra = cryptoKeys;
-  mainIsolatePort.send(initialTask);
+  mainIsolatePort.send((
+    seed: seed,
+    sendPort: receivePort.sendPort,
+    encPubKey: encKeyPair.publicKey,
+    signPubKey: signKeyPair.publicKey,
+  ));
 
   receivePort.listen(
     (final task) {
-      if (task is! CryptoTask) return;
+      if (task is! TaskRequest) return;
       try {
         switch (task.type) {
-          case CryptoTaskType.seal:
-            final message = task.payload as Message;
-            if (message.isNotEmpty) {
-              message.payload = box.seal(
-                publicKey: message.dstPeerId.encPublicKey,
-                message: message.payload!,
-              );
-            }
-            final datagram = message.toBytes();
+          case TaskType.seal:
+            // ignore: deprecated_export_use
             final signedDatagram = BytesBuilder(copy: false)
-              ..add(datagram)
-              ..add(sign.detached(
-                message: datagram,
-                secretKey: signKeyPair.secretKey,
+              ..add(Message.getHeader(task.datagram));
+            if (Message.isNotEmptyPayload(task.datagram)) {
+              signedDatagram.add(box.seal(
+                publicKey: Message.getDstPeerId(task.datagram).encPublicKey,
+                message: Message.getPayload(task.datagram),
               ));
-            task.payload = signedDatagram.toBytes();
-            break;
-
-          case CryptoTaskType.unseal:
-            final datagram = task.payload as Uint8List;
-            if (!sign.verifyDetached(
-              message: Message.getUnsignedDatagram(datagram),
-              signature: Message.getSignature(datagram),
-              publicKey: Message.getSrcPeerId(datagram).signPiblicKey,
-            )) {
-              task.payload = const ExceptionInvalidSignature();
-              break;
             }
-            if (Message.hasEmptyPayload(datagram)) {
-              task.payload = emptyUint8List;
-            } else {
-              task.payload = box.sealOpen(
-                cipherText: Message.getPayload(datagram),
-                publicKey: encKeyPair.publicKey,
-                secretKey: encKeyPair.secretKey,
-              );
-            }
-            break;
-
-          case CryptoTaskType.sign:
-            task.payload = sign.detached(
-              message: task.payload as Uint8List,
+            signedDatagram.add(sign.detached(
+              message: signedDatagram.toBytes(),
               secretKey: signKeyPair.secretKey,
-            );
+            ));
+            mainIsolatePort.send((
+              id: task.id,
+              datagram: signedDatagram.toBytes(),
+            ));
             break;
 
-          case CryptoTaskType.verifySigned:
-            final data = task.payload as Uint8List;
-            final messageLength = data.length - signatureLength;
-            task.payload = sign.verifyDetached(
-              message: data.sublist(0, messageLength),
-              signature: data.sublist(messageLength),
-              publicKey: task.extra as Uint8List,
-            );
+          case TaskType.unseal:
+            mainIsolatePort.send(sign.verifyDetached(
+              message: Message.getUnsignedDatagram(task.datagram),
+              signature: Message.getSignature(task.datagram),
+              publicKey: Message.getSrcPeerId(task.datagram).signPiblicKey,
+            )
+                ? (
+                    id: task.id,
+                    datagram: Message.hasEmptyPayload(task.datagram)
+                        ? emptyUint8List
+                        : box.sealOpen(
+                            cipherText:
+                                Message.getUnsignedPayload(task.datagram),
+                            publicKey: encKeyPair.publicKey,
+                            secretKey: encKeyPair.secretKey,
+                          )
+                  )
+                : (id: task.id, error: const ExceptionInvalidSignature()));
+            break;
+
+          case TaskType.verify:
+            mainIsolatePort.send(sign.verifyDetached(
+              message: Message.getUnsignedDatagram(task.datagram),
+              signature: Message.getSignature(task.datagram),
+              publicKey: Message.getSrcPeerId(task.datagram).signPiblicKey,
+            )
+                ? (id: task.id, datagram: emptyUint8List)
+                : (id: task.id, error: const ExceptionInvalidSignature()));
             break;
         }
       } catch (e) {
-        task.payload = e;
-      } finally {
-        mainIsolatePort.send(task);
+        mainIsolatePort.send((id: task.id, error: e));
       }
     },
     onDone: () {
       encKeyPair.secretKey.dispose();
       signKeyPair.secretKey.dispose();
     },
+    cancelOnError: false,
   );
 }
 

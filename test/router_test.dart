@@ -354,7 +354,7 @@ main() async {
           issuedAt: DateTime.now().millisecondsSinceEpoch,
           id: genRandomInt(),
         );
-        final datagram = await aliceRouter.crypto.sign(Message(
+        final datagram = await aliceRouter.crypto.seal(Message(
           header: header,
           srcPeerId: aliceRouter.selfId,
           dstPeerId: bobRouter.selfId,
@@ -374,7 +374,7 @@ main() async {
           issuedAt: DateTime.now().millisecondsSinceEpoch,
           id: genRandomInt(),
         );
-        final datagram2 = await aliceRouter.crypto.sign(Message(
+        final datagram2 = await aliceRouter.crypto.seal(Message(
           header: header2,
           srcPeerId: aliceRouter.selfId,
           dstPeerId: bobRouter.selfId,

@@ -4,9 +4,7 @@ import 'mock.dart';
 
 main() async {
   final crypto = Crypto();
-  await crypto.init(CryptoKeys.empty()..seed = proxySeed);
-  final encPublicKey = crypto.cryptoKeys.encPublicKey;
-  final signPublicKey = crypto.cryptoKeys.signPublicKey;
+  final initResults = await crypto.init(proxySeed);
   final emptyMessage = Message(
     header: PacketHeader(
       issuedAt: DateTime.now().millisecondsSinceEpoch,
@@ -30,8 +28,8 @@ main() async {
         'Crypto seed',
         () => expect(
           PeerId.fromKeys(
-            encryptionKey: encPublicKey,
-            signKey: signPublicKey,
+            encryptionKey: initResults.encPubKey,
+            signKey: initResults.signPubKey,
           ).toString(),
           proxyPeerId.toString(),
         ),
@@ -39,28 +37,19 @@ main() async {
       test(
         'Crypto seal/unseal',
         () async {
-          // empty message
           expect(
-            await crypto.unseal(await crypto.seal(emptyMessage)),
-            emptyUint8List,
-          );
-          // not empty message
-          expect(
-            await crypto.unseal(await crypto.seal(notEmptyMessage)),
+            await crypto.unseal(await crypto.seal(notEmptyMessage.toBytes())),
             randomPayload,
           );
         },
       );
 
       test(
-        'Crypto sign/unsign',
+        'Crypto sign/verify',
         () async {
           expect(
-            await crypto.verifySigned(
-              signPublicKey,
-              await crypto.sign(randomPayload),
-            ),
-            true,
+            await crypto.verify(await crypto.seal(emptyMessage.toBytes())),
+            Uint8List(0),
           );
         },
       );
@@ -73,23 +62,12 @@ main() async {
       test(
         'Crypto stress test: seal/unseal',
         () async {
+          final datagram = notEmptyMessage.toBytes();
           for (var i = 0; i < stressCount; i++) {
-            await crypto.unseal(await crypto.seal(notEmptyMessage));
+            await crypto.unseal(await crypto.seal(datagram));
           }
         },
         timeout: Timeout(Duration(minutes: 1)),
-      );
-
-      test(
-        'Crypto stress test: sign/unsign',
-        () async {
-          for (var i = 0; i < stressCount; i++) {
-            await crypto.verifySigned(
-              signPublicKey,
-              await crypto.sign(randomPayload),
-            );
-          }
-        },
       );
     },
   );

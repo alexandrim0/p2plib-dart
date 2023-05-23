@@ -24,8 +24,8 @@ class RouterL1 extends RouterL0 {
   Stream<Message> get messageStream => _messageController.stream;
 
   @override
-  Future<CryptoKeys> init([CryptoKeys? keys]) async {
-    final cryptoKeys = await super.init(keys);
+  Future<Uint8List> init([Uint8List? seed]) async {
+    final cryptoKeys = await super.init(seed);
 
     // send keepalive messages
     Timer.periodic(
@@ -58,7 +58,7 @@ class RouterL1 extends RouterL0 {
   Future<Packet> onMessage(final Packet packet) async {
     await super.onMessage(packet);
 
-    // check and remove signature, decrypt if not empty
+    // // check and remove signature, decrypt if not empty
     packet.payload = await crypto.unseal(packet.datagram);
 
     // exit if message is confirmation of mine message
@@ -70,7 +70,7 @@ class RouterL1 extends RouterL0 {
     // send confirmation if required
     if (packet.header.messageType == PacketType.confirmable) {
       crypto
-          .sign(Message(
+          .seal(Message(
             header: packet.header.copyWith(
               messageType: PacketType.confirmation,
             ),
@@ -121,7 +121,7 @@ class RouterL1 extends RouterL0 {
       dstPeerId: dstPeerId,
       payload: payload,
     );
-    final datagram = await crypto.seal(message);
+    final datagram = await crypto.seal(message.toBytes());
 
     if (isConfirmable) {
       await sendDatagramConfirmable(

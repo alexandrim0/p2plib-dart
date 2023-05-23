@@ -1,3 +1,8 @@
+## 2.0.0
+Breaking changes:
+  - Upgrade dart sdk up to 3.0.0
+  - Router.init() signature
+
 ## 1.1.5
 
 - Add messageTTL to Router`s children constructor

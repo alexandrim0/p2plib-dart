@@ -19,8 +19,8 @@ class RouterL0 extends RouterBase {
   });
 
   @override
-  Future<CryptoKeys> init([final CryptoKeys? keys]) async {
-    final cryptoKeys = await super.init(keys);
+  Future<Uint8List> init([Uint8List? seed]) async {
+    final cryptoKeys = await super.init(seed);
     // remove stale records
     Timer.periodic(
       keepalivePeriod,
@@ -61,27 +61,26 @@ class RouterL0 extends RouterBase {
     // drop duplicate
     if (route != null &&
         Route.maxStoredHeaders > 0 &&
-        route.lastHeaders.contains(packet.header)) throw const StopProcessing();
+        route.lastHeaders.contains(packet.header)) {
+      throw const StopProcessing();
+    }
 
     // reset for checking signature
     PacketHeader.setForwardsCount(0, packet.datagram);
 
     // if peer unknown then check signature and keep address if success
     if (route?.addresses[packet.srcFullAddress] == null) {
-      if (await crypto.verifySigned(
-        packet.srcPeerId.signPiblicKey,
-        packet.datagram,
-      )) {
-        routes[packet.srcPeerId] = Route(
-          header: packet.header,
-          peerId: packet.srcPeerId,
-          address: MapEntry(packet.srcFullAddress, AddressProperties()),
-        );
-        _log('Keep ${packet.srcFullAddress} for ${packet.srcPeerId}');
-      } else {
-        // exit on wrong signature
+      try {
+        await crypto.verify(packet.datagram);
+      } on ExceptionInvalidSignature {
         throw const StopProcessing();
       }
+      routes[packet.srcPeerId] = Route(
+        header: packet.header,
+        peerId: packet.srcPeerId,
+        address: MapEntry(packet.srcFullAddress, AddressProperties()),
+      );
+      _log('Keep ${packet.srcFullAddress} for ${packet.srcPeerId}');
     } else {
       routes[packet.srcPeerId]!
         // update peer address timestamp

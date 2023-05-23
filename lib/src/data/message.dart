@@ -15,6 +15,9 @@ class Message {
       datagram.length == emptySignedMessageLength ||
       datagram.length > emptySignedMessageLength + sealLength;
 
+  static Uint8List getHeader(Uint8List datagram) =>
+      datagram.sublist(0, headerLength);
+
   static PeerId getSrcPeerId(Uint8List datagram) => PeerId(
           value: datagram.sublist(
         PacketHeader.length,
@@ -27,6 +30,20 @@ class Message {
         headerLength,
       ));
 
+  // Unsigned Datagram methods
+  static Uint8List getPayload(Uint8List datagram) =>
+      datagram.sublist(headerLength);
+
+  static bool isNotEmptyPayload(Uint8List datagram) =>
+      datagram.length > headerLength;
+
+  // Signed Datagram methods
+  static Uint8List getUnsignedPayload(Uint8List signedDatagram) =>
+      signedDatagram.sublist(
+        headerLength,
+        signedDatagram.length - signatureLength,
+      );
+
   static Uint8List getUnsignedDatagram(Uint8List signedDatagram) =>
       signedDatagram.sublist(0, signedDatagram.length - signatureLength);
 
@@ -35,9 +52,6 @@ class Message {
 
   static bool hasEmptyPayload(Uint8List signedDatagram) =>
       signedDatagram.length == emptySignedMessageLength;
-
-  static Uint8List getPayload(Uint8List signedDatagram) => signedDatagram
-      .sublist(headerLength, signedDatagram.length - signatureLength);
 
   final PacketHeader header;
   final PeerId srcPeerId, dstPeerId;

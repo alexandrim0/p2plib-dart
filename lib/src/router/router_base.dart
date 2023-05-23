@@ -56,13 +56,13 @@ abstract class RouterBase {
 
   set maxStoredHeaders(int value) => Route.maxStoredHeaders = value;
 
-  Future<CryptoKeys> init([final CryptoKeys? keys]) async {
-    final cryptoKeys = await crypto.init(keys);
+  Future<Uint8List> init([Uint8List? seed]) async {
+    final cryptoKeys = await crypto.init(seed);
     _selfId = PeerId.fromKeys(
-      encryptionKey: cryptoKeys.encPublicKey,
-      signKey: cryptoKeys.signPublicKey,
+      encryptionKey: cryptoKeys.encPubKey,
+      signKey: cryptoKeys.signPubKey,
     );
-    return cryptoKeys;
+    return cryptoKeys.seed;
   }
 
   Future<void> start() async {

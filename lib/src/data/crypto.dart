@@ -3,45 +3,25 @@ part of 'data.dart';
 const sealLength = 48;
 const signatureLength = 64;
 
-enum CryptoTaskType {
-  seal,
-  unseal,
-  sign,
-  verifySigned,
-}
+typedef InitRequest = ({SendPort sendPort, Uint8List? seed});
 
-class CryptoTask {
-  final int id;
-  final CryptoTaskType type;
-  Object payload;
-  Object? extra;
+typedef InitResponse = ({
+  SendPort sendPort,
+  Uint8List seed,
+  Uint8List encPubKey,
+  Uint8List signPubKey,
+});
 
-  CryptoTask({
-    required this.id,
-    required this.type,
-    required this.payload,
-    this.extra,
-  });
-}
+typedef InitResult = ({
+  Uint8List seed,
+  Uint8List encPubKey,
+  Uint8List signPubKey,
+});
 
-/// seed, public keys and encPrivateKey is Uint8List(32)
-/// signPrivateKey is Uint8List(64)
-class CryptoKeys {
-  Uint8List seed, encPublicKey, encPrivateKey, signPublicKey, signPrivateKey;
+typedef TaskRequest = ({int id, TaskType type, Uint8List datagram});
 
-  CryptoKeys({
-    required this.seed,
-    required this.encPublicKey,
-    required this.encPrivateKey,
-    required this.signPublicKey,
-    required this.signPrivateKey,
-  });
+typedef TaskResult = ({int id, Uint8List datagram});
 
-  factory CryptoKeys.empty() => CryptoKeys(
-        seed: emptyUint8List,
-        encPublicKey: emptyUint8List,
-        encPrivateKey: emptyUint8List,
-        signPublicKey: emptyUint8List,
-        signPrivateKey: emptyUint8List,
-      );
-}
+typedef TaskError = ({int id, Object error});
+
+enum TaskType { seal, unseal, verify }
