@@ -1,4 +1,4 @@
-## 2.0.1
+## 2.0.2
 
   - wrap socket operations in try-catch
 
