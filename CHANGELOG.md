@@ -1,3 +1,7 @@
+## 2.0.1
+
+  - wrap socket operations in try-catch
+
 ## 2.0.0
 Breaking changes:
   - Upgrade dart sdk up to 3.0.0
