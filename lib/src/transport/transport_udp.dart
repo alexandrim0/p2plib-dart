@@ -13,34 +13,16 @@ class TransportUdp extends TransportBase {
 
   @override
   Future<void> start() async {
-    if (_socket != null) return;
-    _socket = await RawDatagramSocket.bind(
-      bindAddress.address,
-      bindAddress.port,
-      ttl: ttl,
-    );
-    _socket!.listen(
-      (event) async {
-        if (event != RawSocketEvent.read) return;
-        final datagram = _socket?.receive();
-        if (datagram == null || datagram.data.length < PacketHeader.length) {
-          return;
-        }
-        try {
-          await onMessage!(Packet(
-            srcFullAddress: FullAddress(
-              address: datagram.address,
-              port: datagram.port,
-            ),
-            header: PacketHeader.fromBytes(datagram.data),
-            datagram: datagram.data,
-          ));
-        } on StopProcessing catch (_) {
-        } catch (e) {
-          logger?.call(e.toString());
-        }
-      },
-    );
+    try {
+      _socket ??= await RawDatagramSocket.bind(
+        bindAddress.address,
+        bindAddress.port,
+        ttl: ttl,
+      );
+      _socket?.listen(_onData);
+    } catch (e) {
+      logger?.call(e.toString());
+    }
   }
 
   @override
@@ -58,7 +40,32 @@ class TransportUdp extends TransportBase {
     for (final peerFullAddress in fullAddresses) {
       if (peerFullAddress.isEmpty) continue;
       if (peerFullAddress.type != bindAddress.type) continue;
-      _socket!.send(datagram, peerFullAddress.address, peerFullAddress.port);
+      try {
+        _socket?.send(datagram, peerFullAddress.address, peerFullAddress.port);
+      } catch (e) {
+        logger?.call(e.toString());
+      }
+    }
+  }
+
+  void _onData(final RawSocketEvent event) async {
+    if (event != RawSocketEvent.read) return;
+    final datagram = _socket?.receive();
+    if (datagram == null || datagram.data.length < PacketHeader.length) {
+      return;
+    }
+    try {
+      await onMessage!(Packet(
+        srcFullAddress: FullAddress(
+          address: datagram.address,
+          port: datagram.port,
+        ),
+        header: PacketHeader.fromBytes(datagram.data),
+        datagram: datagram.data,
+      ));
+    } on StopProcessing catch (_) {
+    } catch (e) {
+      logger?.call(e.toString());
     }
   }
 }
