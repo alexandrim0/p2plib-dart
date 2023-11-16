@@ -21,11 +21,10 @@ class AddressProperties {
   void updateLastSeen() =>
       lastSeen = DateTime.timestamp().millisecondsSinceEpoch;
 
-  AddressProperties combine(AddressProperties other) {
+  void combine(AddressProperties other) {
     if (other.isLocal) isLocal = true;
     if (other.isStatic) isStatic = true;
     if (other.lastSeen > lastSeen) lastSeen = other.lastSeen;
-    return this;
   }
 
   @override

@@ -123,12 +123,10 @@ void main() async {
           bobAddressWithProperties.ip: bobAddressWithProperties.properties,
           actualAddress: AddressProperties(
             isLocal: true,
-            isStatic: false,
             lastSeen: now,
           ),
           staleAddress: AddressProperties(
             isLocal: true,
-            isStatic: false,
             lastSeen: staleAt - 1,
           ),
           staticAddress: AddressProperties(

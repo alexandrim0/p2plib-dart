@@ -1,3 +1,8 @@
+## 2.1.1
+
+  - better lint
+  - downgrade meta (package)
+
 ## 2.1.0
 
   - upgrade dart, packages
