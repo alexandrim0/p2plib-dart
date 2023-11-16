@@ -30,11 +30,11 @@ void main(List<String> args) async {
 }
 
 void _printHelpScreen() {
-  stdout.writeln('Run with "log" parameter to write logs to stdout\n');
-  stdout.writeln('Run with "show_seed" parameter to generate seed\n');
-  stdout.writeln(
-      '\tuse env var "P2P_SEED" to set seed or it will be generated\n');
-  stdout.writeln('Run with "port [1025-65535]" parameter to set listen port\n');
+  stdout.writeln('''
+Run with "log" parameter to write logs to stdout
+Run with "show_seed" parameter to generate seed (use env var "P2P_SEED" to set seed or it will be generated)
+Run with "port [1025-65535]" parameter to set listen port
+''');
   exit(0);
 }
 

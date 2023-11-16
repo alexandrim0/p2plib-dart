@@ -1,15 +1,14 @@
 part of 'transport.dart';
 
 class TransportUdp extends TransportBase {
-  static const defaultPort = 2022;
-
-  RawDatagramSocket? _socket;
-
   TransportUdp({
     required super.bindAddress,
     super.onMessage,
     super.ttl,
   });
+  static const defaultPort = 2022;
+
+  RawDatagramSocket? _socket;
 
   @override
   Future<void> start() async {
@@ -33,8 +32,8 @@ class TransportUdp extends TransportBase {
 
   @override
   void send(
-    final Iterable<FullAddress> fullAddresses,
-    final Uint8List datagram,
+    Iterable<FullAddress> fullAddresses,
+    Uint8List datagram,
   ) {
     if (_socket == null) return;
     for (final peerFullAddress in fullAddresses) {
@@ -48,7 +47,7 @@ class TransportUdp extends TransportBase {
     }
   }
 
-  void _onData(final RawSocketEvent event) async {
+  Future<void> _onData(RawSocketEvent event) async {
     if (event != RawSocketEvent.read) return;
     final datagram = _socket?.receive();
     if (datagram == null || datagram.data.length < PacketHeader.length) {

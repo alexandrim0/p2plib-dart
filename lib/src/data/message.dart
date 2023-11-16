@@ -53,16 +53,17 @@ class Message {
   static bool hasEmptyPayload(Uint8List signedDatagram) =>
       signedDatagram.length == emptySignedMessageLength;
 
-  final PacketHeader header;
-  final PeerId srcPeerId, dstPeerId;
-  Uint8List? payload;
-
   Message({
     required this.header,
     required this.srcPeerId,
     required this.dstPeerId,
     this.payload,
   });
+
+  final PacketHeader header;
+  final PeerId srcPeerId;
+  final PeerId dstPeerId;
+  Uint8List? payload;
 
   bool get isEmpty => payload == null || payload!.isEmpty;
   bool get isNotEmpty => payload != null && payload!.isNotEmpty;

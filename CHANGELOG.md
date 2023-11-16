@@ -1,3 +1,10 @@
+## 2.1.0
+
+  - upgrade dart, packages
+  - use very_good_analysis
+  - follow very_good_analysis highlights
+  - use DateTime.timestamp() instead of DateTime.now()
+
 ## 2.0.2
 
   - wrap socket operations in try-catch

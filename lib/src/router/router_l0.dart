@@ -4,12 +4,6 @@ part of 'router.dart';
 /// It can recieve, send and forward datagrams
 
 class RouterL0 extends RouterBase {
-  /// Defines required clock sync accuracy between nodes
-  var deltaT = const Duration(seconds: 10).inMilliseconds;
-
-  /// Defines how much times message can be forwarded
-  var maxForwardsLimit = 1;
-
   RouterL0({
     super.crypto,
     super.transports,
@@ -17,6 +11,12 @@ class RouterL0 extends RouterBase {
     super.messageTTL,
     super.logger,
   });
+
+  /// Defines required clock sync accuracy between nodes
+  int deltaT = const Duration(seconds: 10).inMilliseconds;
+
+  /// Defines how much times message can be forwarded
+  int maxForwardsLimit = 1;
 
   @override
   Future<Uint8List> init([Uint8List? seed]) async {
@@ -39,7 +39,7 @@ class RouterL0 extends RouterBase {
   }
 
   @override
-  Future<Packet> onMessage(final Packet packet) async {
+  Future<Packet> onMessage(Packet packet) async {
     // check minimal datagram length
     if (!Message.hasCorrectLength(packet.datagram)) {
       throw const StopProcessing();

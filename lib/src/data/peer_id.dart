@@ -9,8 +9,8 @@ class PeerId extends Token {
   }
 
   factory PeerId.fromKeys({
-    required final Uint8List encryptionKey,
-    required final Uint8List signKey,
+    required Uint8List encryptionKey,
+    required Uint8List signKey,
   }) {
     if (encryptionKey.length != _keyLength) {
       throw const FormatException('Encription key length');

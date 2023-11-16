@@ -5,11 +5,6 @@ part of 'router.dart';
 /// Also it can be an base class for poor client.
 
 class RouterL1 extends RouterL0 {
-  var retryPeriod = const Duration(seconds: 1);
-
-  final _ackCompleters = <int, Completer<void>>{};
-  final _messageController = StreamController<Message>();
-
   RouterL1({
     super.crypto,
     super.transports,
@@ -17,6 +12,11 @@ class RouterL1 extends RouterL0 {
     super.messageTTL,
     super.logger,
   });
+
+  Duration retryPeriod = const Duration(seconds: 1);
+
+  final _ackCompleters = <int, Completer<void>>{};
+  final _messageController = StreamController<Message>();
 
   Iterable<FullAddress> get selfAddresses =>
       transports.map((t) => t.bindAddress);
@@ -55,7 +55,7 @@ class RouterL1 extends RouterL0 {
   }
 
   @override
-  Future<Packet> onMessage(final Packet packet) async {
+  Future<Packet> onMessage(Packet packet) async {
     await super.onMessage(packet);
 
     // // check and remove signature, decrypt if not empty
@@ -69,7 +69,7 @@ class RouterL1 extends RouterL0 {
 
     // send confirmation if required
     if (packet.header.messageType == PacketType.confirmable) {
-      crypto
+      unawaited(crypto
           .seal(Message(
             header: packet.header.copyWith(
               messageType: PacketType.confirmation,
@@ -80,7 +80,7 @@ class RouterL1 extends RouterL0 {
           .then((datagram) => sendDatagram(
                 addresses: [packet.srcFullAddress],
                 datagram: datagram,
-              ));
+              )));
     }
 
     // message is for user, send it to subscriber
@@ -98,12 +98,12 @@ class RouterL1 extends RouterL0 {
 
   /// Send message. If useAddress is not null then use this else resolve peerId
   Future<PacketHeader> sendMessage({
-    final bool isConfirmable = false,
-    required final PeerId dstPeerId,
-    final int? messageId,
-    final Uint8List? payload,
-    final Duration? ackTimeout,
-    final Iterable<FullAddress>? useAddresses,
+    required PeerId dstPeerId,
+    bool isConfirmable = false,
+    int? messageId,
+    Uint8List? payload,
+    Duration? ackTimeout,
+    Iterable<FullAddress>? useAddresses,
   }) async {
     if (isNotRun) throw const ExceptionIsNotRunning();
 
@@ -138,10 +138,10 @@ class RouterL1 extends RouterL0 {
   }
 
   Future<void> sendDatagramConfirmable({
-    required final int messageId,
-    required final Uint8List datagram,
-    required final Iterable<FullAddress> addresses,
-    final Duration? ackTimeout,
+    required int messageId,
+    required Uint8List datagram,
+    required Iterable<FullAddress> addresses,
+    Duration? ackTimeout,
   }) {
     final completer = Completer<void>();
     _ackCompleters[messageId] = completer;
@@ -156,9 +156,9 @@ class RouterL1 extends RouterL0 {
   }
 
   void _sendAndRetry({
-    required final int messageId,
-    required final Uint8List datagram,
-    required final Iterable<FullAddress> addresses,
+    required int messageId,
+    required Uint8List datagram,
+    required Iterable<FullAddress> addresses,
   }) {
     if (isRun && _ackCompleters.containsKey(messageId)) {
       sendDatagram(addresses: addresses, datagram: datagram);

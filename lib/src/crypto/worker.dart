@@ -3,9 +3,9 @@ import 'dart:ffi';
 import 'dart:isolate';
 import 'package:sodium/sodium.dart';
 
-import '/src/data/data.dart';
+import 'package:p2plib/src/data/data.dart';
 
-void cryptoWorker(initialTask) async {
+Future<void> cryptoWorker(dynamic initialTask) async {
   initialTask as InitRequest;
   final receivePort = ReceivePort();
   final mainIsolatePort = initialTask.sendPort;
@@ -28,7 +28,7 @@ void cryptoWorker(initialTask) async {
   ));
 
   receivePort.listen(
-    (final task) {
+    (task) {
       if (task is! TaskRequest) return;
       try {
         switch (task.type) {
@@ -50,7 +50,6 @@ void cryptoWorker(initialTask) async {
               id: task.id,
               datagram: signedDatagram.toBytes(),
             ));
-            break;
 
           case TaskType.unseal:
             mainIsolatePort.send(sign.verifyDetached(
@@ -70,7 +69,6 @@ void cryptoWorker(initialTask) async {
                           )
                   )
                 : (id: task.id, error: const ExceptionInvalidSignature()));
-            break;
 
           case TaskType.verify:
             mainIsolatePort.send(sign.verifyDetached(
@@ -80,7 +78,6 @@ void cryptoWorker(initialTask) async {
             )
                 ? (id: task.id, datagram: emptyUint8List)
                 : (id: task.id, error: const ExceptionInvalidSignature()));
-            break;
         }
       } catch (e) {
         mainIsolatePort.send((id: task.id, error: e));
@@ -102,7 +99,7 @@ DynamicLibrary _loadSodium() {
     return DynamicLibrary.open('/usr/local/lib/libsodium.dylib');
   }
   if (Platform.isWindows) {
-    return DynamicLibrary.open('C:\\Windows\\System32\\libsodium.dll');
+    return DynamicLibrary.open(r'C:\Windows\System32\libsodium.dll');
   }
-  throw OSError('[Crypto] Platform not supported');
+  throw const OSError('[Crypto] Platform not supported');
 }

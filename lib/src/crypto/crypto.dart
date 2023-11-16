@@ -1,26 +1,16 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import '/src/data/data.dart';
-
-import 'worker.dart';
+import 'package:p2plib/src/data/data.dart';
+import 'package:p2plib/src/crypto/worker.dart';
 
 class Crypto {
-  final _recievePort = ReceivePort();
-  final _initCompleter = Completer<InitResult>();
-  final Map<int, Completer<Uint8List>> _completers = {};
-
-  late final SendPort _sendPort;
-
-  var _idCounter = 0;
-  var operationTimeout = const Duration(seconds: 1);
-
   Crypto() {
     _recievePort.listen(
       (taskResult) => switch (taskResult) {
-        TaskResult r => _completers.remove(r.id)?.complete(r.datagram),
-        TaskError r => _completers.remove(r.id)?.completeError(r.error),
-        InitResponse r => () {
+        final TaskResult r => _completers.remove(r.id)?.complete(r.datagram),
+        final TaskError r => _completers.remove(r.id)?.completeError(r.error),
+        final InitResponse r => () {
             _sendPort = r.sendPort;
             _initCompleter.complete((
               seed: r.seed,
@@ -33,6 +23,14 @@ class Crypto {
       cancelOnError: false,
     );
   }
+
+  final _recievePort = ReceivePort();
+  final _initCompleter = Completer<InitResult>();
+  final Map<int, Completer<Uint8List>> _completers = {};
+
+  late final SendPort _sendPort;
+
+  var _idCounter = 0;
 
   /// Will create keys from given or generated seed
   Future<InitResult> init([Uint8List? seed]) async {

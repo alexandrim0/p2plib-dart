@@ -1,8 +1,9 @@
 part of 'data.dart';
 
 abstract class ExceptionBase implements Exception {
-  final Object? message;
   const ExceptionBase([this.message = '']);
+
+  final Object? message;
 
   @override
   String toString() => '$runtimeType: $message';

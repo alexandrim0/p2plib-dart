@@ -1,6 +1,11 @@
 part of 'data.dart';
 
 class AddressProperties {
+  AddressProperties({
+    this.isLocal = false,
+    this.isStatic = false,
+    int? lastSeen,
+  }) : lastSeen = lastSeen ?? DateTime.timestamp().millisecondsSinceEpoch;
   int lastSeen;
 
   /// Defines if address can be stale or not
@@ -9,17 +14,12 @@ class AddressProperties {
   /// Defines if it needs keepalive
   bool isLocal;
 
-  AddressProperties({
-    this.isLocal = false,
-    this.isStatic = false,
-    int? lastSeen,
-  }) : lastSeen = lastSeen ?? DateTime.now().millisecondsSinceEpoch;
-
   bool get isNotStatic => !isStatic;
 
   bool get isNotLocal => !isLocal;
 
-  void updateLastSeen() => lastSeen = DateTime.now().millisecondsSinceEpoch;
+  void updateLastSeen() =>
+      lastSeen = DateTime.timestamp().millisecondsSinceEpoch;
 
   AddressProperties combine(AddressProperties other) {
     if (other.isLocal) isLocal = true;

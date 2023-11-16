@@ -1,9 +1,11 @@
+// ignore_for_file: avoid_print, inference_failure_on_instance_creation
+
 import 'dart:async';
 import 'package:test/test.dart';
 
 import 'mock.dart';
 
-main() async {
+Future<void> main() async {
   final bootstrap = await createProxy(
     address: proxyAddressWithProperties.ip,
     debugLabel: 'Bootstrap',
@@ -124,7 +126,7 @@ main() async {
             properties: AddressProperties(
               isLocal: bobAddressWithProperties.properties.isLocal,
               isStatic: bobAddressWithProperties.properties.isStatic,
-              lastSeen: DateTime.now()
+              lastSeen: DateTime.timestamp()
                   .subtract(aliceRouter.peerOnlineTimeout)
                   .millisecondsSinceEpoch,
             ),
@@ -162,7 +164,7 @@ main() async {
             properties: AddressProperties(
               isLocal: bobAddressWithProperties.properties.isLocal,
               isStatic: bobAddressWithProperties.properties.isStatic,
-              lastSeen: DateTime.now()
+              lastSeen: DateTime.timestamp()
                   .subtract(aliceRouter.peerOnlineTimeout)
                   .millisecondsSinceEpoch,
             ),
@@ -351,7 +353,7 @@ main() async {
 
         final header = PacketHeader(
           messageType: PacketType.confirmable,
-          issuedAt: DateTime.now().millisecondsSinceEpoch,
+          issuedAt: DateTime.timestamp().millisecondsSinceEpoch,
           id: genRandomInt(),
         );
         final datagram = await aliceRouter.crypto.seal(Message(
@@ -371,7 +373,7 @@ main() async {
 
         final header2 = PacketHeader(
           messageType: PacketType.confirmable,
-          issuedAt: DateTime.now().millisecondsSinceEpoch,
+          issuedAt: DateTime.timestamp().millisecondsSinceEpoch,
           id: genRandomInt(),
         );
         final datagram2 = await aliceRouter.crypto.seal(Message(
@@ -394,7 +396,10 @@ main() async {
     timeout: Timeout(testTimeoutLong),
   );
 
-  tearDownAll(bootstrap.kill);
+  tearDownAll(() async {
+    await subscription.cancel();
+    bootstrap.kill();
+  });
   tearDown(() {
     subscription.onData(null);
     aliceRouter.stop();

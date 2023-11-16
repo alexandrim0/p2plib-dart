@@ -1,6 +1,6 @@
 part of 'data.dart';
 
-/// Only address and port defines hash and equality
+@immutable
 class FullAddress {
   const FullAddress({
     required this.address,

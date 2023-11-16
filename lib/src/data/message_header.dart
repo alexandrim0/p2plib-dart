@@ -7,6 +7,7 @@ enum PacketType { regular, confirmable, confirmation }
 /// 6 bytes - issuedAt (unix timestamp with ms)
 /// 8 bytes - message id (int)
 
+@immutable
 class PacketHeader {
   static const length = 16;
 
@@ -15,27 +16,14 @@ class PacketHeader {
     return datagram;
   }
 
-  final PacketType messageType;
-  final int forwardsCount, issuedAt, id;
-
   const PacketHeader({
+    required this.id,
+    required this.issuedAt,
     this.forwardsCount = 0,
     this.messageType = PacketType.regular,
-    required this.issuedAt,
-    required this.id,
   });
 
-  @override
-  int get hashCode => Object.hash(runtimeType, issuedAt, id);
-
-  @override
-  bool operator ==(Object other) =>
-      other is PacketHeader &&
-      runtimeType == other.runtimeType &&
-      issuedAt == other.issuedAt &&
-      id == other.id;
-
-  factory PacketHeader.fromBytes(final Uint8List datagram) {
+  factory PacketHeader.fromBytes(Uint8List datagram) {
     final messageType = datagram[1];
     if (messageType > PacketType.values.length) {
       throw const FormatException('Packet type is wrong!');
@@ -49,6 +37,21 @@ class PacketHeader {
     );
   }
 
+  final int id;
+  final int issuedAt;
+  final int forwardsCount;
+  final PacketType messageType;
+
+  @override
+  int get hashCode => Object.hash(runtimeType, issuedAt, id);
+
+  @override
+  bool operator ==(Object other) =>
+      other is PacketHeader &&
+      runtimeType == other.runtimeType &&
+      issuedAt == other.issuedAt &&
+      id == other.id;
+
   Uint8List toBytes() {
     final head = Uint8List(16);
     head.buffer.asByteData()
@@ -59,9 +62,9 @@ class PacketHeader {
   }
 
   PacketHeader copyWith({
-    final int? issuedAt,
-    final int? id,
-    final PacketType? messageType,
+    int? issuedAt,
+    int? id,
+    PacketType? messageType,
   }) =>
       PacketHeader(
         messageType: messageType ?? this.messageType,

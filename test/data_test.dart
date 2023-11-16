@@ -22,7 +22,7 @@ void main() async {
     'MessageHeader equality and serialization',
     () {
       final headerA = PacketHeader(
-        issuedAt: DateTime.now().millisecondsSinceEpoch,
+        issuedAt: DateTime.timestamp().millisecondsSinceEpoch,
         id: genRandomInt(),
       );
       final headerB = headerA.copyWith(
@@ -45,7 +45,7 @@ void main() async {
       final messageId = genRandomInt();
       final message = Message(
         header: PacketHeader(
-          issuedAt: DateTime.now().millisecondsSinceEpoch,
+          issuedAt: DateTime.timestamp().millisecondsSinceEpoch,
           id: messageId,
         ),
         srcPeerId: randomPeerId,
@@ -91,7 +91,7 @@ void main() async {
     'Route.addHeader',
     () {
       Route.maxStoredHeaders = 5;
-      final now = DateTime.now().millisecondsSinceEpoch;
+      final now = DateTime.timestamp().millisecondsSinceEpoch;
       final firstHeader = PacketHeader(issuedAt: now, id: genRandomInt());
       final route = Route(
         peerId: proxyPeerId,
@@ -111,7 +111,7 @@ void main() async {
   test(
     'Route.getActualAddresses, removeStaleAddresses',
     () {
-      final now = DateTime.now().millisecondsSinceEpoch;
+      final now = DateTime.timestamp().millisecondsSinceEpoch;
       final staleAt = now - 3000;
       final actualAddress = FullAddress(address: localAddress, port: 1234);
       final staleAddress = FullAddress(address: localAddress, port: 4321);

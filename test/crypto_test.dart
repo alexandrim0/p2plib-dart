@@ -2,12 +2,12 @@ import 'package:test/test.dart';
 
 import 'mock.dart';
 
-main() async {
+Future<void> main() async {
   final crypto = Crypto();
   final initResults = await crypto.init(proxySeed);
   final emptyMessage = Message(
     header: PacketHeader(
-      issuedAt: DateTime.now().millisecondsSinceEpoch,
+      issuedAt: DateTime.timestamp().millisecondsSinceEpoch,
       id: genRandomInt(),
     ),
     srcPeerId: proxyPeerId,
@@ -67,7 +67,7 @@ main() async {
             await crypto.unseal(await crypto.seal(datagram));
           }
         },
-        timeout: Timeout(Duration(minutes: 1)),
+        timeout: const Timeout(Duration(minutes: 1)),
       );
     },
   );

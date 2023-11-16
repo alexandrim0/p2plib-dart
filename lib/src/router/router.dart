@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'dart:async';
 
-import '/src/data/data.dart';
-import '/src/crypto/crypto.dart';
-import '/src/transport/transport.dart';
+import 'package:p2plib/src/data/data.dart';
+import 'package:p2plib/src/crypto/crypto.dart';
+import 'package:p2plib/src/transport/transport.dart';
 
 part 'router_base.dart';
 part 'router_l0.dart';

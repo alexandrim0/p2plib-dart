@@ -1,7 +1,19 @@
 part of 'data.dart';
 
 class Route {
-  static var maxStoredHeaders = 0;
+  static int maxStoredHeaders = 0;
+
+  Route({
+    required this.peerId,
+    this.canForward = false,
+    PacketHeader? header,
+    Map<FullAddress, AddressProperties>? addresses,
+    ({FullAddress ip, AddressProperties properties})? address,
+  }) {
+    if (header != null) _lastHeaders.add(header);
+    if (addresses != null) _addresses.addAll(addresses);
+    if (address != null) _addresses[address.ip] = address.properties;
+  }
 
   final PeerId peerId;
 
@@ -9,18 +21,6 @@ class Route {
 
   final _addresses = <FullAddress, AddressProperties>{};
   final _lastHeaders = QueueList<PacketHeader>(maxStoredHeaders);
-
-  Route({
-    required this.peerId,
-    this.canForward = false,
-    final PacketHeader? header,
-    final Map<FullAddress, AddressProperties>? addresses,
-    final ({FullAddress ip, AddressProperties properties})? address,
-  }) {
-    if (header != null) _lastHeaders.add(header);
-    if (addresses != null) _addresses.addAll(addresses);
-    if (address != null) _addresses[address.ip] = address.properties;
-  }
 
   bool get isEmpty => addresses.isEmpty;
   bool get isNotEmpty => addresses.isNotEmpty;
@@ -39,9 +39,9 @@ class Route {
   }
 
   void addAddress({
-    required final FullAddress address,
-    required final AddressProperties properties,
-    final bool? canForward,
+    required FullAddress address,
+    required AddressProperties properties,
+    bool? canForward,
   }) {
     if (canForward != null) this.canForward = canForward;
     if (addresses.containsKey(address)) {
@@ -51,12 +51,12 @@ class Route {
     }
   }
 
-  Iterable<FullAddress> getActualAddresses({required final int staleAt}) =>
+  Iterable<FullAddress> getActualAddresses({required int staleAt}) =>
       addresses.entries
           .where((e) => e.value.isStatic || e.value.lastSeen > staleAt)
           .map((e) => e.key);
 
-  void removeStaleAddresses({required final int staleAt}) =>
+  void removeStaleAddresses({required int staleAt}) =>
       addresses.removeWhere((k, v) => v.isNotStatic && v.lastSeen < staleAt);
 
   @override

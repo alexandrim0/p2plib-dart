@@ -1,11 +1,12 @@
 part of 'data.dart';
 
+@immutable
 class Token {
   static const _listEq = ListEquality<int>();
 
-  final Uint8List value;
-
   const Token({required this.value});
+
+  final Uint8List value;
 
   @override
   int get hashCode => Object.hash(runtimeType, _listEq.hash(value));

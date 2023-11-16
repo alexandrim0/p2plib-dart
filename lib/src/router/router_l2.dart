@@ -3,10 +3,6 @@ part of 'router.dart';
 /// Enhanced router with more high level API for building rich client
 
 class RouterL2 extends RouterL1 {
-  final _lastSeenController = StreamController<PeerStatus>.broadcast();
-
-  late var peerOnlineTimeout = retryPeriod * 2;
-
   RouterL2({
     super.crypto,
     super.transports,
@@ -14,11 +10,14 @@ class RouterL2 extends RouterL1 {
     super.messageTTL,
     super.logger,
   });
+  final _lastSeenController = StreamController<PeerStatus>.broadcast();
+
+  late Duration peerOnlineTimeout = retryPeriod * 2;
 
   Stream<PeerStatus> get lastSeenStream => _lastSeenController.stream;
 
   @override
-  Future<Packet> onMessage(final Packet packet) async {
+  Future<Packet> onMessage(Packet packet) async {
     await super.onMessage(packet);
 
     // update peer status
@@ -27,15 +26,15 @@ class RouterL2 extends RouterL1 {
     return packet;
   }
 
-  bool getPeerStatus(final PeerId peerId) =>
+  bool getPeerStatus(PeerId peerId) =>
       (routes[peerId]?.lastSeen ?? 0) + peerOnlineTimeout.inMilliseconds > _now;
 
   /// Add Address with port and timestamp for PeerId into cache
   void addPeerAddress({
-    required final PeerId peerId,
-    required final FullAddress address,
-    required final AddressProperties properties,
-    final bool? canForward,
+    required PeerId peerId,
+    required FullAddress address,
+    required AddressProperties properties,
+    bool? canForward,
   }) {
     if (peerId == selfId) return;
     if (routes.containsKey(peerId)) {
@@ -59,7 +58,7 @@ class RouterL2 extends RouterL1 {
     }
   }
 
-  Future<bool> pingPeer(final PeerId peerId) async {
+  Future<bool> pingPeer(PeerId peerId) async {
     if (peerId == selfId) return true;
     try {
       await sendMessage(isConfirmable: true, dstPeerId: peerId);

@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 import 'dart:convert';
 import 'dart:isolate';
@@ -13,7 +15,8 @@ final token = Token(value: randomPayload);
 final proxySeed = base64Decode('tuTfQVH3qgHZ751JtEja_ZbkY-EF0cbRzVDDO_HNrmY=');
 final proxyPeerId = PeerId(
   value: base64Decode(
-      'xD_eApw8bN2EDDirUzCoEsOpSbGXfFD0WYr7q7hWjVUARgW4EQ7CTjMT_SqAfItrfS4BGl6sU-rnSWCwuOtv3Q=='),
+    'xD_eApw8bN2EDDirUzCoEsOpSbGXfFD0WYr7q7hWjVUARgW4EQ7CTjMT_SqAfItrfS4BGl6sU-rnSWCwuOtv3Q==',
+  ),
 );
 final proxyAddressWithProperties = (
   ip: FullAddress(address: localAddress, port: 2022),
@@ -31,12 +34,12 @@ final bobAddressWithProperties = (
 Route getProxyRoute() => Route(
     peerId: proxyPeerId, canForward: true, address: proxyAddressWithProperties);
 
-void log(debugLabel, message) => print('[$debugLabel] $message');
+void log(String debugLabel, String message) => print('[$debugLabel] $message');
 
 Future<RouterL2> createRouter({
-  required final FullAddress address,
-  final Uint8List? seed,
-  final String? debugLabel,
+  required FullAddress address,
+  Uint8List? seed,
+  String? debugLabel,
 }) async {
   final router = RouterL2(
     transports: [TransportUdp(bindAddress: address)],
@@ -49,8 +52,8 @@ Future<RouterL2> createRouter({
 }
 
 Future<Isolate> createProxy({
-  final FullAddress? address,
-  final String? debugLabel = 'Proxy',
+  FullAddress? address,
+  String? debugLabel = 'Proxy',
 }) async {
   final isolate = await Isolate.spawn(
     (_) async {
@@ -66,6 +69,6 @@ Future<Isolate> createProxy({
     null,
     debugName: debugLabel,
   );
-  await Future.delayed(initTime);
+  await Future.delayed(initTime, () {});
   return isolate;
 }

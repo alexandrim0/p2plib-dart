@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:isolate';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:meta/meta.dart';
 import 'package:collection/collection.dart';
 
 export 'dart:typed_data' show Uint8List;
@@ -26,7 +27,7 @@ int genRandomInt() =>
     (_random.nextInt(_maxRandomNumber) << 32) |
     _random.nextInt(_maxRandomNumber);
 
-Uint8List getRandomBytes(final int length) {
+Uint8List getRandomBytes(int length) {
   final r = Uint8List(length);
   for (var i = 0; i < length; i++) {
     r[i] = _random.nextInt(255);

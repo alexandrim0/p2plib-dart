@@ -21,8 +21,8 @@ abstract class TransportBase {
   void stop();
 
   void send(
-    final Iterable<FullAddress> fullAddresses,
-    final Uint8List datagram,
+    Iterable<FullAddress> fullAddresses,
+    Uint8List datagram,
   );
 
   @override

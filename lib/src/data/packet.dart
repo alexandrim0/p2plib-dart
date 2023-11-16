@@ -10,15 +10,16 @@ part of 'data.dart';
 /// 64 bytes - signature
 
 class Packet {
-  final FullAddress srcFullAddress;
-  final PacketHeader header;
-  final Uint8List datagram;
-  late final PeerId srcPeerId, dstPeerId;
-  late final Uint8List payload;
-
   Packet({
     required this.srcFullAddress,
     required this.datagram,
     required this.header,
   });
+
+  final FullAddress srcFullAddress;
+  final PacketHeader header;
+  final Uint8List datagram;
+  late final PeerId srcPeerId;
+  late final PeerId dstPeerId;
+  late final Uint8List payload;
 }

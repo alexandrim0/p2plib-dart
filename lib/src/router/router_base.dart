@@ -4,26 +4,9 @@ part of 'router.dart';
 /// Also it keeps Routes and can manipulate with them
 
 abstract class RouterBase {
-  final Map<PeerId, Route> routes = {};
-  final List<TransportBase> transports = [];
-  final Duration keepalivePeriod;
-  final Crypto crypto;
-
-  late Duration messageTTL;
-  late Duration peerAddressTTL = keepalivePeriod * 2;
-
-  /// Defines how much nodes will be used for delivery
-  var useForwardersLimit = 2;
-
-  void Function(String)? logger;
-
-  late final PeerId _selfId;
-
-  var _isRun = false;
-
   RouterBase({
-    final Crypto? crypto,
-    final List<TransportBase>? transports,
+    Crypto? crypto,
+    List<TransportBase>? transports,
     this.messageTTL = const Duration(seconds: 3),
     this.keepalivePeriod = const Duration(seconds: 15),
     this.logger,
@@ -47,12 +30,31 @@ abstract class RouterBase {
         ]);
   }
 
+  final Crypto crypto;
+  final Duration keepalivePeriod;
+  final Map<PeerId, Route> routes = {};
+  final List<TransportBase> transports = [];
+
+  late Duration messageTTL;
+  late Duration peerAddressTTL = keepalivePeriod * 2;
+
+  /// Defines how much nodes will be used for delivery
+  int useForwardersLimit = 2;
+
+  void Function(String)? logger;
+
+  late final PeerId _selfId;
+
+  var _isRun = false;
+
   bool get isRun => _isRun;
   bool get isNotRun => !_isRun;
 
   PeerId get selfId => _selfId;
 
-  int get _now => DateTime.now().millisecondsSinceEpoch;
+  int get maxStoredHeaders => Route.maxStoredHeaders;
+
+  int get _now => DateTime.timestamp().millisecondsSinceEpoch;
 
   set maxStoredHeaders(int value) => Route.maxStoredHeaders = value;
 
@@ -68,7 +70,7 @@ abstract class RouterBase {
   Future<void> start() async {
     if (_isRun) return;
     if (transports.isEmpty) {
-      throw ExceptionTransport('Need at least one Transport!');
+      throw const ExceptionTransport('Need at least one Transport!');
     }
     for (final transport in transports) {
       transport
@@ -89,11 +91,11 @@ abstract class RouterBase {
   }
 
   /// throws StopProcessing if message is processed and children have to return
-  Future<Packet> onMessage(final Packet packet);
+  Future<Packet> onMessage(Packet packet);
 
   void sendDatagram({
-    required final Iterable<FullAddress> addresses,
-    required final Uint8List datagram,
+    required Iterable<FullAddress> addresses,
+    required Uint8List datagram,
   }) {
     for (final t in transports) {
       t.send(addresses, datagram);
@@ -101,7 +103,7 @@ abstract class RouterBase {
   }
 
   /// Returns cached addresses or who can forward
-  Iterable<FullAddress> resolvePeerId(final PeerId peerId) {
+  Iterable<FullAddress> resolvePeerId(PeerId peerId) {
     final route = routes[peerId];
     if (route == null || route.isEmpty) {
       final result = <FullAddress>{};
