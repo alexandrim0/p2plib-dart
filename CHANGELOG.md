@@ -1,3 +1,8 @@
+## 2.2.0
+
+  - added RouterL3 with automatic transport handler
+  - fix Dockerfile
+
 ## 2.1.1
 
   - better lint

@@ -10,6 +10,7 @@ class RouterL2 extends RouterL1 {
     super.messageTTL,
     super.logger,
   });
+
   final _lastSeenController = StreamController<PeerStatus>.broadcast();
 
   late Duration peerOnlineTimeout = retryPeriod * 2;

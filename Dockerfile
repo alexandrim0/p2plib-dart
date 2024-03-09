@@ -1,4 +1,4 @@
-FROM dart:2.18 AS builder
+FROM dart:stable AS build
 
 WORKDIR /tmp/
 
@@ -8,8 +8,14 @@ COPY ./ ./
 
 RUN dart pub get && dart compile exe -o p2p_bootstrap example/bootstrap_server.dart
 
-FROM alpine:latest
+FROM scratch
 
-COPY --from=builder /tmp/p2p_bootstrap /root/p2p_bootstrap
+COPY --from=build /runtime/ /
 
-CMD [ "/root/p2p_bootstrap" ]
+COPY --from=build /usr/lib/ /usr/lib/
+
+COPY --from=build /tmp/p2p_bootstrap /p2p_bootstrap
+
+EXPOSE 2022/udp
+
+CMD [ "/p2p_bootstrap" ]
