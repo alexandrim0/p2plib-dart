@@ -40,6 +40,7 @@ class RouterL3 extends RouterL2 {
     required String bsPeerId,
     int port = TransportUdp.defaultPort,
   }) async {
+    stop();
     _addresses[bsPeerId] =
         await InternetAddress.lookup(bsName).timeout(messageTTL);
     final addressProperties = AddressProperties(isStatic: true);
@@ -54,9 +55,10 @@ class RouterL3 extends RouterL2 {
         );
       }
     }
+    await start();
   }
 
-  Future<void> removeAllBootstraps() async {
+  void removeAllBootstraps() {
     for (final e in _addresses.entries) {
       removePeerAddress(PeerId(value: base64Decode(e.key)));
     }

@@ -11,12 +11,23 @@ class RouterL1 extends RouterL0 {
     super.keepalivePeriod,
     super.messageTTL,
     super.logger,
-  });
+  }) {
+    // Init Timer
+    _keepaliveWorker.isActive;
+  }
 
   Duration retryPeriod = const Duration(seconds: 1);
 
   final _ackCompleters = <int, Completer<void>>{};
   final _messageController = StreamController<Message>();
+
+  // send keepalive messages
+  late final _keepaliveWorker = Timer.periodic(
+    keepalivePeriod,
+    (_) async {
+      if (isRun && routes.isNotEmpty) await _pingNonLocals();
+    },
+  );
 
   Iterable<FullAddress> get selfAddresses =>
       transports.map((t) => t.bindAddress);
@@ -24,25 +35,9 @@ class RouterL1 extends RouterL0 {
   Stream<Message> get messageStream => _messageController.stream;
 
   @override
-  Future<Uint8List> init([Uint8List? seed]) async {
-    final cryptoKeys = await super.init(seed);
-
-    // send keepalive messages
-    Timer.periodic(
-      keepalivePeriod,
-      (_) {
-        if (isNotRun || routes.isEmpty) return;
-        for (final route in routes.values) {
-          final addresses = route.addresses.entries
-              .where((e) => e.value.isNotLocal)
-              .map((e) => e.key);
-          if (addresses.isNotEmpty) {
-            sendMessage(dstPeerId: route.peerId, useAddresses: addresses);
-          }
-        }
-      },
-    );
-    return cryptoKeys;
+  Future<void> start() async {
+    await super.start();
+    await _pingNonLocals();
   }
 
   @override
@@ -171,6 +166,20 @@ class RouterL1 extends RouterL0 {
           addresses: addresses,
         ),
       );
+    }
+  }
+
+  Future<void> _pingNonLocals() async {
+    for (final route in routes.values) {
+      final addresses = route.addresses.entries
+          .where((e) => e.value.isNotLocal)
+          .map((e) => e.key);
+      if (addresses.isNotEmpty) {
+        await sendMessage(
+          dstPeerId: route.peerId,
+          useAddresses: addresses,
+        );
+      }
     }
   }
 }

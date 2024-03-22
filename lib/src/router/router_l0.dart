@@ -10,7 +10,10 @@ class RouterL0 extends RouterBase {
     super.keepalivePeriod,
     super.messageTTL,
     super.logger,
-  });
+  }) {
+    // Init Timer
+    _routesCleaner.isActive;
+  }
 
   /// Defines required clock sync accuracy between nodes
   int deltaT = const Duration(seconds: 10).inMilliseconds;
@@ -18,25 +21,18 @@ class RouterL0 extends RouterBase {
   /// Defines how much times message can be forwarded
   int maxForwardsLimit = 1;
 
-  @override
-  Future<Uint8List> init([Uint8List? seed]) async {
-    final cryptoKeys = await super.init(seed);
-    // remove stale records
-    Timer.periodic(
-      keepalivePeriod,
-      (_) {
-        if (isNotRun || routes.isEmpty) return;
-        routes.forEach((_, r) => r.removeStaleAddresses(
-              staleAt: _now - peerAddressTTL.inMilliseconds,
-            ));
-        final routesCount = routes.length;
-        routes.removeWhere((_, r) => r.isEmpty);
-        final removedCount = routesCount - routes.length;
-        if (removedCount > 0) _log('remove $removedCount empty routes');
-      },
-    );
-    return cryptoKeys;
-  }
+  // Clean stale routes
+  late final _routesCleaner = Timer.periodic(
+    keepalivePeriod,
+    (_) {
+      if (routes.isNotEmpty) {
+        final staleAt = _now - peerAddressTTL.inMilliseconds;
+        routes
+          ..forEach((_, r) => r.removeStaleAddresses(staleAt: staleAt))
+          ..removeWhere((_, r) => r.isEmpty);
+      }
+    },
+  );
 
   @override
   Future<Packet> onMessage(Packet packet) async {

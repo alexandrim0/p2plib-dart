@@ -48,6 +48,7 @@ abstract class RouterBase {
   var _isRun = false;
 
   bool get isRun => _isRun;
+
   bool get isNotRun => !_isRun;
 
   PeerId get selfId => _selfId;

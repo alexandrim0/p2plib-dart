@@ -1,3 +1,10 @@
+## 2.2.1
+
+  - upgrade sodium
+  - ping bootstrap on start
+  - restart on add bootstrap
+  - refactoring
+
 ## 2.2.0
 
   - added RouterL3 with automatic transport handler
