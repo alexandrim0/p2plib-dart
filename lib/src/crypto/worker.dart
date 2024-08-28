@@ -10,7 +10,7 @@ Future<void> cryptoWorker(dynamic initialTask) async {
   final receivePort = ReceivePort();
   final mainIsolatePort = initialTask.sendPort;
 
-  final sodium = await SodiumInit.init2(_loadSodium);
+  final sodium = await SodiumInit.init(_loadSodium);
   final box = sodium.crypto.box;
   final sign = sodium.crypto.sign;
 
