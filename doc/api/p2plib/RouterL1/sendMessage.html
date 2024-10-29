@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the sendMessage method from the RouterL1 class, for the Dart programming language.">
+  <title>sendMessage method - RouterL1 class - p2plib library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">p2plib</a></li>
+    <li><a href="../../p2plib/p2plib-library.html">p2plib.dart</a></li>
+    <li><a href="../../p2plib/RouterL1-class.html">RouterL1</a></li>
+    <li class="self-crumb">sendMessage method</li>
+  </ol>
+  <div class="self-name">sendMessage</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button" title="Toggle brightness">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span id="dark-theme-button" class="material-symbols-outlined">
+        dark_mode
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        light_mode
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="p2plib&#47;RouterL1-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">sendMessage</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+
+<span class="returntype"><a href="https://api.dart.dev/stable/3.5.3/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../p2plib/PacketHeader-class.html">PacketHeader</a></span>&gt;</span></span>
+<span class="name ">sendMessage</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="sendMessage-param-dstPeerId"><span>required</span> <span class="type-annotation"><a href="../../p2plib/PeerId-class.html">PeerId</a></span> <span class="parameter-name">dstPeerId</span>, </span></li>
+<li><span class="parameter" id="sendMessage-param-isConfirmable"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">isConfirmable</span> = <span class="default-value">false</span>, </span></li>
+<li><span class="parameter" id="sendMessage-param-messageId"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">messageId</span>, </span></li>
+<li><span class="parameter" id="sendMessage-param-payload"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a>?</span> <span class="parameter-name">payload</span>, </span></li>
+<li><span class="parameter" id="sendMessage-param-ackTimeout"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Duration-class.html">Duration</a>?</span> <span class="parameter-name">ackTimeout</span>, </span></li>
+<li><span class="parameter" id="sendMessage-param-useAddresses"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Iterable-class.html">Iterable</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../p2plib/FullAddress-class.html">FullAddress</a></span>&gt;</span>?</span> <span class="parameter-name">useAddresses</span>, </span></li>
+</ol>})
+
+      
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Sends a message to the specified destination peer.</p>
+<p>This method sends a message to the specified destination peer, optionally
+requesting confirmation of delivery. It resolves the peer's addresses,
+creates the message, encrypts it, and sends it using the configured
+transports.</p>
+<p><code>dstPeerId</code> The ID of the destination peer.
+<code>isConfirmable</code> Whether the message should be sent confirmably, requiring
+  an acknowledgement from the receiver. Defaults to <code>false</code>.
+<code>messageId</code> An optional message ID to use. If not provided, a random ID
+  is generated.
+<code>payload</code> The data to be sent with the message.
+<code>ackTimeout</code> The duration to wait for an acknowledgement before timing
+  out. If not specified, the default message TTL is used.
+<code>useAddresses</code> An optional list of addresses to use for sending the
+  message. If not provided, the addresses are resolved using the
+  <code>dstPeerId</code>.</p>
+<p>Returns the header of the sent message.</p>
+<p>Throws an <a href="../../p2plib/ExceptionIsNotRunning-class.html">ExceptionIsNotRunning</a> if the router is not running.
+Throws an <a href="../../p2plib/ExceptionUnknownRoute-class.html">ExceptionUnknownRoute</a> if the destination peer is not known
+  or no addresses could be resolved.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">Future&lt;PacketHeader&gt; sendMessage({
+  required PeerId dstPeerId,
+  bool isConfirmable = false,
+  int? messageId,
+  Uint8List? payload,
+  Duration? ackTimeout,
+  Iterable&lt;FullAddress&gt;? useAddresses,
+}) async {
+  &#47;&#47; Check if the router is running.
+  if (isNotRun) throw const ExceptionIsNotRunning();
+
+  &#47;&#47; Resolve the addresses for the destination peer.
+  final addresses = useAddresses ?? resolvePeerId(dstPeerId);
+
+  &#47;&#47; If no addresses are found, throw an exception.
+  if (addresses.isEmpty) throw ExceptionUnknownRoute(dstPeerId);
+
+  &#47;&#47; Create the message.
+  final message = Message(
+    header: PacketHeader(
+      &#47;&#47; Set the message type based on whether it is confirmable.
+      messageType:
+          isConfirmable ? PacketType.confirmable : PacketType.regular,
+      issuedAt: _now,
+      &#47;&#47; Generate a message ID if one is not provided.
+      id: messageId ?? genRandomInt(),
+    ),
+
+    srcPeerId: selfId,
+    dstPeerId: dstPeerId,
+    payload: payload,
+  );
+
+  &#47;&#47; Seal the message using the crypto provider.
+  final datagram = await crypto.seal(message.toBytes());
+
+  &#47;&#47; Send the message.
+  if (isConfirmable) {
+    &#47;&#47; If the message is confirmable, send it and wait for an
+    &#47;&#47; acknowledgement.
+    await sendDatagramConfirmable(
+      messageId: message.header.id,
+      datagram: datagram,
+      addresses: addresses,
+      ackTimeout: ackTimeout,
+    );
+  } else {
+    &#47;&#47; If the message is not confirmable, send it without waiting for an
+    &#47;&#47; acknowledgement.
+    sendDatagram(addresses: addresses, datagram: datagram);
+    _log(&#39;sent ${datagram.length} bytes to $addresses&#39;);
+  }
+
+  &#47;&#47; Return the header of the sent message.
+  return message.header;
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">p2plib</a></li>
+    <li><a href="../../p2plib/p2plib-library.html">p2plib</a></li>
+    <li><a href="../../p2plib/RouterL1-class.html">RouterL1</a></li>
+    <li class="self-crumb">sendMessage method</li>
+</ol>
+
+
+    <h5>RouterL1 class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    p2plib
+      2.2.2
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

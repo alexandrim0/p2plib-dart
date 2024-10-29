@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the removePeerAddress method from the RouterL2 class, for the Dart programming language.">
+  <title>removePeerAddress method - RouterL2 class - p2plib library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">p2plib</a></li>
+    <li><a href="../../p2plib/p2plib-library.html">p2plib.dart</a></li>
+    <li><a href="../../p2plib/RouterL2-class.html">RouterL2</a></li>
+    <li class="self-crumb">removePeerAddress method</li>
+  </ol>
+  <div class="self-name">removePeerAddress</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button" title="Toggle brightness">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span id="dark-theme-button" class="material-symbols-outlined">
+        dark_mode
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        light_mode
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="p2plib&#47;RouterL2-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">removePeerAddress</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+
+<span class="returntype">void</span>
+<span class="name ">removePeerAddress</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="removePeerAddress-param-peerId"><span class="type-annotation"><a href="../../p2plib/PeerId-class.html">PeerId</a></span> <span class="parameter-name">peerId</span></span></li>
+</ol>)
+
+      
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Removes the peer address from the routing table.</p>
+<p>This method removes the peer address from the routing table. If the peer
+is removed from the routing table, the last seen controller is updated
+to indicate that the peer is offline.</p>
+<p>The <code>peerId</code> parameter specifies the ID of the peer to remove.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">void removePeerAddress(PeerId peerId) {
+  &#47;&#47; Remove the peer from the routing table.
+  if (routes.remove(peerId) != null) {
+    &#47;&#47; Update the last seen controller to indicate that the peer is
+    &#47;&#47; offline.
+    _lastSeenController.add((peerId: peerId, isOnline: false));
+  }
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">p2plib</a></li>
+    <li><a href="../../p2plib/p2plib-library.html">p2plib</a></li>
+    <li><a href="../../p2plib/RouterL2-class.html">RouterL2</a></li>
+    <li class="self-crumb">removePeerAddress method</li>
+</ol>
+
+
+    <h5>RouterL2 class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    p2plib
+      2.2.2
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+
