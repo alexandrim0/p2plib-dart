@@ -1,8 +1,15 @@
 name: p2plib
 description: 'Tooling for encrypted udp datagram peer to peer communication'
 homepage: https://github.com/alexandrim0/p2plib-dart
+repository: https://github.com/alexandrim0/p2plib-dart
+issue_tracker: https://github.com/alexandrim0/p2plib-dart/issues
 
-version: 2.2.2
+topics:
+  - p2p
+  - web3
+  - network
+
+version: 2.2.2+1
 
 environment:
   sdk: '>=3.5.0 <4.0.0'
