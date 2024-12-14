@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the Packet class from the p2plib library, for the Dart programming language.">
+  <title>Packet class - p2plib library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">p2plib</a></li>
+    <li><a href="../p2plib/p2plib-library.html">p2plib.dart</a></li>
+    <li class="self-crumb">Packet class</li>
+  </ol>
+  <div class="self-name">Packet</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button" title="Toggle brightness">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span id="dark-theme-button" class="material-symbols-outlined">
+        dark_mode
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        light_mode
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="p2plib&#47;p2plib-library-sidebar.html"
+    data-below-sidebar="p2plib&#47;Packet-class-sidebar.html">
+    <div>
+<h1><span class="kind-class">Packet</span> class 
+ 
+</h1></div>
+
+    
+<section class="desc markdown">
+  <p>Represents a network packet.</p>
+<p>A packet consists of a header, source and destination Peer IDs, an optional
+encrypted payload, and a signature. It is the fundamental unit of data
+transmitted over the network.</p>
+<p>Packet Structure:</p>
+<ul>
+<li>1 byte:  Forwards count (number of times the packet has been forwarded)</li>
+<li>1 byte:  Packet type (regular, confirmable, confirmation)</li>
+<li>6 bytes: IssuedAt (Unix timestamp with milliseconds)</li>
+<li>8 bytes: Message ID (unique identifier of the message)</li>
+<li>64 bytes: Source Peer ID (identifier of the sending peer)</li>
+<li>64 bytes: Destination Peer ID (identifier of the receiving peer)</li>
+<li>0 or &gt;48 bytes: Encrypted payload (optional data, encrypted for security)</li>
+<li>64 bytes: Signature (used for message authentication)</li>
+</ul>
+</section>
+
+
+
+    
+  <section class="summary offset-anchor" id="constructors">
+    <h2>Constructors</h2>
+
+    <dl class="constructor-summary-list">
+        <dt id="Packet" class="callable">
+          <span class="name"><a href="../p2plib/Packet/Packet.html">Packet</a></span><span class="signature">({<span class="parameter" id="-param-srcFullAddress"><span>required</span> <span class="type-annotation"><a href="../p2plib/FullAddress-class.html">FullAddress</a></span> <span class="parameter-name">srcFullAddress</span>, </span><span class="parameter" id="-param-datagram"><span>required</span> <span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a></span> <span class="parameter-name">datagram</span>, </span><span class="parameter" id="-param-header"><span>required</span> <span class="type-annotation"><a href="../p2plib/PacketHeader-class.html">PacketHeader</a></span> <span class="parameter-name">header</span></span>})</span>
+        </dt>
+        <dd>
+          Creates a new <a href="../p2plib/Packet-class.html">Packet</a> instance.
+        </dd>
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-properties">
+    <h2>Properties</h2>
+    <dl class="properties">
+        <dt id="datagram" class="property">
+  <span class="name"><a href="../p2plib/Packet/datagram.html">datagram</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a></span>
+  
+
+</dt>
+<dd>
+  The raw datagram data of the packet.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="dstPeerId" class="property">
+  <span class="name"><a href="../p2plib/Packet/dstPeerId.html">dstPeerId</a></span>
+  <span class="signature">&#8596; <a href="../p2plib/PeerId-class.html">PeerId</a></span>
+  
+
+</dt>
+<dd>
+  The destination Peer ID.
+  <div class="features"><span class="feature">late</span><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="hashCode" class="property inherited">
+  <span class="name"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Object/hashCode.html">hashCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The hash code for this object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="header" class="property">
+  <span class="name"><a href="../p2plib/Packet/header.html">header</a></span>
+  <span class="signature">&#8594; <a href="../p2plib/PacketHeader-class.html">PacketHeader</a></span>
+  
+
+</dt>
+<dd>
+  The header of the packet.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="payload" class="property">
+  <span class="name"><a href="../p2plib/Packet/payload.html">payload</a></span>
+  <span class="signature">&#8596; <a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a></span>
+  
+
+</dt>
+<dd>
+  The encrypted payload of the packet.
+  <div class="features"><span class="feature">late</span><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="runtimeType" class="property inherited">
+  <span class="name"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Object/runtimeType.html">runtimeType</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-core/Type-class.html">Type</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  A representation of the runtime type of the object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="srcFullAddress" class="property">
+  <span class="name"><a href="../p2plib/Packet/srcFullAddress.html">srcFullAddress</a></span>
+  <span class="signature">&#8594; <a href="../p2plib/FullAddress-class.html">FullAddress</a></span>
+  
+
+</dt>
+<dd>
+  The full network address of the source peer.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="srcPeerId" class="property">
+  <span class="name"><a href="../p2plib/Packet/srcPeerId.html">srcPeerId</a></span>
+  <span class="signature">&#8596; <a href="../p2plib/PeerId-class.html">PeerId</a></span>
+  
+
+</dt>
+<dd>
+  The source Peer ID.
+  <div class="features"><span class="feature">late</span><span class="feature">final</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="instance-methods">
+    <h2>Methods</h2>
+    <dl class="callables">
+        <dt id="noSuchMethod" class="callable inherited">
+  <span class="name"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
+    <span class="returntype parameter">&#8594; dynamic</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Invoked when a nonexistent method or property is accessed.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="toString" class="callable inherited">
+  <span class="name"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Object/toString.html">toString</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  A string representation of this object.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="operators">
+    <h2>Operators</h2>
+    <dl class="callables">
+        <dt id="operator ==" class="callable inherited">
+  <span class="name"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Object/operator_equals.html">operator ==</a></span><span class="signature">(<wbr><span class="parameter" id="==-param-other"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">other</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-core/bool-class.html">bool</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  The equality operator.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+    
+    
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../index.html">p2plib</a></li>
+    <li><a href="../p2plib/p2plib-library.html">p2plib</a></li>
+    <li class="self-crumb">Packet class</li>
+</ol>
+
+
+    <h5>p2plib library</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div>
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    p2plib
+      2.2.2
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

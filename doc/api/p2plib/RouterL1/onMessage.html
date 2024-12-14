@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the onMessage method from the RouterL1 class, for the Dart programming language.">
+  <title>onMessage method - RouterL1 class - p2plib library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">p2plib</a></li>
+    <li><a href="../../p2plib/p2plib-library.html">p2plib.dart</a></li>
+    <li><a href="../../p2plib/RouterL1-class.html">RouterL1</a></li>
+    <li class="self-crumb">onMessage method</li>
+  </ol>
+  <div class="self-name">onMessage</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button" title="Toggle brightness">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span id="dark-theme-button" class="material-symbols-outlined">
+        dark_mode
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        light_mode
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="p2plib&#47;RouterL1-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">onMessage</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+  <div>
+    <ol class="annotation-list">
+        <li>@<a href="https://api.dart.dev/stable/3.5.3/dart-core/override-constant.html">override</a></li>
+    </ol>
+  </div>
+
+<span class="returntype"><a href="https://api.dart.dev/stable/3.5.3/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../p2plib/Packet-class.html">Packet</a></span>&gt;</span></span>
+<span class="name ">onMessage</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="onMessage-param-packet"><span class="type-annotation"><a href="../../p2plib/Packet-class.html">Packet</a></span> <span class="parameter-name">packet</span></span></li>
+</ol>)
+
+      <div class="features"><span class="feature">override</span></div>
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Handles incoming messages.</p>
+<p>This method is called when a new message is received. It performs the
+following actions:</p>
+<ol>
+<li>Decrypts the message payload.</li>
+<li>Checks if the message is a confirmation and handles it accordingly.</li>
+<li>Sends a confirmation if the message is confirmable.</li>
+<li>Forwards the message to the subscriber if it has a payload.</li>
+</ol>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">@override
+Future&lt;Packet&gt; onMessage(Packet packet) async {
+  &#47;&#47; Call the superclass&#39;s onMessage method to perform basic message
+  &#47;&#47; validation and routing.
+  await super.onMessage(packet);
+
+  &#47;&#47; Decrypt the message payload using the configured cryptography instance.
+  packet.payload = await crypto.unseal(packet.datagram);
+
+  &#47;&#47; If the message is a confirmation, complete the corresponding
+  &#47;&#47; acknowledgement and stop processing the message.
+  if (packet.header.messageType == PacketType.confirmation) {
+    _ackCompleters.remove(packet.header.id)?.complete();
+    &#47;&#47; Stop processing the message since it&#39;s a confirmation.
+    throw const StopProcessing();
+  }
+
+  &#47;&#47; If the message is confirmable, send a confirmation message back to
+  &#47;&#47; the sender.
+  if (packet.header.messageType == PacketType.confirmable) {
+    &#47;&#47; Send a confirmation message asynchronously without awaiting its
+    &#47;&#47; completion.
+    unawaited(crypto
+        .seal(Message(
+          header: packet.header.copyWith(
+            messageType: PacketType.confirmation,
+          ),
+          srcPeerId: selfId,
+          dstPeerId: packet.srcPeerId,
+        ).toBytes())
+        .then((datagram) =&gt; sendDatagram(
+              addresses: [packet.srcFullAddress],
+              datagram: datagram,
+            )));
+  }
+
+  &#47;&#47; If the message has a payload and there is a listener, forward the
+  &#47;&#47; message to the subscriber.
+  if (packet.payload.isNotEmpty &amp;&amp; _messageController.hasListener) {
+    _messageController.add(Message(
+      header: packet.header,
+      srcPeerId: packet.srcPeerId,
+      dstPeerId: packet.dstPeerId,
+      payload: packet.payload,
+    ));
+  }
+
+  &#47;&#47; Return the processed packet.
+  return packet;
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">p2plib</a></li>
+    <li><a href="../../p2plib/p2plib-library.html">p2plib</a></li>
+    <li><a href="../../p2plib/RouterL1-class.html">RouterL1</a></li>
+    <li class="self-crumb">onMessage method</li>
+</ol>
+
+
+    <h5>RouterL1 class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    p2plib
+      2.2.2
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the onMessage method from the RouterL0 class, for the Dart programming language.">
+  <title>onMessage method - RouterL0 class - p2plib library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">p2plib</a></li>
+    <li><a href="../../p2plib/p2plib-library.html">p2plib.dart</a></li>
+    <li><a href="../../p2plib/RouterL0-class.html">RouterL0</a></li>
+    <li class="self-crumb">onMessage method</li>
+  </ol>
+  <div class="self-name">onMessage</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button" title="Toggle brightness">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span id="dark-theme-button" class="material-symbols-outlined">
+        dark_mode
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        light_mode
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="p2plib&#47;RouterL0-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">onMessage</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+  <div>
+    <ol class="annotation-list">
+        <li>@<a href="https://api.dart.dev/stable/3.5.3/dart-core/override-constant.html">override</a></li>
+    </ol>
+  </div>
+
+<span class="returntype"><a href="https://api.dart.dev/stable/3.5.3/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../p2plib/Packet-class.html">Packet</a></span>&gt;</span></span>
+<span class="name ">onMessage</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="onMessage-param-packet"><span class="type-annotation"><a href="../../p2plib/Packet-class.html">Packet</a></span> <span class="parameter-name">packet</span></span></li>
+</ol>)
+
+      <div class="features"><span class="feature">override</span></div>
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Handles incoming messages.</p>
+<p><code>packet</code> The incoming <a href="../../p2plib/Packet-class.html">Packet</a> to be processed.</p>
+<p>This method is called by the transports when a new message is received.
+It is responsible for validating the message, updating routing information,
+and potentially forwarding the message to other peers.</p>
+<p>Throws a <a href="../../p2plib/StopProcessing-class.html">StopProcessing</a> exception if the message is invalid or has
+already been processed, or if an error occurs during processing.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">@override
+Future&lt;Packet&gt; onMessage(Packet packet) async {
+  &#47;&#47; Check if the datagram has the minimum required length.
+  if (!Message.hasCorrectLength(packet.datagram)) {
+    &#47;&#47; If the datagram is too short, it&#39;s likely malformed. Stop processing.
+    throw const StopProcessing();
+  }
+
+  &#47;&#47; Check if the message timestamp is within the allowed deltaT.
+  if (packet.header.issuedAt &lt; _now - deltaT ||
+      packet.header.issuedAt &gt; _now + deltaT) {
+    &#47;&#47; If the timestamp is outside the acceptable range, it might be an old
+    &#47;&#47; or invalid message. Stop processing to prevent replay attacks.
+    throw const ExceptionInvalidTimestamp();
+  }
+
+  &#47;&#47; Extract the source peer ID from the datagram.
+  packet.srcPeerId = Message.getSrcPeerId(packet.datagram);
+
+  &#47;&#47; Drop the packet if it is an echo message (sent by this peer).
+  if (packet.srcPeerId == _selfId) {
+    &#47;&#47; Prevent processing messages sent by this router to avoid loops.
+    throw const StopProcessing();
+  }
+
+  &#47;&#47; Get the route associated with the source peer ID.
+  final route = routes[packet.srcPeerId];
+
+  &#47;&#47; Drop the packet if it is a duplicate (already processed).
+  if (route != null &amp;&amp;
+      Route.maxStoredHeaders &gt; 0 &amp;&amp;
+      route.lastHeaders.contains(packet.header)) {
+    &#47;&#47; If the header has already been seen, the message is likely a
+    &#47;&#47; duplicate. Stop processing to prevent redundant handling.
+    throw const StopProcessing();
+  }
+
+  &#47;&#47; Reset the forwards count in the packet header for signature verification.
+  PacketHeader.setForwardsCount(0, packet.datagram);
+
+  &#47;&#47; If the peer is unknown, verify the signature and store the address if successful.
+  if (route?.addresses[packet.srcFullAddress] == null) {
+    try {
+      &#47;&#47; Verify the signature of the datagram to ensure its authenticity.
+      await crypto.verify(packet.datagram);
+    } on ExceptionInvalidSignature {
+      &#47;&#47; If the signature is invalid, the message is likely tampered with.
+      &#47;&#47; Stop processing to prevent potential security risks.
+      throw const StopProcessing();
+    }
+
+    &#47;&#47; Create a new route for the peer and store it in the routing table.
+    routes[packet.srcPeerId] = Route(
+      header: packet.header,
+      peerId: packet.srcPeerId,
+      address: (ip: packet.srcFullAddress, properties: AddressProperties()),
+    );
+
+    &#47;&#47; Log the event of keeping the peer&#39;s address for future communication.
+    _log(&#39;Keep ${packet.srcFullAddress} for ${packet.srcPeerId}&#39;);
+  } else {
+    &#47;&#47; If the peer is known, update the last seen timestamp and add the
+    &#47;&#47; header to the route&#39;s history.
+    routes[packet.srcPeerId]!
+      ..addresses[packet.srcFullAddress]?.updateLastSeen()
+      ..addHeader(packet.header);
+
+    &#47;&#47; Log the event of updating the last seen timestamp for the peer.
+    _log(
+      &#39;Update lastseen of ${packet.srcFullAddress} for ${packet.srcPeerId}&#39;,
+    );
+  }
+  &#47;&#47; Extract the destination peer ID from the datagram.
+  packet.dstPeerId = Message.getDstPeerId(packet.datagram);
+
+  &#47;&#47; If the message is for this peer, return it.
+  if (packet.dstPeerId == _selfId) {
+    &#47;&#47; The message is intended for this router, so we return it for further
+    &#47;&#47; processing by higher-level layers.
+    return packet;
+  }
+
+  &#47;&#47; Check if the forwards count exceeds the maximum limit.
+  if (packet.header.forwardsCount &gt;= maxForwardsLimit) {
+    &#47;&#47; If the message has been forwarded too many times, it&#39;s likely stuck
+    &#47;&#47; in a loop. Stop processing to prevent infinite forwarding.
+    throw const StopProcessing();
+  }
+
+  &#47;&#47; Resolve the destination peer&#39;s addresses, excluding the source address
+  &#47;&#47; to prevent echo.
+  final addresses = resolvePeerId(packet.dstPeerId)
+      .where((e) =&gt; e != packet.srcFullAddress);
+
+  &#47;&#47; If no route to the destination peer is found, log an error.
+  if (addresses.isEmpty) {
+    &#47;&#47; If we cannot find a route to the destination, it means the peer is
+    &#47;&#47; currently unreachable. Log an error to indicate the routing failure.
+    _log(
+      &#39;Unknown route to ${packet.dstPeerId}. &#39;
+      &#39;Failed forwarding from ${packet.srcFullAddress}&#39;,
+    );
+  } else {
+    &#47;&#47; Increment the forwards count and forward the message to the resolved
+    &#47;&#47; addresses.
+    sendDatagram(
+      addresses: addresses,
+      datagram: PacketHeader.setForwardsCount(
+        packet.header.forwardsCount + 1,
+        packet.datagram,
+      ),
+    );
+    &#47;&#47; Log the forwarding event, including the source and destination
+    &#47;&#47; addresses and the size of the datagram.
+    _log(
+      &#39;forwarded from ${packet.srcFullAddress} &#39;
+      &#39;to $addresses ${packet.datagram.length} bytes&#39;,
+    );
+  }
+
+  &#47;&#47; Stop processing the packet after forwarding or failing to forward.
+  &#47;&#47; For RouterL0, which acts primarily as a relay, further processing is
+  &#47;&#47; not necessary. This prevents the message from being handled by higher-
+  &#47;&#47; level routers or application logic.
+  throw const StopProcessing();
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">p2plib</a></li>
+    <li><a href="../../p2plib/p2plib-library.html">p2plib</a></li>
+    <li><a href="../../p2plib/RouterL0-class.html">RouterL0</a></li>
+    <li class="self-crumb">onMessage method</li>
+</ol>
+
+
+    <h5>RouterL0 class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    p2plib
+      2.2.2
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

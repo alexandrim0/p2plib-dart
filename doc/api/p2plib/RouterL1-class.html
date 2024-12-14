@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the RouterL1 class from the p2plib library, for the Dart programming language.">
+  <title>RouterL1 class - p2plib library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">p2plib</a></li>
+    <li><a href="../p2plib/p2plib-library.html">p2plib.dart</a></li>
+    <li class="self-crumb">RouterL1 class</li>
+  </ol>
+  <div class="self-name">RouterL1</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button" title="Toggle brightness">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span id="dark-theme-button" class="material-symbols-outlined">
+        dark_mode
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        light_mode
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="p2plib&#47;p2plib-library-sidebar.html"
+    data-below-sidebar="p2plib&#47;RouterL1-class-sidebar.html">
+    <div>
+<h1><span class="kind-class">RouterL1</span> class 
+ 
+</h1></div>
+
+    
+<section class="desc markdown">
+  <p>Enhanced router with confirmation and keepalive features.</p>
+<p>This class extends the functionality of <code>RouterL0</code> by implementing
+enhanced protocol features like message confirmation and keepalive
+mechanisms. It is suitable for use as an advanced relay node or as a base
+class for clients that require more reliable communication.</p>
+</section>
+
+
+    <section>
+      <dl class="dl-horizontal">
+        
+  <dt>Inheritance</dt>
+  <dd>
+    <ul class="gt-separated dark clazz-relationships">
+      <li><a href="https://api.dart.dev/stable/3.5.3/dart-core/Object-class.html">Object</a></li>
+        <li><a href="../p2plib/RouterBase-class.html">RouterBase</a></li>
+        <li><a href="../p2plib/RouterL0-class.html">RouterL0</a></li>
+      <li>RouterL1</li>
+    </ul>
+  </dd>
+
+        
+        
+
+          <dt>Implementers</dt>
+          <dd><ul class="comma-separated clazz-relationships">
+              <li><a href="../p2plib/RouterL2-class.html">RouterL2</a></li>
+          </ul></dd>
+
+
+        
+
+
+      </dl>
+    </section>
+
+    
+  <section class="summary offset-anchor" id="constructors">
+    <h2>Constructors</h2>
+
+    <dl class="constructor-summary-list">
+        <dt id="RouterL1" class="callable">
+          <span class="name"><a href="../p2plib/RouterL1/RouterL1.html">RouterL1</a></span><span class="signature">({<span class="parameter" id="-param-crypto"><span class="type-annotation"><a href="../p2plib/Crypto-class.html">Crypto</a>?</span> <span class="parameter-name">crypto</span>, </span><span class="parameter" id="-param-transports"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../p2plib/TransportBase-class.html">TransportBase</a></span>&gt;</span>?</span> <span class="parameter-name">transports</span>, </span><span class="parameter" id="-param-keepalivePeriod"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Duration-class.html">Duration</a></span> <span class="parameter-name">keepalivePeriod</span> = <span class="default-value">const Duration(seconds: 15)</span>, </span><span class="parameter" id="-param-messageTTL"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Duration-class.html">Duration</a></span> <span class="parameter-name">messageTTL</span> = <span class="default-value">const Duration(seconds: 3)</span>, </span><span class="parameter" id="-param-logger"><span class="type-annotation">void</span> <span class="parameter-name">logger</span>(<span class="parameter" id="param-"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/String-class.html">String</a></span></span>)?</span>})</span>
+        </dt>
+        <dd>
+          Creates a new <a href="../p2plib/RouterL1-class.html">RouterL1</a> instance.
+        </dd>
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-properties">
+    <h2>Properties</h2>
+    <dl class="properties">
+        <dt id="crypto" class="property inherited">
+  <span class="name"><a href="../p2plib/RouterBase/crypto.html">crypto</a></span>
+  <span class="signature">&#8594; <a href="../p2plib/Crypto-class.html">Crypto</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The cryptography instance used for encryption and signing.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="deltaT" class="property inherited">
+  <span class="name"><a href="../p2plib/RouterL0/deltaT.html">deltaT</a></span>
+  <span class="signature">&#8596; <a href="https://api.dart.dev/stable/3.5.3/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  Defines the required clock synchronization accuracy between nodes, in
+milliseconds.
+  <div class="features"><span class="feature">getter/setter pair</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="hashCode" class="property inherited">
+  <span class="name"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Object/hashCode.html">hashCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The hash code for this object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="isNotRun" class="property inherited">
+  <span class="name"><a href="../p2plib/RouterBase/isNotRun.html">isNotRun</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-core/bool-class.html">bool</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  Whether the router is not currently running.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="isRun" class="property inherited">
+  <span class="name"><a href="../p2plib/RouterBase/isRun.html">isRun</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-core/bool-class.html">bool</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  Whether the router is currently running.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="keepalivePeriod" class="property inherited">
+  <span class="name"><a href="../p2plib/RouterBase/keepalivePeriod.html">keepalivePeriod</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-core/Duration-class.html">Duration</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The keepalive period, specifying the interval for sending keepalive
+messages to peers.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="logger" class="property inherited">
+  <span class="name"><a href="../p2plib/RouterBase/logger.html">logger</a></span>
+  <span class="signature">&#8596; (void Function<span class="signature">(<span class="parameter" id="param-"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/String-class.html">String</a></span></span>)</span>?)</span>
+  
+
+</dt>
+<dd class="inherited">
+  The logger used for logging events.
+  <div class="features"><span class="feature">getter/setter pair</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="maxForwardsLimit" class="property inherited">
+  <span class="name"><a href="../p2plib/RouterL0/maxForwardsLimit.html">maxForwardsLimit</a></span>
+  <span class="signature">&#8596; <a href="https://api.dart.dev/stable/3.5.3/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  Defines the maximum number of times a message can be forwarded.
+  <div class="features"><span class="feature">getter/setter pair</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="maxStoredHeaders" class="property inherited">
+  <span class="name"><a href="../p2plib/RouterBase/maxStoredHeaders.html">maxStoredHeaders</a></span>
+  <span class="signature">&#8596; <a href="https://api.dart.dev/stable/3.5.3/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The maximum number of stored headers for routes.
+  <div class="features"><span class="feature">getter/setter pair</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="messageStream" class="property">
+  <span class="name"><a href="../p2plib/RouterL1/messageStream.html">messageStream</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-async/Stream-class.html">Stream</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../p2plib/Message-class.html">Message</a></span>&gt;</span></span>
+  
+
+</dt>
+<dd>
+  Returns a stream of incoming messages.
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="messageTTL" class="property inherited">
+  <span class="name"><a href="../p2plib/RouterBase/messageTTL.html">messageTTL</a></span>
+  <span class="signature">&#8596; <a href="https://api.dart.dev/stable/3.5.3/dart-core/Duration-class.html">Duration</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The message time-to-live, specifying how long messages are considered
+valid.
+  <div class="features"><span class="feature">getter/setter pair</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="peerAddressTTL" class="property inherited">
+  <span class="name"><a href="../p2plib/RouterBase/peerAddressTTL.html">peerAddressTTL</a></span>
+  <span class="signature">&#8596; <a href="https://api.dart.dev/stable/3.5.3/dart-core/Duration-class.html">Duration</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The peer address time-to-live, specifying how long peer addresses are
+considered valid. Defaults to twice the keepalive period.
+  <div class="features"><span class="feature">getter/setter pair</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="retryPeriod" class="property">
+  <span class="name"><a href="../p2plib/RouterL1/retryPeriod.html">retryPeriod</a></span>
+  <span class="signature">&#8596; <a href="https://api.dart.dev/stable/3.5.3/dart-core/Duration-class.html">Duration</a></span>
+  
+
+</dt>
+<dd>
+  The retry period for sending messages.
+  <div class="features"><span class="feature">getter/setter pair</span></div>
+
+</dd>
+
+        <dt id="routes" class="property inherited">
+  <span class="name"><a href="../p2plib/RouterBase/routes.html">routes</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../p2plib/PeerId-class.html">PeerId</a></span>, <span class="type-parameter"><a href="../p2plib/Route-class.html">Route</a></span>&gt;</span></span>
+  
+
+</dt>
+<dd class="inherited">
+  The routes maintained by the router, stored as a map of <code>PeerId</code> to
+<code>Route</code>.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="runtimeType" class="property inherited">
+  <span class="name"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Object/runtimeType.html">runtimeType</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-core/Type-class.html">Type</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  A representation of the runtime type of the object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="selfAddresses" class="property">
+  <span class="name"><a href="../p2plib/RouterL1/selfAddresses.html">selfAddresses</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-core/Iterable-class.html">Iterable</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../p2plib/FullAddress-class.html">FullAddress</a></span>&gt;</span></span>
+  
+
+</dt>
+<dd>
+  Returns an iterable of the self addresses of this router.
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="selfId" class="property inherited">
+  <span class="name"><a href="../p2plib/RouterBase/selfId.html">selfId</a></span>
+  <span class="signature">&#8594; <a href="../p2plib/PeerId-class.html">PeerId</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The self ID of the router.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="transports" class="property inherited">
+  <span class="name"><a href="../p2plib/RouterBase/transports.html">transports</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../p2plib/TransportBase-class.html">TransportBase</a></span>&gt;</span></span>
+  
+
+</dt>
+<dd class="inherited">
+  The transports used for network communication.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="useForwardersLimit" class="property inherited">
+  <span class="name"><a href="../p2plib/RouterBase/useForwardersLimit.html">useForwardersLimit</a></span>
+  <span class="signature">&#8596; <a href="https://api.dart.dev/stable/3.5.3/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  Defines the maximum number of forwarders to use for message delivery.
+  <div class="features"><span class="feature">getter/setter pair</span><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-methods">
+    <h2>Methods</h2>
+    <dl class="callables">
+        <dt id="init" class="callable inherited">
+  <span class="name"><a href="../p2plib/RouterBase/init.html">init</a></span><span class="signature">(<wbr>[<span class="parameter" id="init-param-seed"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a>?</span> <span class="parameter-name">seed</span></span>])
+    <span class="returntype parameter">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Initializes the router.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="noSuchMethod" class="callable inherited">
+  <span class="name"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
+    <span class="returntype parameter">&#8594; dynamic</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Invoked when a nonexistent method or property is accessed.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="onMessage" class="callable">
+  <span class="name"><a href="../p2plib/RouterL1/onMessage.html">onMessage</a></span><span class="signature">(<wbr><span class="parameter" id="onMessage-param-packet"><span class="type-annotation"><a href="../p2plib/Packet-class.html">Packet</a></span> <span class="parameter-name">packet</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../p2plib/Packet-class.html">Packet</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Handles incoming messages.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="resolvePeerId" class="callable inherited">
+  <span class="name"><a href="../p2plib/RouterBase/resolvePeerId.html">resolvePeerId</a></span><span class="signature">(<wbr><span class="parameter" id="resolvePeerId-param-peerId"><span class="type-annotation"><a href="../p2plib/PeerId-class.html">PeerId</a></span> <span class="parameter-name">peerId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-core/Iterable-class.html">Iterable</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../p2plib/FullAddress-class.html">FullAddress</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Resolves a Peer ID to a set of network addresses.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="sendDatagram" class="callable inherited">
+  <span class="name"><a href="../p2plib/RouterBase/sendDatagram.html">sendDatagram</a></span><span class="signature">(<wbr>{<span class="parameter" id="sendDatagram-param-addresses"><span>required</span> <span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Iterable-class.html">Iterable</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../p2plib/FullAddress-class.html">FullAddress</a></span>&gt;</span></span> <span class="parameter-name">addresses</span>, </span><span class="parameter" id="sendDatagram-param-datagram"><span>required</span> <span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a></span> <span class="parameter-name">datagram</span></span>})
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Sends a datagram to the specified addresses.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="sendDatagramConfirmable" class="callable">
+  <span class="name"><a href="../p2plib/RouterL1/sendDatagramConfirmable.html">sendDatagramConfirmable</a></span><span class="signature">(<wbr>{<span class="parameter" id="sendDatagramConfirmable-param-messageId"><span>required</span> <span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/int-class.html">int</a></span> <span class="parameter-name">messageId</span>, </span><span class="parameter" id="sendDatagramConfirmable-param-datagram"><span>required</span> <span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a></span> <span class="parameter-name">datagram</span>, </span><span class="parameter" id="sendDatagramConfirmable-param-addresses"><span>required</span> <span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Iterable-class.html">Iterable</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../p2plib/FullAddress-class.html">FullAddress</a></span>&gt;</span></span> <span class="parameter-name">addresses</span>, </span><span class="parameter" id="sendDatagramConfirmable-param-ackTimeout"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Duration-class.html">Duration</a>?</span> <span class="parameter-name">ackTimeout</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Sends a confirmable datagram and waits for an acknowledgement.
+  
+
+</dd>
+
+        <dt id="sendMessage" class="callable">
+  <span class="name"><a href="../p2plib/RouterL1/sendMessage.html">sendMessage</a></span><span class="signature">(<wbr>{<span class="parameter" id="sendMessage-param-dstPeerId"><span>required</span> <span class="type-annotation"><a href="../p2plib/PeerId-class.html">PeerId</a></span> <span class="parameter-name">dstPeerId</span>, </span><span class="parameter" id="sendMessage-param-isConfirmable"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">isConfirmable</span> = <span class="default-value">false</span>, </span><span class="parameter" id="sendMessage-param-messageId"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">messageId</span>, </span><span class="parameter" id="sendMessage-param-payload"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a>?</span> <span class="parameter-name">payload</span>, </span><span class="parameter" id="sendMessage-param-ackTimeout"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Duration-class.html">Duration</a>?</span> <span class="parameter-name">ackTimeout</span>, </span><span class="parameter" id="sendMessage-param-useAddresses"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Iterable-class.html">Iterable</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../p2plib/FullAddress-class.html">FullAddress</a></span>&gt;</span>?</span> <span class="parameter-name">useAddresses</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../p2plib/PacketHeader-class.html">PacketHeader</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Sends a message to the specified destination peer.
+  
+
+</dd>
+
+        <dt id="start" class="callable">
+  <span class="name"><a href="../p2plib/RouterL1/start.html">start</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Starts the router.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="stop" class="callable">
+  <span class="name"><a href="../p2plib/RouterL1/stop.html">stop</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Stops the router.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="toString" class="callable inherited">
+  <span class="name"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Object/toString.html">toString</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  A string representation of this object.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="operators">
+    <h2>Operators</h2>
+    <dl class="callables">
+        <dt id="operator ==" class="callable inherited">
+  <span class="name"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Object/operator_equals.html">operator ==</a></span><span class="signature">(<wbr><span class="parameter" id="==-param-other"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">other</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-core/bool-class.html">bool</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  The equality operator.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+    
+    
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../index.html">p2plib</a></li>
+    <li><a href="../p2plib/p2plib-library.html">p2plib</a></li>
+    <li class="self-crumb">RouterL1 class</li>
+</ol>
+
+
+    <h5>p2plib library</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div>
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    p2plib
+      2.2.2
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="p2plib library API docs, for the Dart programming language.">
+  <title>p2plib library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">p2plib</a></li>
+    <li class="self-crumb">p2plib.dart</li>
+  </ol>
+  <div class="self-name">p2plib</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button" title="Toggle brightness">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span id="dark-theme-button" class="material-symbols-outlined">
+        dark_mode
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        light_mode
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar=""
+    data-below-sidebar="p2plib&#47;p2plib-library-sidebar.html">
+  
+    <div>
+      
+
+      <h1>
+        <span class="kind-library">p2plib</span>
+        library 
+ 
+
+      </h1>
+    </div>
+
+    
+<section class="desc markdown">
+  <p>Core library for building peer-to-peer applications.</p>
+<p>This library provides a comprehensive set of tools and abstractions for
+developing peer-to-peer applications in Dart. It includes functionalities
+for data structures, cryptography, message routing, and network transport.</p>
+</section>
+
+
+    <section class="summary offset-anchor" id="classes">
+      <h2>Classes</h2>
+
+      <dl>
+          <dt id="AddressProperties">
+  <span class="name "><a href="../p2plib/AddressProperties-class.html">AddressProperties</a></span> 
+
+</dt>
+<dd>
+  Represents properties associated with a network address.
+</dd>
+
+          <dt id="Crypto">
+  <span class="name "><a href="../p2plib/Crypto-class.html">Crypto</a></span> 
+
+</dt>
+<dd>
+  Provides cryptographic functionalities for encrypting, decrypting, signing, and verifying data.
+</dd>
+
+          <dt id="FullAddress">
+  <span class="name "><a href="../p2plib/FullAddress-class.html">FullAddress</a></span> 
+
+</dt>
+<dd>
+  Represents a full network address, including an IP address and a port number.
+</dd>
+
+          <dt id="Message">
+  <span class="name "><a href="../p2plib/Message-class.html">Message</a></span> 
+
+</dt>
+<dd>
+  Represents a network message.
+</dd>
+
+          <dt id="Packet">
+  <span class="name "><a href="../p2plib/Packet-class.html">Packet</a></span> 
+
+</dt>
+<dd>
+  Represents a network packet.
+</dd>
+
+          <dt id="PacketHeader">
+  <span class="name "><a href="../p2plib/PacketHeader-class.html">PacketHeader</a></span> 
+
+</dt>
+<dd>
+  Structure of a packet header:
+</dd>
+
+          <dt id="PeerId">
+  <span class="name "><a href="../p2plib/PeerId-class.html">PeerId</a></span> 
+
+</dt>
+<dd>
+  Represents a Peer ID, which is used to uniquely identify a peer in the network.
+</dd>
+
+          <dt id="Route">
+  <span class="name "><a href="../p2plib/Route-class.html">Route</a></span> 
+
+</dt>
+<dd>
+  Represents a route to a peer in the network.
+</dd>
+
+          <dt id="RouterBase">
+  <span class="name "><a href="../p2plib/RouterBase-class.html">RouterBase</a></span> 
+
+</dt>
+<dd>
+  Abstract base class for network routers.
+</dd>
+
+          <dt id="RouterL0">
+  <span class="name "><a href="../p2plib/RouterL0-class.html">RouterL0</a></span> 
+
+</dt>
+<dd>
+  Basic router implementation for relaying and forwarding datagrams.
+</dd>
+
+          <dt id="RouterL1">
+  <span class="name "><a href="../p2plib/RouterL1-class.html">RouterL1</a></span> 
+
+</dt>
+<dd>
+  Enhanced router with confirmation and keepalive features.
+</dd>
+
+          <dt id="RouterL2">
+  <span class="name "><a href="../p2plib/RouterL2-class.html">RouterL2</a></span> 
+
+</dt>
+<dd>
+  Enhanced router with more high-level API for building rich client applications.
+</dd>
+
+          <dt id="RouterL3">
+  <span class="name "><a href="../p2plib/RouterL3-class.html">RouterL3</a></span> 
+
+</dt>
+<dd>
+  Router implementation for Layer 3 (Network Layer).
+</dd>
+
+          <dt id="Token">
+  <span class="name "><a href="../p2plib/Token-class.html">Token</a></span> 
+
+</dt>
+<dd>
+  Represents an immutable token.
+</dd>
+
+          <dt id="TransportBase">
+  <span class="name "><a href="../p2plib/TransportBase-class.html">TransportBase</a></span> 
+
+</dt>
+<dd>
+  Base class for all transport implementations.
+</dd>
+
+          <dt id="TransportUdp">
+  <span class="name "><a href="../p2plib/TransportUdp-class.html">TransportUdp</a></span> 
+
+</dt>
+<dd>
+  A UDP transport implementation.
+</dd>
+
+          <dt id="Uint8List">
+  <span class="name "><a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a></span> 
+
+</dt>
+<dd>
+  A fixed-length list of 8-bit unsigned integers.
+</dd>
+
+      </dl>
+    </section>
+
+    <section class="summary offset-anchor" id="enums">
+      <h2>Enums</h2>
+
+      <dl>
+          <dt id="PacketType">
+  <span class="name "><a href="../p2plib/PacketType.html">PacketType</a></span> 
+
+</dt>
+<dd>
+  Represents the type of packet.
+</dd>
+
+          <dt id="TaskType">
+  <span class="name "><a href="../p2plib/TaskType.html">TaskType</a></span> 
+
+</dt>
+<dd>
+  Defines the different types of cryptographic tasks that can be performed.
+</dd>
+
+      </dl>
+    </section>
+
+
+
+
+    <section class="summary offset-anchor" id="constants">
+      <h2>Constants</h2>
+
+      <dl class="properties">
+          <dt id="sealLength" class="constant">
+    <span class="name "><a href="../p2plib/sealLength-constant.html">sealLength</a></span>
+  <span class="signature">&#8594; const <a href="https://api.dart.dev/stable/3.5.3/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd>
+  The length of the sealed data, in bytes.
+  
+
+</dd>
+
+          <dt id="signatureLength" class="constant">
+    <span class="name "><a href="../p2plib/signatureLength-constant.html">signatureLength</a></span>
+  <span class="signature">&#8594; const <a href="https://api.dart.dev/stable/3.5.3/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd>
+  The length of the digital signature used for message authentication, in bytes.
+  
+
+</dd>
+
+      </dl>
+    </section>
+
+    <section class="summary offset-anchor" id="properties">
+      <h2>Properties</h2>
+
+      <dl class="properties">
+          <dt id="emptyUint8List" class="property">
+  <span class="name"><a href="../p2plib/emptyUint8List.html">emptyUint8List</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a></span>
+  
+
+</dt>
+<dd>
+  An empty <a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a> for convenience and to avoid unnecessary allocations.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+      </dl>
+    </section>
+
+    <section class="summary offset-anchor" id="functions">
+      <h2>Functions</h2>
+
+      <dl class="callables">
+          <dt id="genRandomInt" class="callable">
+  <span class="name"><a href="../p2plib/genRandomInt.html">genRandomInt</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-core/int-class.html">int</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Generates a random integer using a cryptographically secure random number generator.
+  
+
+</dd>
+
+          <dt id="getRandomBytes" class="callable">
+  <span class="name"><a href="../p2plib/getRandomBytes.html">getRandomBytes</a></span><span class="signature">(<wbr><span class="parameter" id="getRandomBytes-param-length"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/int-class.html">int</a></span> <span class="parameter-name">length</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Generates a list of random bytes of the specified length.
+  
+
+</dd>
+
+      </dl>
+    </section>
+
+    <section class="summary offset-anchor" id="typedefs">
+      <h2>Typedefs</h2>
+
+      <dl>
+          
+  <dt id="InitRequest" class="">
+  <span class="name"><a href="../p2plib/InitRequest.html">InitRequest</a></span>
+    = (<span class="field">{<span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a>?</span> <span class="field-name">seed</span>, </span><span class="field"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-isolate/SendPort-class.html">SendPort</a></span> <span class="field-name">sendPort</span>}</span>)
+  </span>
+  
+
+</dt>
+<dd>
+  Represents a request to initialize the cryptographic engine.
+  
+
+</dd>
+
+
+          
+  <dt id="InitResponse" class="">
+  <span class="name"><a href="../p2plib/InitResponse.html">InitResponse</a></span>
+    = (<span class="field">{<span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a></span> <span class="field-name">encPubKey</span>, </span><span class="field"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a></span> <span class="field-name">seed</span>, </span><span class="field"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-isolate/SendPort-class.html">SendPort</a></span> <span class="field-name">sendPort</span>, </span><span class="field"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a></span> <span class="field-name">signPubKey</span>}</span>)
+  </span>
+  
+
+</dt>
+<dd>
+  Represents a response to an initialization request.
+  
+
+</dd>
+
+
+          
+  <dt id="InitResult" class="">
+  <span class="name"><a href="../p2plib/InitResult.html">InitResult</a></span>
+    = (<span class="field">{<span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a></span> <span class="field-name">encPubKey</span>, </span><span class="field"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a></span> <span class="field-name">seed</span>, </span><span class="field"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a></span> <span class="field-name">signPubKey</span>}</span>)
+  </span>
+  
+
+</dt>
+<dd>
+  Represents the result of the initialization process.
+  
+
+</dd>
+
+
+          
+  <dt id="PeerStatus" class="">
+  <span class="name"><a href="../p2plib/PeerStatus.html">PeerStatus</a></span>
+    = (<span class="field">{<span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/bool-class.html">bool</a></span> <span class="field-name">isOnline</span>, </span><span class="field"><span class="type-annotation"><a href="../p2plib/PeerId-class.html">PeerId</a></span> <span class="field-name">peerId</span>}</span>)
+  </span>
+  
+
+</dt>
+<dd>
+  Type definition for representing the status of a peer.
+  
+
+</dd>
+
+
+          
+  <dt id="TaskError" class="">
+  <span class="name"><a href="../p2plib/TaskError.html">TaskError</a></span>
+    = (<span class="field">{<span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/Object-class.html">Object</a></span> <span class="field-name">error</span>, </span><span class="field"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/int-class.html">int</a></span> <span class="field-name">id</span>}</span>)
+  </span>
+  
+
+</dt>
+<dd>
+  Represents an error that occurred during a cryptographic task.
+  
+
+</dd>
+
+
+          
+  <dt id="TaskRequest" class="">
+  <span class="name"><a href="../p2plib/TaskRequest.html">TaskRequest</a></span>
+    = (<span class="field">{<span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a></span> <span class="field-name">datagram</span>, </span><span class="field"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/int-class.html">int</a></span> <span class="field-name">id</span>, </span><span class="field"><span class="type-annotation"><a href="../p2plib/TaskType.html">TaskType</a></span> <span class="field-name">type</span>}</span>)
+  </span>
+  
+
+</dt>
+<dd>
+  Represents a request for a cryptographic task.
+  
+
+</dd>
+
+
+          
+  <dt id="TaskResult" class="">
+  <span class="name"><a href="../p2plib/TaskResult.html">TaskResult</a></span>
+    = (<span class="field">{<span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-typed_data/Uint8List-class.html">Uint8List</a></span> <span class="field-name">datagram</span>, </span><span class="field"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.5.3/dart-core/int-class.html">int</a></span> <span class="field-name">id</span>}</span>)
+  </span>
+  
+
+</dt>
+<dd>
+  Represents the result of a cryptographic task.
+  
+
+</dd>
+
+
+      </dl>
+    </section>
+
+    <section class="summary offset-anchor" id="exceptions">
+      <h2>Exceptions / Errors</h2>
+
+      <dl>
+          <dt id="ExceptionBase">
+  <span class="name "><a href="../p2plib/ExceptionBase-class.html">ExceptionBase</a></span> 
+
+</dt>
+<dd>
+  Base class for all exceptions thrown by this library.
+</dd>
+
+          <dt id="ExceptionInvalidSignature">
+  <span class="name "><a href="../p2plib/ExceptionInvalidSignature-class.html">ExceptionInvalidSignature</a></span> 
+
+</dt>
+<dd>
+  Exception indicating that an invalid signature was detected.
+</dd>
+
+          <dt id="ExceptionInvalidTimestamp">
+  <span class="name "><a href="../p2plib/ExceptionInvalidTimestamp-class.html">ExceptionInvalidTimestamp</a></span> 
+
+</dt>
+<dd>
+  Exception indicating that an invalid timestamp was detected.
+</dd>
+
+          <dt id="ExceptionIsNotRunning">
+  <span class="name "><a href="../p2plib/ExceptionIsNotRunning-class.html">ExceptionIsNotRunning</a></span> 
+
+</dt>
+<dd>
+  Exception indicating that an operation was attempted on a router that is not
+currently running.
+</dd>
+
+          <dt id="ExceptionTransport">
+  <span class="name "><a href="../p2plib/ExceptionTransport-class.html">ExceptionTransport</a></span> 
+
+</dt>
+<dd>
+  Exception indicating an error related to the transport layer.
+</dd>
+
+          <dt id="ExceptionUnknownRoute">
+  <span class="name "><a href="../p2plib/ExceptionUnknownRoute-class.html">ExceptionUnknownRoute</a></span> 
+
+</dt>
+<dd>
+  Exception indicating that an unknown route was encountered.
+</dd>
+
+          <dt id="StopProcessing">
+  <span class="name "><a href="../p2plib/StopProcessing-class.html">StopProcessing</a></span> 
+
+</dt>
+<dd>
+  Exception indicating that processing should be stopped immediately.
+</dd>
+
+      </dl>
+    </section>
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../index.html">p2plib</a></li>
+    <li class="self-crumb">p2plib.dart</li>
+</ol>
+
+
+    <h5><span class="package-name">p2plib</span> <span class="package-kind">package</span></h5>
+    <ol>
+      <li class="section-title">Libraries</li>
+      <li><a href="../p2plib/p2plib-library.html">p2plib</a></li>
+</ol>
+
+  </div>
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+    <h5>p2plib library</h5>
+  </div><!--/sidebar-offcanvas-right-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    p2plib
+      2.2.2
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+
