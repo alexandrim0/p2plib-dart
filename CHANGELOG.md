@@ -1,3 +1,10 @@
+## 2.3.0
+
+  - upgrade sdk
+  - upgrade packages
+  - make linter happy
+  - remove AI slop
+
 ## 2.2.1
 
   - upgrade sodium
