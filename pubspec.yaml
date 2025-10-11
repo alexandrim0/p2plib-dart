@@ -9,7 +9,7 @@ topics:
   - web3
   - network
 
-version: 2.3.0
+version: 2.3.1
 
 environment:
   sdk: '>=3.9.2 <4.0.0'
