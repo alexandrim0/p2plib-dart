@@ -43,10 +43,10 @@ class TransportUdp extends TransportBase {
         bindAddress.port,
         ttl: ttl,
       );
-      
+
       // Start listening for incoming data.
       _socket?.listen(_onData);
-    } catch (e) {
+    } on Object catch (e) {
       // Log any errors that occur during startup.
       logger?.call(e.toString());
     }
@@ -77,23 +77,30 @@ class TransportUdp extends TransportBase {
     Uint8List datagram,
   ) {
     // If the socket is not initialized, do nothing.
-    if (_socket == null) return;
-    
+    if (_socket == null) {
+      return;
+    }
+
     // Iterate over the provided addresses and send the datagram to each one.
     for (final peerFullAddress in fullAddresses) {
       // Skip empty or incompatible addresses.
-      if (peerFullAddress.isEmpty) continue;
-      if (peerFullAddress.type != bindAddress.type) continue;
-      
+      if (peerFullAddress.isEmpty) {
+        continue;
+      }
+      if (peerFullAddress.type != bindAddress.type) {
+        continue;
+      }
+
       try {
         // Send the datagram using the underlying socket.
         _socket?.send(datagram, peerFullAddress.address, peerFullAddress.port);
-      } catch (e) {
+      } on Object catch (e) {
         // Log any errors that occur during sending.
         logger?.call(e.toString());
       }
     }
   }
+
   /// Handles incoming data events.
   ///
   /// This method is called when a new datagram is received on the UDP socket.
@@ -104,33 +111,37 @@ class TransportUdp extends TransportBase {
   ///   event to indicate that data is available to be read from the socket.
   Future<void> _onData(RawSocketEvent event) async {
     // Only process read events, as we are interested in incoming data.
-    if (event != RawSocketEvent.read) return;
-    
+    if (event != RawSocketEvent.read) {
+      return;
+    }
+
     // Receive the datagram from the socket.
     final datagram = _socket?.receive();
-    
+
     // If the datagram is invalid (null or too short to contain a valid
     // header), do nothing.
     if (datagram == null || datagram.data.length < PacketHeader.length) {
       return;
     }
-    
+
     try {
       // Process the datagram by invoking the onMessage callback, if
       // provided.
-      await onMessage!(Packet(
-        srcFullAddress: FullAddress(
-          address: datagram.address,
-          port: datagram.port,
+      await onMessage!(
+        Packet(
+          srcFullAddress: FullAddress(
+            address: datagram.address,
+            port: datagram.port,
+          ),
+          header: PacketHeader.fromBytes(datagram.data),
+          datagram: datagram.data,
         ),
-        header: PacketHeader.fromBytes(datagram.data),
-        datagram: datagram.data,
-      ));
+      );
     } on StopProcessing catch (_) {
       // Ignore StopProcessing exceptions. These are expected and indicate
       // that the message has been processed and further handling is not
       // required.
-    } catch (e) {
+    } on Object catch (e) {
       // Log any other errors that occur during processing, such as
       // exceptions thrown by the onMessage callback.
       logger?.call(e.toString());

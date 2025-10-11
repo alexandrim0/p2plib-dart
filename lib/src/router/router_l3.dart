@@ -6,13 +6,6 @@ part of 'router.dart';
 /// network addresses and bootstrapping. It handles the discovery and
 /// connection to bootstrap nodes, enabling the router to join the network.
 class RouterL3 extends RouterL2 {
-  /// Creates a new [RouterL3] instance.
-  ///
-  /// [crypto] The cryptography instance to use for encryption and signing.
-  /// [transports] The list of transports to use for network communication.
-  /// [keepalivePeriod] The interval at which keepalive messages are sent.
-  /// [messageTTL] The time-to-live for messages.
-  /// [logger] The logger to use for logging events.
   RouterL3({
     super.crypto,
     super.transports,
@@ -41,7 +34,7 @@ class RouterL3 extends RouterL2 {
     for (final nIf in await NetworkInterface.list()) {
       ifs.addAll(nIf.addresses);
     }
-    
+
     // Bind to each interface using UDP transport.
     for (final address in ifs) {
       transports.add(
@@ -50,8 +43,7 @@ class RouterL3 extends RouterL2 {
         ),
       );
     }
-    
-    // Start the base router.
+
     await super.start();
   }
 
@@ -61,11 +53,10 @@ class RouterL3 extends RouterL2 {
   /// performs any necessary cleanup.
   @override
   void stop() {
-    // Call the superclass's stop method to perform any necessary cleanup.
     super.stop();
-    // Clear the list of transports.
     transports.clear();
   }
+
   /// Adds a bootstrap node to the router.
   ///
   /// This method adds a bootstrap node to the router, allowing it to join the
@@ -84,14 +75,15 @@ class RouterL3 extends RouterL2 {
     // Stop the router before adding a bootstrap node to prevent conflicts
     // during the address resolution and routing table updates.
     stop();
-    
+
     // Resolve the DNS name to get the IP addresses of the bootstrap node.
-    _addresses[bsPeerId] =
-        await InternetAddress.lookup(bsName).timeout(messageTTL);
-    
+    _addresses[bsPeerId] = await InternetAddress.lookup(
+      bsName,
+    ).timeout(messageTTL);
+
     // Set address properties for the bootstrap node, marking it as static.
     final addressProperties = AddressProperties(isStatic: true);
-    
+
     // Add the bootstrap node's addresses to the peer addresses in the
     // routing table.
     for (final e in _addresses.entries) {
@@ -105,7 +97,7 @@ class RouterL3 extends RouterL2 {
         );
       }
     }
-    
+
     // Restart the router after adding the bootstrap node to establish
     // connections.
     await start();
@@ -121,7 +113,7 @@ class RouterL3 extends RouterL2 {
     for (final e in _addresses.entries) {
       removePeerAddress(PeerId(value: base64Decode(e.key)));
     }
-    
+
     // Clear the internal list of bootstrap node addresses.
     _addresses.clear();
   }

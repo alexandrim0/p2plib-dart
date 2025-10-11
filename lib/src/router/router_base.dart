@@ -7,17 +7,6 @@ part of 'router.dart';
 /// and handling routes. It defines the core interface for interacting with the
 /// network and is intended to be extended by concrete router implementations.
 abstract class RouterBase {
-  /// Creates a new [RouterBase] instance.
-  ///
-  /// [crypto] The cryptography instance to use for encryption and signing. If
-  ///   not provided, a default [Crypto] instance is created.
-  /// [transports] The list of transports to use for network communication. If
-  ///   not provided, default UDP transports for IPv4 and IPv6 are created.
-  /// [messageTTL] The time-to-live for messages, specifying how long they
-  ///   should be considered valid. Defaults to 3 seconds.
-  /// [keepalivePeriod] The interval at which keepalive messages are sent to
-  ///   maintain connections with peers. Defaults to 15 seconds.
-  /// [logger] The logger to use for logging events.
   RouterBase({
     Crypto? crypto,
     List<TransportBase>? transports,
@@ -26,23 +15,25 @@ abstract class RouterBase {
     this.logger,
   }) : crypto = crypto ?? Crypto() {
     // Initialize transports with provided or default UDP transports.
-    this.transports.addAll(transports ??
-        [
-          TransportUdp(
-            bindAddress: FullAddress(
-              address: InternetAddress.anyIPv4,
-              port: TransportUdp.defaultPort,
+    this.transports.addAll(
+      transports ??
+          [
+            TransportUdp(
+              bindAddress: FullAddress(
+                address: InternetAddress.anyIPv4,
+                port: TransportUdp.defaultPort,
+              ),
+              ttl: messageTTL.inSeconds,
             ),
-            ttl: messageTTL.inSeconds,
-          ),
-          TransportUdp(
-            bindAddress: FullAddress(
-              address: InternetAddress.anyIPv6,
-              port: TransportUdp.defaultPort,
+            TransportUdp(
+              bindAddress: FullAddress(
+                address: InternetAddress.anyIPv6,
+                port: TransportUdp.defaultPort,
+              ),
+              ttl: messageTTL.inSeconds,
             ),
-            ttl: messageTTL.inSeconds,
-          ),
-        ]);
+          ],
+    );
   }
 
   /// The cryptography instance used for encryption and signing.
@@ -72,31 +63,23 @@ abstract class RouterBase {
   /// This value limits the number of intermediate peers that a message can be
   /// routed through to reach its destination.
   int useForwardersLimit = 2;
-  
+
   /// The logger used for logging events.
   void Function(String)? logger;
 
-  /// The self ID of the router.
-  ///
-  /// This ID uniquely identifies the router within the network.
   late final PeerId _selfId;
 
-  /// Whether the router is currently running.
-  var _isRun = false;
+  var _isRunning = false;
 
-  /// Whether the router is currently running.
-  bool get isRun => _isRun;
+  bool get isRunning => _isRunning;
 
-  /// Whether the router is not currently running.
-  bool get isNotRun => !_isRun;
+  bool get isNotRunning => !_isRunning;
 
-  /// The self ID of the router.
   PeerId get selfId => _selfId;
 
   /// The maximum number of stored headers for routes.
   int get maxStoredHeaders => Route.maxStoredHeaders;
 
-  /// The current time in milliseconds since the epoch.
   int get _now => DateTime.timestamp().millisecondsSinceEpoch;
 
   /// Sets the maximum number of stored headers for routes.
@@ -124,7 +107,7 @@ abstract class RouterBase {
   ///
   /// Throws an [ExceptionTransport] if no transports are configured.
   Future<void> start() async {
-    if (_isRun) return; 
+    if (_isRunning) return;
     if (transports.isEmpty) {
       throw const ExceptionTransport('Need at least one Transport!');
     }
@@ -135,7 +118,7 @@ abstract class RouterBase {
         ..ttl = messageTTL.inSeconds;
       await transport.start();
     }
-    _isRun = true;
+    _isRunning = true;
     _log('Start listen $transports with key $_selfId');
   }
 
@@ -144,7 +127,7 @@ abstract class RouterBase {
   /// This method stops all configured transports, effectively shutting down
   /// the router and preventing further message processing.
   void stop() {
-    _isRun = false;
+    _isRunning = false;
     for (final t in transports) {
       t.stop();
     }
@@ -197,37 +180,22 @@ abstract class RouterBase {
   /// Returns an iterable of [FullAddress] objects representing the resolved
   /// addresses.
   Iterable<FullAddress> resolvePeerId(PeerId peerId) {
-    // Look up the route for the given peer ID.
     final route = routes[peerId];
-    
-    // If the route is not found or is empty:
+
     if (route == null || route.isEmpty) {
-      // Create a set to store the resolved addresses.
       final result = <FullAddress>{};
-      
-      // Iterate through all routes that can forward messages.
+
       for (final a in routes.values.where((e) => e.canForward)) {
-        // Add the addresses of the forwarder to the result set.
         result.addAll(a.addresses.keys);
       }
-      
-      // Return up to `useForwardersLimit` addresses from the result set.
+
       return result.take(useForwardersLimit);
-    } else { 
-      // If the route is found, return the actual addresses associated with it,
-      // filtering out stale addresses based on `peerAddressTTL`.
+    } else {
       return route.getActualAddresses(
         staleAt: _now - peerAddressTTL.inMilliseconds,
       );
     }
   }
 
-  /// Logs a message using the provided logger.
-  ///
-  /// [message] The message to be logged.
-  ///
-  /// This method checks if a logger is configured and, if so, calls the logger
-  /// function with the provided message converted to a string. If no logger
-  /// is configured, the message is ignored.
   void _log(Object message) => logger?.call(message.toString());
 }

@@ -7,13 +7,6 @@ part of 'router.dart';
 /// foundation for more advanced router implementations with additional
 /// features.
 class RouterL0 extends RouterBase {
-  /// Creates a new [RouterL0] instance.
-  ///
-  /// [crypto] The cryptography instance to use for encryption and signing.
-  /// [transports] The list of transports to use for network communication.
-  /// [keepalivePeriod] The interval at which keepalive messages are sent.
-  /// [messageTTL] The time-to-live for messages.
-  /// [logger] The logger to use for logging events.
   RouterL0({
     super.crypto,
     super.transports,
@@ -45,26 +38,24 @@ class RouterL0 extends RouterBase {
   /// the network topology by removing routes to peers that have become
   /// unreachable.
   late final _routesCleaner = Timer.periodic(
-    keepalivePeriod, // The timer fires at intervals specified by the keepalive period.
+    keepalivePeriod,
     (_) {
-      // If there are routes in the routing table...
       if (routes.isNotEmpty) {
-        // Calculate the timestamp before which a peer address is considered stale.
         final staleAt = _now - peerAddressTTL.inMilliseconds;
-        
-        // Iterate through the routes and remove stale addresses.
+
         routes
           ..forEach((_, r) => r.removeStaleAddresses(staleAt: staleAt))
           ..removeWhere((_, r) => r.isEmpty);
       }
     },
   );
+
   /// Handles incoming messages.
   ///
   /// [packet] The incoming [Packet] to be processed.
   ///
   /// This method is called by the transports when a new message is received.
-  /// It is responsible for validating the message, updating routing information,
+  /// It is responsible for validating the message, updating routing information
   /// and potentially forwarding the message to other peers.
   ///
   /// Throws a [StopProcessing] exception if the message is invalid or has
@@ -109,7 +100,8 @@ class RouterL0 extends RouterBase {
     // Reset the forwards count in the packet header for signature verification.
     PacketHeader.setForwardsCount(0, packet.datagram);
 
-    // If the peer is unknown, verify the signature and store the address if successful.
+    // If the peer is unknown, verify the signature
+    // and store the address if successful.
     if (route?.addresses[packet.srcFullAddress] == null) {
       try {
         // Verify the signature of the datagram to ensure its authenticity.
@@ -119,15 +111,14 @@ class RouterL0 extends RouterBase {
         // Stop processing to prevent potential security risks.
         throw const StopProcessing();
       }
-      
+
       // Create a new route for the peer and store it in the routing table.
       routes[packet.srcPeerId] = Route(
         header: packet.header,
         peerId: packet.srcPeerId,
         address: (ip: packet.srcFullAddress, properties: AddressProperties()),
       );
-      
-      // Log the event of keeping the peer's address for future communication.
+
       _log('Keep ${packet.srcFullAddress} for ${packet.srcPeerId}');
     } else {
       // If the peer is known, update the last seen timestamp and add the
@@ -135,8 +126,7 @@ class RouterL0 extends RouterBase {
       routes[packet.srcPeerId]!
         ..addresses[packet.srcFullAddress]?.updateLastSeen()
         ..addHeader(packet.header);
-      
-      // Log the event of updating the last seen timestamp for the peer.
+
       _log(
         'Update lastseen of ${packet.srcFullAddress} for ${packet.srcPeerId}',
       );
@@ -160,8 +150,9 @@ class RouterL0 extends RouterBase {
 
     // Resolve the destination peer's addresses, excluding the source address
     // to prevent echo.
-    final addresses = resolvePeerId(packet.dstPeerId)
-        .where((e) => e != packet.srcFullAddress);
+    final addresses = resolvePeerId(
+      packet.dstPeerId,
+    ).where((e) => e != packet.srcFullAddress);
 
     // If no route to the destination peer is found, log an error.
     if (addresses.isEmpty) {

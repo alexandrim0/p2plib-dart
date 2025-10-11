@@ -1,11 +1,5 @@
 part of 'data.dart';
 
-/// Represents a network message.
-///
-/// A message consists of a header, source and destination Peer IDs, an optional
-/// encrypted payload, and a signature. It follows a specific structure to
-/// ensure proper communication between peers in the network.
-///
 /// Message Structure:
 /// - 16 bytes: Message header (contains metadata about the message)
 /// - 64 bytes: Source Peer ID (identifies the sender)
@@ -22,13 +16,13 @@ class Message {
   /// Length of the message header in bytes.
   ///
   /// This value represents the total size of the header section in a message.
-  static const headerLength = PacketHeader.length + PeerId.length * 2;
+  static const int headerLength = PacketHeader.length + PeerId.length * 2;
 
   /// Length of an empty signed message in bytes.
   ///
   /// This value represents the minimum size of a message, even if it does not
   /// contain any payload.
-  static const emptySignedMessageLength = headerLength + signatureLength;
+  static const int emptySignedMessageLength = headerLength + signatureLength;
 
   /// Checks if the datagram has the correct length for a message.
   ///
@@ -57,10 +51,11 @@ class Message {
   ///
   /// Returns a [PeerId] representing the source of the message.
   static PeerId getSrcPeerId(Uint8List datagram) => PeerId(
-          value: datagram.sublist(
-        PacketHeader.length,
-        PacketHeader.length + PeerId.length,
-      ));
+    value: datagram.sublist(
+      PacketHeader.length,
+      PacketHeader.length + PeerId.length,
+    ),
+  );
 
   /// Extracts the destination Peer ID from the datagram.
   ///
@@ -68,10 +63,11 @@ class Message {
   ///
   /// Returns a [PeerId] representing the intended recipient of the message.
   static PeerId getDstPeerId(Uint8List datagram) => PeerId(
-          value: datagram.sublist(
-        PacketHeader.length + PeerId.length,
-        headerLength,
-      ));
+    value: datagram.sublist(
+      PacketHeader.length + PeerId.length,
+      headerLength,
+    ),
+  );
 
   // Unsigned Datagram methods
 
@@ -123,16 +119,11 @@ class Message {
   ///
   /// [signedDatagram] The signed datagram to check.
   ///
-  /// Returns `true` if the signed datagram has an empty payload, `false` otherwise.
+  /// Returns `true` if the signed datagram has an empty payload,
+  /// `false` otherwise.
   static bool hasEmptyPayload(Uint8List signedDatagram) =>
       signedDatagram.length == emptySignedMessageLength;
 
-  /// Creates a new [Message] instance.
-  ///
-  /// [header] The header of the message.
-  /// [srcPeerId] The source Peer ID of the message.
-  /// [dstPeerId] The destination Peer ID of the message.
-  /// [payload] The payload of the message (optional).
   Message({
     required this.header,
     required this.srcPeerId,
@@ -140,30 +131,18 @@ class Message {
     this.payload,
   });
 
-  /// The header of the message.
   final PacketHeader header;
 
-  /// The source Peer ID of the message.
   final PeerId srcPeerId;
 
-  /// The destination Peer ID of the message.
   final PeerId dstPeerId;
 
-  /// The payload of the message.
   Uint8List? payload;
 
-  /// Checks if the message has an empty payload.
   bool get isEmpty => payload == null || payload!.isEmpty;
 
-  /// Checks if the message has a non-empty payload.
   bool get isNotEmpty => payload != null && payload!.isNotEmpty;
 
-  /// Converts the message to a byte array.
-  ///
-  /// This method serializes the message into a byte array representation,
-  /// which can be used for network transmission or storage.
-  ///
-  /// Returns a [Uint8List] containing the serialized message data.
   Uint8List toBytes() {
     final bytesBuilder = BytesBuilder(copy: false)
       ..add(header.toBytes())

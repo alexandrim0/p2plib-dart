@@ -5,6 +5,4 @@ linter:
     directives_ordering: false
     sort_pub_dependencies: false
     public_member_api_docs: false
-    require_trailing_commas: false
     sort_constructors_first: false
-    lines_longer_than_80_chars: false

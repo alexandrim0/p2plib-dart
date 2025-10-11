@@ -7,13 +7,6 @@ part of 'router.dart';
 /// mechanisms. It is suitable for use as an advanced relay node or as a base
 /// class for clients that require more reliable communication.
 class RouterL1 extends RouterL0 {
-  /// Creates a new [RouterL1] instance.
-  ///
-  /// [crypto] The cryptography instance to use for encryption and signing.
-  /// [transports] The list of transports to use for network communication.
-  /// [keepalivePeriod] The interval at which keepalive messages are sent.
-  /// [messageTTL] The time-to-live for messages.
-  /// [logger] The logger to use for logging events.
   RouterL1({
     super.crypto,
     super.transports,
@@ -53,7 +46,7 @@ class RouterL1 extends RouterL0 {
     (_) async {
       // Only send keepalive messages if the router is running and there are
       // active routes.
-      if (isRun && routes.isNotEmpty) await _pingNonLocals();
+      if (isRunning && routes.isNotEmpty) await _pingNonLocals();
     },
   );
 
@@ -92,10 +85,10 @@ class RouterL1 extends RouterL0 {
     for (final c in _ackCompleters.values) {
       c.completeError(const ExceptionIsNotRunning());
     }
-    
+
     // Clear the map of acknowledgement completers to release resources.
     _ackCompleters.clear();
-    
+
     // Call the superclass's stop method to perform any necessary cleanup.
     super.stop();
   }
@@ -130,32 +123,39 @@ class RouterL1 extends RouterL0 {
     if (packet.header.messageType == PacketType.confirmable) {
       // Send a confirmation message asynchronously without awaiting its
       // completion.
-      unawaited(crypto
-          .seal(Message(
-            header: packet.header.copyWith(
-              messageType: PacketType.confirmation,
-            ),
-            srcPeerId: selfId,
-            dstPeerId: packet.srcPeerId,
-          ).toBytes())
-          .then((datagram) => sendDatagram(
+      unawaited(
+        crypto
+            .seal(
+              Message(
+                header: packet.header.copyWith(
+                  messageType: PacketType.confirmation,
+                ),
+                srcPeerId: selfId,
+                dstPeerId: packet.srcPeerId,
+              ).toBytes(),
+            )
+            .then(
+              (datagram) => sendDatagram(
                 addresses: [packet.srcFullAddress],
                 datagram: datagram,
-              )));
+              ),
+            ),
+      );
     }
 
     // If the message has a payload and there is a listener, forward the
     // message to the subscriber.
     if (packet.payload.isNotEmpty && _messageController.hasListener) {
-      _messageController.add(Message(
-        header: packet.header,
-        srcPeerId: packet.srcPeerId,
-        dstPeerId: packet.dstPeerId,
-        payload: packet.payload,
-      ));
+      _messageController.add(
+        Message(
+          header: packet.header,
+          srcPeerId: packet.srcPeerId,
+          dstPeerId: packet.dstPeerId,
+          payload: packet.payload,
+        ),
+      );
     }
 
-    // Return the processed packet.
     return packet;
   }
 
@@ -192,20 +192,25 @@ class RouterL1 extends RouterL0 {
     Iterable<FullAddress>? useAddresses,
   }) async {
     // Check if the router is running.
-    if (isNotRun) throw const ExceptionIsNotRunning();
+    if (isNotRunning) {
+      throw const ExceptionIsNotRunning();
+    }
 
     // Resolve the addresses for the destination peer.
     final addresses = useAddresses ?? resolvePeerId(dstPeerId);
-    
+
     // If no addresses are found, throw an exception.
-    if (addresses.isEmpty) throw ExceptionUnknownRoute(dstPeerId);
+    if (addresses.isEmpty) {
+      throw ExceptionUnknownRoute(dstPeerId);
+    }
 
     // Create the message.
     final message = Message(
       header: PacketHeader(
         // Set the message type based on whether it is confirmable.
-        messageType:
-            isConfirmable ? PacketType.confirmable : PacketType.regular,
+        messageType: isConfirmable
+            ? PacketType.confirmable
+            : PacketType.regular,
         issuedAt: _now,
         // Generate a message ID if one is not provided.
         id: messageId ?? genRandomInt(),
@@ -215,7 +220,7 @@ class RouterL1 extends RouterL0 {
       dstPeerId: dstPeerId,
       payload: payload,
     );
-    
+
     // Seal the message using the crypto provider.
     final datagram = await crypto.seal(message.toBytes());
 
@@ -235,8 +240,7 @@ class RouterL1 extends RouterL0 {
       sendDatagram(addresses: addresses, datagram: datagram);
       _log('sent ${datagram.length} bytes to $addresses');
     }
-    
-    // Return the header of the sent message.
+
     return message.header;
   }
 
@@ -263,21 +267,16 @@ class RouterL1 extends RouterL0 {
     required Iterable<FullAddress> addresses,
     Duration? ackTimeout,
   }) {
-    // Create a completer to handle the future.
     final completer = Completer<void>();
-    
-    // Store the completer in the ackCompleters map, keyed by the messageId.
+
     _ackCompleters[messageId] = completer;
-    
-    // Send the datagram and schedule retries.
+
     _sendAndRetry(
       datagram: datagram,
       messageId: messageId,
       addresses: addresses,
     );
-    
-    // Return a future that completes when the acknowledgement is received
-    // or the timeout expires.
+
     return completer.future
         // Set a timeout for the future, using the provided ackTimeout or
         // the default message TTL.
@@ -305,13 +304,11 @@ class RouterL1 extends RouterL0 {
   }) {
     // Check if the router is running and if the message is still waiting
     // for an acknowledgement.
-    if (isRun && _ackCompleters.containsKey(messageId)) {
-      // Send the datagram.
+    if (isRunning && _ackCompleters.containsKey(messageId)) {
       sendDatagram(addresses: addresses, datagram: datagram);
-      
-      // Log the message.
+
       _log('sent confirmable message, id: $messageId to $addresses');
-      
+
       // Schedule a retry after the retry period.
       Future.delayed(
         retryPeriod,
@@ -332,15 +329,14 @@ class RouterL1 extends RouterL0 {
   /// non-local peers, the router can detect changes in the network and update
   /// its routing information accordingly.
   Future<void> _pingNonLocals() async {
-    // Iterate through all known routes.
     for (final route in routes.values) {
       // Get a list of all non-local addresses for this route.
       final addresses = route.addresses.entries
-          // Filter out local addresses, as we only want to ping non-local peers.
+          // Filter out local addresses, as we only want to ping non-local peers
           .where((e) => e.value.isNotLocal)
           // Map the entries to their keys (addresses).
           .map((e) => e.key);
-      
+
       // If there are any non-local addresses, send a ping message.
       if (addresses.isNotEmpty) {
         // Send a message to the peer using the resolved addresses.

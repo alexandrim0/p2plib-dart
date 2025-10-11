@@ -1,19 +1,13 @@
 part of 'router.dart';
 
-/// Enhanced router with more high-level API for building rich client applications.
+/// Enhanced router with more high-level API for building rich client
+/// applications.
 ///
 /// This class extends the functionality of `RouterL1` by providing a
 /// higher-level API for managing peer connections and monitoring peer status.
 /// It is designed to simplify the development of client applications that
 /// require real-time communication and peer discovery.
 class RouterL2 extends RouterL1 {
-  /// Creates a new instance of the [RouterL2] class.
-  ///
-  /// [crypto] The cryptography instance to use for encryption and signing.
-  /// [transports] The list of transports to use for network communication.
-  /// [keepalivePeriod] The interval at which keepalive messages are sent.
-  /// [messageTTL] The time-to-live for messages.
-  /// [logger] The logger to use for logging events.
   RouterL2({
     super.crypto,
     super.transports,
@@ -54,13 +48,11 @@ class RouterL2 extends RouterL1 {
   /// Returns the incoming packet.
   @override
   Future<Packet> onMessage(Packet packet) async {
-    // Call the superclass's onMessage method to handle the packet.
     await super.onMessage(packet);
 
     // Update the peer status to online.
     _lastSeenController.add((peerId: packet.srcPeerId, isOnline: true));
 
-    // Return the packet.
     return packet;
   }
 
@@ -95,7 +87,9 @@ class RouterL2 extends RouterL1 {
     bool? canForward,
   }) {
     // Ignore self.
-    if (peerId == selfId) return;
+    if (peerId == selfId) {
+      return;
+    }
 
     // If peer already exists in routing table.
     if (routes.containsKey(peerId)) {
@@ -142,28 +136,33 @@ class RouterL2 extends RouterL1 {
   /// Returns `true` if the peer is online, `false` otherwise.
   Future<bool> pingPeer(PeerId peerId) async {
     // If the peer is the same as the self ID, return true.
-    if (peerId == selfId) return true;
-    
+    if (peerId == selfId) {
+      return true;
+    }
+
     // Try to send a message to the peer.
     try {
       // Send a confirmable message to the peer and wait for an
       // acknowledgement.
       await sendMessage(isConfirmable: true, dstPeerId: peerId);
-      
+
       // If the message was sent successfully, update the last seen
       // controller to indicate that the peer is online.
       _lastSeenController.add((peerId: peerId, isOnline: true));
-      
+
       // Return true to indicate that the peer is online.
       return true;
-    } catch (_) {
+    } on Object catch (_) {
       // Ignore any errors that occur during message sending.
     }
-    
+
     // If the message was not sent successfully, update the last seen
     // controller to indicate that the peer is offline.
-    _lastSeenController.add((peerId: peerId, isOnline: getPeerStatus(peerId)));
-    
+    _lastSeenController.add((
+      peerId: peerId,
+      isOnline: getPeerStatus(peerId),
+    ));
+
     // Return false to indicate that the peer is offline.
     return false;
   }
